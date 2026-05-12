@@ -119,7 +119,7 @@ class ReelTemplate(VideoTemplate):
             current_v = "[v3]"
 
         graph = ";".join(steps)
-        return graph + ";" + self._drawtext_pro((assets, current_v, duration))
+        return graph + ";" + self._drawtext_pro(assets, current_v, duration)
 
     def _drawtext_pro(
         self,
