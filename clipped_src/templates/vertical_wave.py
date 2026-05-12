@@ -56,9 +56,9 @@ class VerticalWaveTemplate(VideoTemplate):
             steps.append(f"[bg]null[outv]")
 
         graph = ";".join(steps)
-        return graph + ";" + self._drawtext_overlay(assets, link_in="[outv]")
+        return graph + ";" + self._drawtext_overlay(assets, duration, link_in="[outv]")
 
-    def _drawtext_overlay(self, assets: "MediaAssets", link_in: str = "[outv]", link_out: str = "[v]") -> str:
+    def _drawtext_overlay(self, assets: "MediaAssets", duration: float, link_in: str = "[outv]", link_out: str = "[v]") -> str:
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
