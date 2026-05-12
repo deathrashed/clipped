@@ -61,18 +61,18 @@ class VerticalTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape(assets.track_title)
-        artist = self._escape(assets.artist_name)
-        album  = self._escape(assets.album_name)
+        title  = self._escape(assets.track_title).replace("'", "\\'").replace(",", "\\,")
+        artist = self._escape(assets.artist_name).replace("'", "\\'").replace(",", "\\,")
+        album  = self._escape(assets.album_name).replace("'", "\\'").replace(",", "\\,")
 
         # Position text in the lower quarter of the 1920-high canvas
         return (
             f"{link_in}"
             f"drawtext=text='{title}':fontcolor=white:fontsize=70"
-            f":x=(w-text_w)/2:y=1540:enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
+            f":x=(w-text_w)/2:y=1540:enable='gt(t,1)':alpha='if(lt(t\\,2)\\,t-1\\,1)',"
             f"drawtext=text='{artist}':fontcolor=0xCCCCCC:fontsize=50"
-            f":x=(w-text_w)/2:y=1630:enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)',"
-            f"drawtext=text='{album}':fontcolor=0x999999:fontsize=38:fontstyle=italic"
-            f":x=(w-text_w)/2:y=1705:enable='gt(t,2)':alpha='if(lt(t,3),t-2,1)'"
+            f":x=(w-text_w)/2:y=1630:enable='gt(t,1.5)':alpha='if(lt(t\\,2.5)\\,t-1.5\\,1)',"
+            f"drawtext=text='{album}':fontcolor=0x999999:fontsize=38"
+            f":x=(w-text_w)/2:y=1705:enable='gt(t,2)':alpha='if(lt(t\\,3)\\,t-2\\,1)'"
             f"{link_out}"
         )

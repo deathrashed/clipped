@@ -15,6 +15,7 @@ from .minimal      import MinimalTemplate
 from .cinematic    import CinematicTemplate
 from .waveformbar  import WaveformBarTemplate
 from .vertical_wave import VerticalWaveTemplate
+from .reel          import ReelTemplate
 
 # ── Registry ──────────────────────────────────────────────────────────────────
 # Ordered dict — insertion order determines TUI display order.
@@ -27,6 +28,7 @@ REGISTRY: dict[str, Type[VideoTemplate]] = {
     "cinematic":   CinematicTemplate,
     "waveformbar": WaveformBarTemplate,
     "vertical_wave": VerticalWaveTemplate,
+    "reel":          ReelTemplate,
 }
 
 

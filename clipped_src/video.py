@@ -108,7 +108,17 @@ def process_video(
     # ── Output path ───────────────────────────────────────────────────────────
     video_dir = Path(config["video_dir"]).expanduser()
     video_dir.mkdir(parents=True, exist_ok=True)
-    output_path = video_dir / f"{assets.audio_path.stem}_{template_name}_{platform_name}.mp4"
+    
+    # Custom format: Artist - Track (Template).mp4
+    if assets.artist_name and assets.track_title:
+        # Sanitize parts
+        clean_artist = assets.artist_name.replace("/", "_").replace(":", "-")
+        clean_track  = assets.track_title.replace("/", "_").replace(":", "-")
+        filename = f"{clean_artist} - {clean_track} ({template_name}).mp4"
+    else:
+        filename = f"{assets.audio_path.stem}_{template_name}_{platform_name}.mp4"
+
+    output_path = video_dir / filename
 
     # ── Build FFmpeg command ──────────────────────────────────────────────────
     inputs         = template.get_inputs(assets)
