@@ -13,16 +13,11 @@ ENV/
 .gemini/
 .history.txt
 settings.local.json
-
-# Media Outputs (default dirs)
-.specstory/
-.vscode/
 .claude/
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
 
 # Temp files
 temp_*/
 *.tmp
+
+# macOS
+.DS_Store

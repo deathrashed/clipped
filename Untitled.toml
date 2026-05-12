@@ -1,0 +1,38 @@
+[general]
+# The directory where your clipped audio and video files will be saved.
+output_dir = "~/Music/Clipped"
+
+# Automatically copy the generated file path to the clipboard.
+copy_to_clipboard = true
+
+# Ask for confirmation and allow adjustments after previewing the clip.
+interactive_preview = true
+
+# Attempt to snap the clip to beats or silence (placeholder for future use).
+smart_clipping = false
+
+# Automatically apply a fade-in and fade-out to the clipped audio.
+auto_fade = true
+
+# The duration of the audio fade (in seconds).
+fade_duration = 0.5
+
+# ── Vertical Template (Reels/TikTok) ──────────────────────────────────────────
+
+# Rotation speed of the circular spinner (revolutions / second)
+vertical_spinner_speed = 0.5
+
+# When the text should fade in (percentage of total duration, e.g., 0.25 for 25%)
+vertical_text_in_percent = 0.25
+
+# When the transition from spinner to square image starts (percentage, e.g., 0.82)
+vertical_reveal_start_percent = 0.82
+
+# Duration of the cross-fade transition between visuals (in seconds)
+vertical_transition_duration = 2.0
+
+# Duration of the text fade in/out animations (in seconds)
+vertical_text_fade_duration = 1.0
+
+# How long the text stays visible after the square cover starts appearing (in seconds)
+vertical_text_reveal_overlap = 1.0

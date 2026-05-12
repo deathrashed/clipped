@@ -2,7 +2,7 @@
 Configuration management for Clipped.
 
 Config file: ~/.config/clipped/config.toml
-State files: ~/.config/clipped/{state.json, history.txt, library.jsonl}
+State files: ~/.config/clipped/{state.json, history.txt}
 
 Supports [general] settings and named [preset.*] profiles.
 """
@@ -18,8 +18,7 @@ except ImportError:
 
 CONFIG_FILE   = Path("~/.config/clipped/config.toml").expanduser()
 STATE_FILE    = CONFIG_FILE.parent / "state.json"
-HISTORY_FILE  = CONFIG_FILE.parent / "history.txt"
-LIBRARY_FILE  = CONFIG_FILE.parent / "library.jsonl"
+HISTORY_FILE   = CONFIG_FILE.parent / "history.txt"
 
 DEFAULT_CONFIG: dict = {
     "general": {

@@ -5,6 +5,29 @@ Format: [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.1.0] — 2026-05-13
+
+### Removed
+- **Clip library** — `library.py`, `clipped browse` command, and all library references stripped. JSONL history and interactive browse/re-render removed entirely.
+- **Interactive preview/offset loop** — removed (was tied to library feature).
+
+### Fixed
+- `reel.py` geq mask: replaced `X/2` and `Y` with proper `W/2` and `H` scope constants. Extracted 15+ magic numbers to named constants. Removed Helvetica Neue font. Rewrote `_drawtext_pro` method.
+- `vertical_wave.py`: removed unused `duration` parameter from `_drawtext_overlay`.
+- `main.py`: fixed indentation corruption in `_interactive_video` source selection block.
+- `platforms.py`: YouTube height corrected to 1080 (was 816, breaking 16:9 aspect).
+- 13 total bugs across 8 files: undefined variables, wrong method signatures, invalid regex escapes, missing context managers, crash on missing cover art.
+
+### Added
+- **macOS notifications** on FFmpeg/audio completion via `osascript`.
+- **`--output`/`-o` flag** on both `audio` and `video` commands for custom output paths.
+- **`_swinsian_current_track()`** extracted to `audio.py` with 5s timeout and error handling (replaces fragile inline AppleScript in `main.py`).
+- Swinsian track shown in TUI source selection.
+- `process_clip` / `process_video` accept `output_path` parameter.
+- 300s timeout on yt-dlp; zero-length clip raises `ValueError`.
+
+---
+
 ## [2.0.0] — 2026-05-12
 
 ### Added
@@ -24,11 +47,6 @@ Format: [Semantic Versioning](https://semver.org/).
 - Each profile carries dimensions, max duration, max file size, codec settings, and suggested template.
 - `discord` platform routes to audio-only MP3 export (8 MB size warning).
 - Platform dimension override: if profile size differs from template native, auto-scales output.
-
-#### Clip Library (new module: `clipped_src/library.py`)
-- Append-only JSONL store at `~/.config/clipped/library.jsonl`.
-- Tracks: source, timestamps, output paths, artist/album/title, platform, template, date.
-- `clipped browse [QUERY]` command with Rich table display and interactive re-render prompt.
 
 #### FFmpeg Progress Bar (new module: `clipped_src/progress.py`)
 - Real-time Rich progress bar during video encoding via `-progress pipe:1`.
