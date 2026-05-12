@@ -49,7 +49,7 @@ class ReelTemplate(VideoTemplate):
         t_logo_end   = 5.0
         t_art_start  = duration * 0.75
         t_spin_start = 5.0
-        t_spin_end   = t_art_start
+        t_spin_end   = t_art_start + 0.5 # Small overlap for continuity
         t_text_start = 7.0
         t_end_gap    = 2.0
         
@@ -83,8 +83,8 @@ class ReelTemplate(VideoTemplate):
 
         # --- Stage 3: Artist Photo (Professional Subtle Border) ---
         if assets.artist:
-            # Subtle corner radius (10px)
-            R = 15
+            # Subtle corner radius (8px - sharper look)
+            R = 8
             steps.append(
                 f"[{idx}:v]scale=950:-1," # Slightly larger photo
                 f"pad=iw+10:ih+10:5:5:white," # 5px white border
@@ -107,14 +107,14 @@ class ReelTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null[v]"
 
-        title  = self._escape(assets.track_title).replace("'", "\\'").replace(",", "\\,")
-        artist = self._escape(assets.artist_name).replace("'", "\\'").replace(",", "\\,")
+        title  = self._escape(assets.track_title)
+        artist = self._escape(assets.artist_name)
         
         t_end = duration - 1.5
         f_dur = 1.0
         
-        # Professional Typography: Helvetica Neue with subtle shadow
-        font_style = "font='Helvetica Neue':shadowcolor=black@0.5:shadowx=2:shadowy=2"
+        # Professional Typography: Helvetica Neue (escaped space) with subtle shadow
+        font_style = "font=Helvetica\\ Neue:shadowcolor=black@0.5:shadowx=2:shadowy=2"
         
         # Track Fade (starts at t_text_start)
         alpha_title = (
@@ -135,9 +135,9 @@ class ReelTemplate(VideoTemplate):
 
         return (
             f"{link_in}"
-            f"drawtext=text='{title}':fontcolor=white:fontsize=90:{font_style}"
-            f":x=(w-text_w)/2:y=1250:enable='gt(t,{t_text_start})':alpha='{alpha_title}',"
-            f"drawtext=text='{artist}':fontcolor=0x00E5FF:fontsize=60:{font_style}"
-            f":x=(w-text_w)/2:y=1365:enable='gt(t,{t_artist_fade})':alpha='{alpha_artist}'"
+            f"drawtext=text={title}:fontcolor=white:fontsize=90:{font_style}"
+            f":x=(w-text_w)/2:y=1250:enable=gt(t\\,{t_text_start}):alpha={alpha_title},"
+            f"drawtext=text={artist}:fontcolor=0x00E5FF:fontsize=60:{font_style}"
+            f":x=(w-text_w)/2:y=1365:enable=gt(t\\,{t_artist_fade}):alpha={alpha_artist}"
             f"[v]"
         )
