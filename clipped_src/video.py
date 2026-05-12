@@ -124,12 +124,14 @@ def process_video(
     inputs         = template.get_inputs(assets)
     filter_graph   = template.get_filter_graph(assets, calc_dur)
 
+    # Stream labels
+    video_map = "[v]"
+    audio_map = "0:a"
+
     # If platform needs a different size, append a scale step
     if scale_out and scale_out != template.get_output_size():
         filter_graph += f";[v]scale={scale_out[0]}:{scale_out[1]}[vout]"
         video_map = "[vout]"
-    else:
-        video_map = "[v]"
 
     cmd = ["ffmpeg", "-y"]
 
@@ -143,7 +145,6 @@ def process_video(
         cmd += ["-loop", "1", "-i", img]
 
     # Audio fades
-    audio_map = "0:a"
     fi = fade_in
     fo = fade_out
     if fi is None and fo is None and config.get("auto_fade", True):

@@ -29,15 +29,12 @@ class VerticalTemplate(VideoTemplate):
 
     def get_filter_graph(self, assets: MediaAssets, duration: float) -> str:
         speed = self.config.get("spinner_speed", 0.5)
-
+        # Background: scaled, cropped, blurred, dimmed
+        bg = (
+            f"[1:v]scale=1080:1920:force_original_aspect_ratio=increase,"
+            f"crop=1080:1920,gblur=sigma=30,eq=brightness=-0.25[bg];"
+        )
         if assets.cover:
-            # Background: fill 1080×1920 with blurred, darkened artwork
-            bg = (
-                "[1:v]scale=1080:1920:force_original_aspect_ratio=increase,"
-                "crop=1080:1920,"
-                "gblur=sigma=30,"
-                "eq=brightness=-0.25[bg];"
-            )
             # Foreground: circular spinner
             fg = (
                 "[1:v]scale=720:720[art];"
@@ -54,25 +51,41 @@ class VerticalTemplate(VideoTemplate):
         else:
             graph = "color=s=1080x1920:c=black[outv]"
 
-        return graph + ";" + self._drawtext_overlay(assets)
+        return graph + ";" + self._drawtext_overlay(assets, duration)
 
-    def _drawtext_overlay(self, assets: "MediaAssets", link_in: str = "[outv]", link_out: str = "[v]") -> str:
-        """Override: push text lower on the tall canvas."""
+    def _drawtext_overlay(self, assets: "MediaAssets", duration: float, link_in: str = "[outv]", link_out: str = "[v]") -> str:
+        """Override: show only Track Title and Band Name under the spinner."""
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape(assets.track_title).replace("'", "\\'").replace(",", "\\,")
-        artist = self._escape(assets.artist_name).replace("'", "\\'").replace(",", "\\,")
-        album  = self._escape(assets.album_name).replace("'", "\\'").replace(",", "\\,")
+        # Strip any literal quotes from metadata for a cleaner look
+        title  = self._escape(assets.track_title.strip('"'))
+        artist = self._escape(assets.artist_name.strip('"'))
 
-        # Position text in the lower quarter of the 1920-high canvas
+        # Timing: 25% in, 75% out
+        t_in  = duration * 0.25
+        t_out = duration * 0.75
+        f_dur = 1.0 # 1s fade duration
+        
+        # Robust fade expression: in at t_in, out at t_out
+        def get_alpha(st):
+            return (
+                f"if(lt(t\\,{st})\\,0\\,"
+                f"if(lt(t\\,{st+f_dur})\\,(t-{st})/{f_dur}\\,"
+                f"if(lt(t\\,{t_out-f_dur})\\,1\\,"
+                f"if(lt(t\\,{t_out})\\,1-(t-({t_out-f_dur}))/{f_dur}\\,0))))"
+            )
+
+        alpha_title  = get_alpha(t_in)
+        alpha_artist = get_alpha(t_in + 0.5) # Slight stagger
+
+        # Position text under the spinner (spinner bottom is at ~1120)
+        # Using Track Title (White, Large) and Band Name (Cyan/Subdued, Medium)
         return (
             f"{link_in}"
-            f"drawtext=text='{title}':fontcolor=white:fontsize=70"
-            f":x=(w-text_w)/2:y=1540:enable='gt(t,1)':alpha='if(lt(t\\,2)\\,t-1\\,1)',"
-            f"drawtext=text='{artist}':fontcolor=0xCCCCCC:fontsize=50"
-            f":x=(w-text_w)/2:y=1630:enable='gt(t,1.5)':alpha='if(lt(t\\,2.5)\\,t-1.5\\,1)',"
-            f"drawtext=text='{album}':fontcolor=0x999999:fontsize=38"
-            f":x=(w-text_w)/2:y=1705:enable='gt(t,2)':alpha='if(lt(t\\,3)\\,t-2\\,1)'"
+            f"drawtext=text={title}:fontcolor=white:fontsize=85"
+            f":x=(w-text_w)/2:y=1280:enable=between(t\\,{t_in}\\,{t_out}):alpha={alpha_title},"
+            f"drawtext=text={artist}:fontcolor=0x00E5FF:fontsize=60"
+            f":x=(w-text_w)/2:y=1400:enable=between(t\\,{t_in+0.5}\\,{t_out}):alpha={alpha_artist}"
             f"{link_out}"
         )
