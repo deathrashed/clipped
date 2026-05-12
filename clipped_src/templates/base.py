@@ -91,13 +91,34 @@ class VideoTemplate(ABC):
         return (
             f"{link_in}"
             f"drawtext=text={title}:fontcolor=white:fontsize=70"
-            f":x=(w-text_w)/2:y={y_title}:enable=gt(t\\,1):alpha=if(lt(t\\,2)\\,t-1\\,1),"
+            f":x=(w-text_w)/2:y={y_title}:enable='gt(t,1)':alpha='{self.get_fade_alpha(1.0, 0, 1.0)}',"
             f"drawtext=text={artist}:fontcolor=0xAAAAAA:fontsize=45"
-            f":x=(w-text_w)/2:y={y_artist}:enable=gt(t\\,1.5):alpha=if(lt(t\\,2.5)\\,t-1.5\\,1),"
+            f":x=(w-text_w)/2:y={y_artist}:enable='gt(t,1.5)':alpha='{self.get_fade_alpha(1.5, 0, 1.0)}',"
             f"drawtext=text={album}:fontcolor=0x888888:fontsize=35"
-            f":x=(w-text_w)/2:y={y_album}:enable=gt(t\\,2):alpha=if(lt(t\\,3)\\,t-2\\,1)"
+            f":x=(w-text_w)/2:y={y_album}:enable='gt(t,2)':alpha='{self.get_fade_alpha(2.0, 0, 1.0)}'"
             f"{link_out}"
         )
+
+    def get_fade_alpha(self, st: float, et: float = 0, dur: float = 1.0) -> str:
+        """
+        Generate an FFmpeg alpha expression for a fade-in and optional fade-out.
+        
+        Args:
+            st  : Start time (fade-in start)
+            et  : End time (fade-out end). If 0 or < st, no fade-out is applied.
+            dur : Fade duration (used for both in and out).
+        """
+        fade_in = f"if(lt(t,{st}),0,if(lt(t,{st+dur}),(t-{st})/{dur},1))"
+        if et > st + dur:
+            # Add fade-out: if(lt(t, et-dur), 1, if(lt(t, et), 1-(t-(et-dur))/dur, 0))
+            # Combined with fade-in:
+            return (
+                f"if(lt(t,{st}),0,"
+                f"if(lt(t,{st+dur}),(t-{st})/{dur},"
+                f"if(lt(t,{et-dur}),1,"
+                f"if(lt(t,{et}),1-(t-({et-dur}))/{dur},0))))"
+            )
+        return fade_in
 
     # ── Abstract interface ────────────────────────────────────────────────
 

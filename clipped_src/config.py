@@ -33,8 +33,15 @@ DEFAULT_CONFIG: dict = {
         "spinner_speed":       0.5,   # revolutions / second
         "waveform_mode":        "line",  # line | cline | p2p | point
         "waveform_color":       "0x00E5FF",  # vivid cyan
-        "default_template":    "spinner",
         "default_platform":    "default",
+        
+        # Vertical Template Settings
+        "vertical_spinner_speed":        0.5,
+        "vertical_text_in_percent":      0.25,
+        "vertical_reveal_start_percent": 0.82,
+        "vertical_transition_duration":  2.0,
+        "vertical_text_fade_duration":   1.0,
+        "vertical_text_reveal_overlap":  1.0,
     }
 }
 
@@ -89,34 +96,41 @@ def load_config() -> dict:
     import copy
     config = copy.deepcopy(DEFAULT_CONFIG)
 
-    if CONFIG_FILE.exists():
-        with open(CONFIG_FILE, "rb") as f:
-            try:
-                user = tomllib.load(f)
-            except Exception as e:
-                print(f"Error parsing config.toml: {e}", file=sys.stderr)
-                return config
-
-        # Migrate legacy output_dir key
-        gen = user.get("general", {})
-        if "output_dir" in gen:
-            if "audio_dir" not in gen:
-                gen["audio_dir"] = f"{gen['output_dir']}/_audio"
-            if "video_dir" not in gen:
-                gen["video_dir"] = f"{gen['output_dir']}/_video"
-
-        config["general"].update(gen)
-
-        # Load presets
-        for key, val in user.items():
-            if key.startswith("preset.") or (key == "preset" and isinstance(val, dict)):
-                # tomllib gives us nested: user["preset"]["instagram"] = {...}
-                pass
-        if "preset" in user and isinstance(user["preset"], dict):
-            config["preset"] = user["preset"]
-
-    else:
+    if not CONFIG_FILE.exists():
         CONFIG_FILE.write_text(_DEFAULT_TOML)
+        return config
+
+    with CONFIG_FILE.open("rb") as f:
+        try:
+            user = tomllib.load(f)
+        except Exception as e:
+            print(f"Error parsing config.toml: {e}", file=sys.stderr)
+            return config
+
+    # Merge general settings
+    gen = user.get("general", {})
+    
+    # Migrate legacy output_dir key
+    if "output_dir" in gen:
+        od = gen.pop("output_dir")
+        if "audio_dir" not in gen:
+            gen["audio_dir"] = f"{od}/_audio"
+        if "video_dir" not in gen:
+            gen["video_dir"] = f"{od}/_video"
+
+    config["general"].update(gen)
+
+    # Load presets - tomllib gives us user["preset"]["instagram"] = {...}
+    if "preset" in user and isinstance(user["preset"], dict):
+        config["preset"] = user["preset"]
+    
+    # Support top-level preset.NAME for backward compatibility if any
+    for key, val in user.items():
+        if key.startswith("preset.") and isinstance(val, dict):
+            p_name = key.split(".", 1)[1]
+            if "preset" not in config:
+                config["preset"] = {}
+            config["preset"][p_name] = val
 
     return config
 

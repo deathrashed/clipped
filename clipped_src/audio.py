@@ -53,12 +53,14 @@ class AudioClipper:
     # ── Output path ───────────────────────────────────────────────────────────
 
     def _get_output_path(self, artist: str = "", title: str = "") -> Path:
-        audio_dir = Path(self.config["audio_dir"]).expanduser()
-        audio_dir.mkdir(parents=True, exist_ok=True)
-
-        name = f"{artist} - {title}" if artist and title else (title or Path(self.src).stem)
-        safe = "".join(c for c in name if c.isalnum() or c in " -_").strip()
-        return audio_dir / f"{safe}.mp3"
+        from .utils import get_output_path
+        return get_output_path(
+            base_dir=Path(self.config["audio_dir"]),
+            artist=artist,
+            title=title,
+            fallback_stem=Path(self.src).stem,
+            extension="mp3"
+        )
 
     # ── Sanity checks ─────────────────────────────────────────────────────────
 
