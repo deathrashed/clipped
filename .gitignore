@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+.env
+
+# Project Specific
+.history
+.gemini/
+.history.txt
+settings.local.json
+
+# Media Outputs (default dirs)
+.specstory/
+.vscode/
+.claude/
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temp files
+temp_*/
+*.tmp

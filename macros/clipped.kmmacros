@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       MACRO 1: Mark Start (⌘⇧[)
+       Marks the current Swinsian playback position as clip start.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <dict>
+    <key>Activate</key><string>Normal</string>
+    <key>CreationDate</key><real>769478400</real>
+    <key>ModificationDate</key><real>769478400</real>
+    <key>Name</key><string>Clipped: Mark Start</string>
+    <key>UID</key><string>A1B2C3D4-0001-4000-0000-CLIPPED00001</string>
+    <key>Enabled</key><true/>
+
+    <key>Triggers</key>
+    <array>
+      <dict>
+        <key>MacroTriggerType</key><string>HotKey</string>
+        <key>KeyCode</key><integer>33</integer><!-- [ -->
+        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
+        <key>FireType</key><string>Pressed</string>
+      </dict>
+    </array>
+
+    <key>Actions</key>
+    <array>
+      <dict>
+        <key>MacroActionType</key><string>ExecuteShellScript</string>
+        <key>Script</key>
+        <string>#!/bin/zsh
+source "$HOME/.zshrc" 2>/dev/null || true
+/Users/rd/Music/clipped/bin/clipped audio --mark-start
+</string>
+        <key>TimeOutAbortsMacro</key><true/>
+        <key>TimeOut</key><integer>10</integer>
+        <key>TrimResults</key><true/>
+        <key>UseEnvironmentVariable</key><false/>
+      </dict>
+      <dict>
+        <key>MacroActionType</key><string>Notification</string>
+        <key>Title</key><string>Clipped</string>
+        <key>SubTitle</key><string>Start Marked</string>
+        <key>Text</key><string>Press ⌘⇧] to clip when done.</string>
+      </dict>
+    </array>
+  </dict>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       MACRO 2: Mark End + Clip (⌘⇧])
+       Marks current position as clip end, clips immediately.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <dict>
+    <key>Activate</key><string>Normal</string>
+    <key>CreationDate</key><real>769478400</real>
+    <key>ModificationDate</key><real>769478400</real>
+    <key>Name</key><string>Clipped: Mark End + Clip</string>
+    <key>UID</key><string>B2C3D4E5-0002-4000-0000-CLIPPED00002</string>
+    <key>Enabled</key><true/>
+
+    <key>Triggers</key>
+    <array>
+      <dict>
+        <key>MacroTriggerType</key><string>HotKey</string>
+        <key>KeyCode</key><integer>30</integer><!-- ] -->
+        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
+        <key>FireType</key><string>Pressed</string>
+      </dict>
+    </array>
+
+    <key>Actions</key>
+    <array>
+      <dict>
+        <key>MacroActionType</key><string>ExecuteShellScript</string>
+        <key>Script</key>
+        <string>#!/bin/zsh
+source "$HOME/.zshrc" 2>/dev/null || true
+/Users/rd/Music/clipped/bin/clipped audio --mark-end
+</string>
+        <key>TimeOutAbortsMacro</key><true/>
+        <key>TimeOut</key><integer>60</integer>
+        <key>TrimResults</key><true/>
+        <key>UseEnvironmentVariable</key><false/>
+      </dict>
+    </array>
+  </dict>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       MACRO 3: Generate Spinner Video from Last Clip (⌘⇧V)
+       Generates a spinner video from the most recently clipped file.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <dict>
+    <key>Activate</key><string>Normal</string>
+    <key>CreationDate</key><real>769478400</real>
+    <key>ModificationDate</key><real>769478400</real>
+    <key>Name</key><string>Clipped: Generate Spinner Video (Last Clip)</string>
+    <key>UID</key><string>C3D4E5F6-0003-4000-0000-CLIPPED00003</string>
+    <key>Enabled</key><true/>
+
+    <key>Triggers</key>
+    <array>
+      <dict>
+        <key>MacroTriggerType</key><string>HotKey</string>
+        <key>KeyCode</key><integer>9</integer><!-- V -->
+        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
+        <key>FireType</key><string>Pressed</string>
+      </dict>
+    </array>
+
+    <key>Actions</key>
+    <array>
+      <dict>
+        <key>MacroActionType</key><string>ExecuteShellScript</string>
+        <key>Script</key>
+        <string>#!/bin/zsh
+source "$HOME/.zshrc" 2>/dev/null || true
+LAST_CLIP="$(cat "$HOME/.config/clipped/history.txt" 2>/dev/null)"
+if [ -z "$LAST_CLIP" ]; then
+  osascript -e 'display notification "No recent clip found." with title "Clipped"'
+  exit 1
+fi
+# Use the output audio dir for the clip if it's there
+AUDIO_DIR="$HOME/Music/clipped/_audio"
+LATEST_AUDIO="$(ls -t "$AUDIO_DIR"/*.mp3 2>/dev/null | head -1)"
+if [ -n "$LATEST_AUDIO" ]; then
+  /Users/rd/Music/clipped/bin/clipped video "$LATEST_AUDIO" --template spinner --platform default
+else
+  osascript -e 'display notification "No clipped audio file found." with title "Clipped"'
+fi
+</string>
+        <key>TimeOutAbortsMacro</key><true/>
+        <key>TimeOut</key><integer>120</integer>
+        <key>TrimResults</key><true/>
+        <key>UseEnvironmentVariable</key><false/>
+      </dict>
+    </array>
+  </dict>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       MACRO 4: Clip from YouTube URL in Clipboard (⌘⇧U)
+       Pastes clipboard YouTube URL into an interactive clip session.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <dict>
+    <key>Activate</key><string>Normal</string>
+    <key>CreationDate</key><real>769478400</real>
+    <key>ModificationDate</key><real>769478400</real>
+    <key>Name</key><string>Clipped: Clip YouTube URL from Clipboard</string>
+    <key>UID</key><string>D4E5F6A7-0004-4000-0000-CLIPPED00004</string>
+    <key>Enabled</key><true/>
+
+    <key>Triggers</key>
+    <array>
+      <dict>
+        <key>MacroTriggerType</key><string>HotKey</string>
+        <key>KeyCode</key><integer>32</integer><!-- U -->
+        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
+        <key>FireType</key><string>Pressed</string>
+      </dict>
+    </array>
+
+    <key>Actions</key>
+    <array>
+      <dict>
+        <key>MacroActionType</key><string>ExecuteShellScript</string>
+        <key>Script</key>
+        <string>#!/bin/zsh
+source "$HOME/.zshrc" 2>/dev/null || true
+URL=$(pbpaste)
+if [[ "$URL" != http* ]]; then
+  osascript -e 'display notification "Clipboard does not contain a URL." with title "Clipped"'
+  exit 1
+fi
+# Open a new Terminal window and run the interactive clip session
+osascript -e "tell application \"Terminal\" to do script \"/Users/rd/Music/clipped/bin/clipped audio '$URL'\""
+</string>
+        <key>TimeOutAbortsMacro</key><true/>
+        <key>TimeOut</key><integer>10</integer>
+        <key>TrimResults</key><true/>
+        <key>UseEnvironmentVariable</key><false/>
+      </dict>
+    </array>
+  </dict>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       MACRO 5: Generate Instagram Reel (⌘⇧I)
+       Generate a 9:16 vertical spinner for the most recent clip.
+  ═══════════════════════════════════════════════════════════════════ -->
+  <dict>
+    <key>Activate</key><string>Normal</string>
+    <key>CreationDate</key><real>769478400</real>
+    <key>ModificationDate</key><real>769478400</real>
+    <key>Name</key><string>Clipped: Generate Instagram Reel (Last Clip)</string>
+    <key>UID</key><string>E5F6A7B8-0005-4000-0000-CLIPPED00005</string>
+    <key>Enabled</key><true/>
+
+    <key>Triggers</key>
+    <array>
+      <dict>
+        <key>MacroTriggerType</key><string>HotKey</string>
+        <key>KeyCode</key><integer>34</integer><!-- I -->
+        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
+        <key>FireType</key><string>Pressed</string>
+      </dict>
+    </array>
+
+    <key>Actions</key>
+    <array>
+      <dict>
+        <key>MacroActionType</key><string>ExecuteShellScript</string>
+        <key>Script</key>
+        <string>#!/bin/zsh
+source "$HOME/.zshrc" 2>/dev/null || true
+AUDIO_DIR="$HOME/Music/clipped/_audio"
+LATEST_AUDIO="$(ls -t "$AUDIO_DIR"/*.mp3 2>/dev/null | head -1)"
+if [ -n "$LATEST_AUDIO" ]; then
+  /Users/rd/Music/clipped/bin/clipped video "$LATEST_AUDIO" --template vertical --platform instagram
+else
+  osascript -e 'display notification "No clipped audio file found." with title "Clipped"'
+fi
+</string>
+        <key>TimeOutAbortsMacro</key><true/>
+        <key>TimeOut</key><integer>120</integer>
+        <key>TrimResults</key><true/>
+        <key>UseEnvironmentVariable</key><false/>
+      </dict>
+    </array>
+  </dict>
+
+</array>
+</plist>

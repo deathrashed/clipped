@@ -1,0 +1,4 @@
+#!/bin/zsh
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+export PYTHONPATH="$REPO_DIR"
+exec "$REPO_DIR/.venv/bin/python" -m clipped_src.main "$@"
