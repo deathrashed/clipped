@@ -67,7 +67,7 @@ class VerticalTemplate(VideoTemplate):
         else:
             graph = "color=s=1080x1920:c=black[outv]"
 
-        return graph + ";" + self._drawtext_overlay(assets, duration, t_out)
+        return graph + ";" + self._drawtext_overlay(assets, duration, t_out, link_in="[outv]")
 
     def _drawtext_overlay(self, assets: "MediaAssets", duration: float, t_out_video: float, link_in: str = "[outv]", link_out: str = "[v]") -> str:
         """Override: show only Track Title and Band Name under the spinner."""

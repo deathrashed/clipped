@@ -69,9 +69,11 @@ class FadeTemplate(VideoTemplate):
             for i in range(1, num):
                 start_t = starts[i]
                 current_link = f"[tmp{i}]" if i < num - 1 else "[outv]"
-                all_filters.append(f"[v{i}]fade=in:st={start_t}:d=1[v{i}f]")
                 all_filters.append(
-                    f"{prev_link}[v{i}f]overlay=enable='gt(t,{start_t})'{current_link}"
+                    f"[v{i}]fade=in:st={start_t}:d=1[v{i}f]"
+                )
+                all_filters.append(
+                    f"{prev_link}[v{i}f]overlay=0:0:enable='gt(t,{start_t})'{current_link}"
                 )
                 prev_link = current_link
 

@@ -18,10 +18,33 @@ from pathlib import Path
 from rich.console import Console
 
 from .config import get_config, HISTORY_FILE, validate_output_dirs
-from .library import Library, ClipEntry
 from .utils import resolve_assets
 
-console = Console()
+def _get_ui():
+    from .main import UI
+    return UI
+
+
+def _swinsian_current_track() -> str | None:
+    """Get the current track path from Swinsian. Returns None on failure."""
+    try:
+        res = subprocess.run(
+            ["osascript", "-e",
+             'tell application "Swinsian" to POSIX path of (get location of current track)'],
+            capture_output=True, text=True, timeout=5,
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+    return None
+
+
+def _notify(title: str, message: str) -> None:
+    subprocess.run(
+        ["osascript", "-e", f'display notification "{message}" with title "{title}"'],
+        capture_output=True,
+    )
 
 # Maximum clip duration before showing a sanity warning
 _DURATION_WARN_SECS = 120.0
@@ -35,16 +58,18 @@ class AudioClipper:
         end: float,
         fade_in: float | None = None,
         fade_out: float | None = None,
+        output_path: Path | None = None,
     ):
         self.src       = src
         self.start     = start
         self.end       = end
-        self.duration  = max(0.0, end - start)
+        self.duration  = end - start
+        if self.duration <= 0:
+            raise ValueError(f"End time ({end}s) must be greater than start time ({start}s)")
         self.config    = get_config()
         self.temp_dir  = Path(tempfile.mkdtemp())
-        self._input_src: str = src  # resolved during run(); used for re-processes
-
-        # Per-clip fade overrides (None = use config auto_fade / fade_duration)
+        self._input_src: str = src
+        self._custom_output = output_path
         self._fade_in  = fade_in
         self._fade_out = fade_out
 
@@ -53,6 +78,8 @@ class AudioClipper:
     # ── Output path ───────────────────────────────────────────────────────────
 
     def _get_output_path(self, artist: str = "", title: str = "") -> Path:
+        if self._custom_output:
+            return self._custom_output
         from .utils import get_output_path
         return get_output_path(
             base_dir=Path(self.config["audio_dir"]),
@@ -66,8 +93,8 @@ class AudioClipper:
 
     def _check_duration(self) -> None:
         if self.duration > _DURATION_WARN_SECS:
-            console.print(
-                f"[bold yellow]⚠  Long clip ({self.duration:.0f}s)[/bold yellow] — "
+            _get_ui().warn(
+                f"Long clip ({self.duration:.0f}s) — "
                 f"did you enter minutes instead of seconds? "
                 f"(e.g. start={self.start:.0f}, end={self.end:.0f})"
             )
@@ -86,12 +113,12 @@ class AudioClipper:
         # Use a stem template — yt-dlp appends the real format extension
         # e.g. "download.%(ext)s" → "download.mp4" → converted to "download.mp3"
         template = str(self.temp_dir / "download.%(ext)s")
-        console.print("📥 [dim]Downloading from YouTube…[/dim]")
+        _get_ui().sys("Downloading from YouTube…")
 
         subprocess.run(
             ["yt-dlp", "-x", "--audio-format", "mp3",
              "--audio-quality", "0", "-o", template, self.src],
-            check=True, capture_output=True,
+            check=True, capture_output=True, timeout=300,
         )
 
         # Find whatever audio container yt-dlp produced.
@@ -145,9 +172,9 @@ class AudioClipper:
         title: str = "",
     ) -> Path:
         self.duration = max(0.0, self.end - self.start)
-        console.print(
-            f"✂️  [dim]Processing audio ({self.start:.2f}s – {self.end:.2f}s, "
-            f"{self.duration:.1f}s)…[/dim]"
+        _get_ui().sys(
+            f"Processing audio ({self.start:.2f}s – {self.end:.2f}s, "
+            f"{self.duration:.1f}s)…"
         )
 
         filters: list[str] = []
@@ -177,14 +204,15 @@ class AudioClipper:
         ]
 
         from rich.status import Status
-        with Status("[cyan]Encoding audio…[/cyan]", console=console):
+        with Status("[cyan]Encoding audio…[/cyan]", console=Console()) as status:
             result = subprocess.run(cmd, capture_output=True, text=True)
 
+ 
         if result.returncode != 0:
-            console.print(f"[bold red]FFmpeg error (exit {result.returncode}):[/bold red]")
+            _get_ui().err(f"FFmpeg error (exit {result.returncode})")
             # Show the last 20 lines of stderr for diagnostics
             for ln in result.stderr.splitlines()[-20:]:
-                console.print(f"  [dim]{ln}[/dim]")
+                Console().print(f"  [dim]{ln}[/dim]")
             raise subprocess.CalledProcessError(result.returncode, cmd)
 
         return self._finalize(
@@ -203,62 +231,15 @@ class AudioClipper:
         title: str = "",
     ) -> Path:
         HISTORY_FILE.write_text(self.src)
-        console.print(f"\n✅ [green]Saved clip:[/green] {path}")
+        _get_ui().info(f"Saved clip: [white]{path.name}[/white]")
 
-        import questionary
-
-        while True:
-            choice = questionary.select(
-                "Clip preview:",
-                choices=["▶ Play", "⇄ Adjust Offset", "✓ Keep"],
-            ).ask()
-
-            if choice == "▶ Play":
-                console.print(
-                    f"[dim]▶ Playing: {self.start:.2f}s – {self.end:.2f}s "
-                    f"({self.duration:.1f}s)[/dim]"
-                )
-                subprocess.run(["afplay", str(path)])
-
-            elif choice == "⇄ Adjust Offset":
-                adj = questionary.text(
-                    "Shift window by (seconds, e.g. -0.5 or 1.2):", default="0"
-                ).ask()
-                try:
-                    delta = float(adj)
-                    if delta == 0:
-                        continue
-                    self.start += delta
-                    self.end   += delta
-                    # Re-process in place
-                    return self._execute_ffmpeg(
-                        input_src, path,
-                        artist=artist, album=album, title=title,
-                    )
-                except ValueError:
-                    console.print("[red]Invalid offset.[/red]")
-
-            else:  # Keep
-                break
-
-        # Record to library
-        lib = Library()
-        lib.record(ClipEntry(
-            source=self.src,
-            start=self.start,
-            end=self.end,
-            output_audio=str(path),
-            artist=artist,
-            album=album,
-            title=title,
-        ))
-
-        # Copy to clipboard
         if self.config.get("copy_to_clipboard", True):
             subprocess.run(
                 ["osascript", "-e", f'set the clipboard to (POSIX file "{path}")']
             )
-            console.print("[dim]📋 Copied to clipboard.[/dim]")
+            _get_ui().sys("Copied to clipboard.")
+
+        _notify("Clipped", f"Saved: {path.name}")
 
         return path
 
@@ -271,6 +252,7 @@ def process_clip(
     dry_run: bool = False,
     fade_in: float | None = None,
     fade_out: float | None = None,
+    output_path: Path | None = None,
 ) -> Path | None:
     """
     Clip audio from *start* to *end*.
@@ -280,18 +262,17 @@ def process_clip(
         fade_out : Fade-out duration in seconds (None = use config default).
     """
     if dry_run:
-        console.print(
-            f"\n[bold cyan]── Dry Run ──[/bold cyan]\n"
-            f"  Source   : {src}\n"
-            f"  Start    : {start}s\n"
-            f"  End      : {end}s\n"
-            f"  Duration : {end - start:.1f}s\n"
-            f"  Fade in  : {fade_in if fade_in is not None else 'auto'}s\n"
-            f"  Fade out : {fade_out if fade_out is not None else 'auto'}s\n"
-        )
+        UI = _get_ui()
+        console.print(f"\n[bold cyan]── Dry Run ──[/bold cyan]")
+        UI.sys(f"Source   : {src}")
+        UI.sys(f"Start    : {start}s")
+        UI.sys(f"End      : {end}s")
+        UI.sys(f"Duration : {end - start:.1f}s")
+        UI.sys(f"Fade in  : {fade_in if fade_in is not None else 'auto'}s")
+        UI.sys(f"Fade out : {fade_out if fade_out is not None else 'auto'}s\n")
         return None
 
-    clipper = AudioClipper(src, start, end, fade_in=fade_in, fade_out=fade_out)
+    clipper = AudioClipper(src, start, end, fade_in=fade_in, fade_out=fade_out, output_path=output_path)
     try:
         return clipper.run(is_url)
     finally:
@@ -310,14 +291,14 @@ def mark_start() -> None:
     )
     pos, loc = res.stdout.strip().split(", ", 1)
     state_file.write_text(json.dumps({"start": pos, "src": loc}))
-    console.print(f"📍 [bold green]Start marked at {pos}s[/bold green]")
+    _get_ui().info(f"Start marked at [bold white]{pos}s[/bold white]")
 
 
 def mark_end() -> None:
     """Mark the current playback position and clip from start to now."""
     state_file = Path("/tmp/clipped_hotkey.json")
     if not state_file.exists():
-        console.print("[red]No start marker found. Press the mark-start hotkey first.[/red]")
+        _get_ui().err("No start marker found. Press the mark-start hotkey first.")
         return
 
     state = json.loads(state_file.read_text())
@@ -326,7 +307,7 @@ def mark_end() -> None:
         capture_output=True, text=True,
     )
     end_pos = res.stdout.strip()
-    console.print(f"📍 [bold green]End marked at {end_pos}s — Processing…[/bold green]")
+    _get_ui().info(f"End marked at [bold white]{end_pos}s[/bold white] — Processing…")
 
     process_clip(state["src"], float(state["start"]), float(end_pos))
     state_file.unlink(missing_ok=True)

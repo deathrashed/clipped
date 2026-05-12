@@ -2,8 +2,7 @@
 Video engine for Clipped.
 
 Thin coordinator: resolves assets → delegates to a VideoTemplate → applies
-PlatformProfile (size, duration limit) → runs FFmpeg with a progress bar →
-records to the clip library.
+PlatformProfile (size, duration limit) → runs FFmpeg with a progress bar.
 """
 from __future__ import annotations
 
@@ -14,13 +13,14 @@ from pathlib import Path
 from rich.console import Console
 
 from .config import get_config, validate_output_dirs
-from .library import Library, ClipEntry
 from .platforms import PlatformProfile, get_profile
 from .progress import run_ffmpeg_with_progress
 from .templates import get_template
 from .utils import resolve_assets
 
-console = Console()
+def _get_ui():
+    from .main import UI
+    return UI
 
 
 def process_video(
@@ -34,6 +34,7 @@ def process_video(
     extra_config: dict | None = None,
     fade_in: float | None = None,
     fade_out: float | None = None,
+    output_path: Path | None = None,
 ) -> Path | None:
     """
     Generate a video from an audio file.
@@ -78,9 +79,9 @@ def process_video(
 
     # Clamp to platform max duration
     if profile.max_duration and calc_dur > profile.max_duration:
-        console.print(
-            f"[yellow]⚠  Clip ({calc_dur:.0f}s) exceeds {profile.label} max "
-            f"({profile.max_duration:.0f}s). Trimming.[/yellow]"
+        _get_ui().warn(
+            f"Clip ({calc_dur:.0f}s) exceeds {profile.label} max "
+            f"({profile.max_duration:.0f}s). Trimming."
         )
         calc_dur = profile.max_duration
 
@@ -107,14 +108,17 @@ def process_video(
 
     # ── Output path ───────────────────────────────────────────────────────────
     from .utils import get_output_path
-    output_path = get_output_path(
-        base_dir=Path(config["video_dir"]),
-        artist=assets.artist_name,
-        title=assets.track_title,
-        fallback_stem=assets.audio_path.stem,
-        template=template_name,
-        extension="mp4"
-    )
+    if output_path:
+        output_path = Path(output_path)
+    else:
+        output_path = get_output_path(
+            base_dir=Path(config["video_dir"]),
+            artist=assets.artist_name,
+            title=assets.track_title,
+            fallback_stem=assets.audio_path.stem,
+            template=template_name,
+            extension="mp4"
+        )
 
     # ── Build FFmpeg command ──────────────────────────────────────────────────
     inputs         = template.get_inputs(assets)
@@ -163,9 +167,9 @@ def process_video(
     cmd.append(str(output_path))
 
     # ── Run ───────────────────────────────────────────────────────────────────
-    console.print(
-        f"🎬 [bold]Generating [cyan]{template.info.label}[/cyan] "
-        f"for [magenta]{profile.label}[/magenta]…[/bold]"
+    _get_ui().sys(
+        f"Generating [bold cyan]{template.info.label}[/bold cyan] "
+        f"for [bold magenta]{profile.label}[/bold magenta]…"
     )
 
     run_ffmpeg_with_progress(
@@ -178,28 +182,18 @@ def process_video(
     if dry_run:
         return None
 
-    console.print(f"✅ [green]Video saved:[/green] {output_path}")
+    _get_ui().info(f"Video saved: [white]{output_path.name}[/white]")
 
-    # Clipboard copy
     if config.get("copy_to_clipboard", True):
         subprocess.run(
             ["osascript", "-e", f'set the clipboard to (POSIX file "{output_path}")']
         )
-        console.print("[dim]📋 Copied to clipboard.[/dim]")
+        _get_ui().sys("Copied to clipboard.")
 
-    # Library record
-    lib = Library()
-    lib.record(ClipEntry(
-        source=src,
-        start=start,
-        end=start + calc_dur,
-        output_video=str(output_path),
-        artist=assets.artist_name,
-        album=assets.album_name,
-        title=assets.track_title,
-        platform=platform_name,
-        template=template_name,
-    ))
+    subprocess.run(
+        ["osascript", "-e", f'display notification "{output_path.name}" with title "Clipped"'],
+        capture_output=True,
+    )
 
     return output_path
 
@@ -224,25 +218,34 @@ def _export_audio_only(
     cmd += ["-i", src, "-t", str(duration), "-c:a", "libmp3lame", "-q:a", "4"]
     cmd.append(str(output_path))
 
-    console.print(f"🎵 [bold]Exporting audio for [magenta]{profile.label}[/magenta]…[/bold]")
+    _get_ui().sys(f"Exporting audio for [bold magenta]{profile.label}[/bold magenta]…")
     run_ffmpeg_with_progress(cmd, duration_secs=duration, label=profile.label, dry_run=dry_run)
 
     if dry_run:
         return None
 
-    # Size check
     size_mb = output_path.stat().st_size / (1024 * 1024)
     if profile.max_size_mb and size_mb > profile.max_size_mb:
-        console.print(
-            f"[yellow]⚠  File is {size_mb:.1f} MB — exceeds {profile.max_size_mb} MB "
-            f"Discord limit. Consider a shorter clip.[/yellow]"
+        _get_ui().warn(
+            f"File is {size_mb:.1f} MB — exceeds {profile.max_size_mb} MB "
+            f"Discord limit. Consider a shorter clip."
         )
 
-    console.print(f"✅ [green]Audio saved:[/green] {output_path}")
+    _get_ui().info(f"Audio saved: [white]{output_path.name}[/white]")
     if config.get("copy_to_clipboard", True):
         subprocess.run(
             ["osascript", "-e", f'set the clipboard to (POSIX file "{output_path}")']
         )
-        console.print("[dim]📋 Copied to clipboard.[/dim]")
+        _get_ui().sys("Copied to clipboard.")
+
+    subprocess.run(
+        ["osascript", "-e", f'display notification "{output_path.name}" with title "Clipped"'],
+        capture_output=True,
+    )
 
     return output_path
+
+
+def _get_ui():
+    from .main import UI
+    return UI

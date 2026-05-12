@@ -28,6 +28,13 @@ from rich.progress import (
 console = Console()
 
 
+def _notify(title: str, message: str) -> None:
+    subprocess.run(
+        ["osascript", "-e", f'display notification "{message}" with title "{title}"'],
+        capture_output=True,
+    )
+
+
 def run_ffmpeg_with_progress(
     cmd: list[str],
     duration_secs: float,
@@ -104,3 +111,4 @@ def run_ffmpeg_with_progress(
 
     elapsed = time.monotonic() - t_start
     console.print(f"[dim]  encode: {elapsed:.1f}s[/dim]")
+    _notify("Clipped", "FFmpeg encoding complete")

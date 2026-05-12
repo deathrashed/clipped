@@ -34,7 +34,6 @@ clipped --version     # v2.0.0
 | **✂️ Precision Clipping** | Clip audio from local files or YouTube URLs with sample-accurate times |
 | **🎬 6 Video Templates** | Spinner, Fade, Static, Vertical (9:16), Minimal, Cinematic — each a self-contained module |
 | **📤 8 Platform Profiles** | Instagram, TikTok, YouTube Shorts, Twitter/X, Discord, YouTube, Bandcamp, Default |
-| **📚 Clip Library** | Append-only JSONL history of every clip; searchable via `clipped browse` |
 | **⚙️ Named Presets** | `--preset instagram` skips all menus and uses the right template + platform |
 | **📊 Live Progress Bar** | Real-time FFmpeg encoding progress (no more silent hangs) |
 | **🎹 KM Macro Bundle** | Double-click `macros/clipped.kmmacros` — 5 hotkeys, ready to use |
@@ -100,20 +99,6 @@ clipped video track.mp3 --preset instagram   # non-interactive
 ```
 
 Shipped presets: `instagram`, `tiktok`, `archive`, `cinematic`, `discord`.
-
----
-
-## 📚 Clip Library
-
-Every clip and video is automatically recorded to `~/.config/clipped/library.jsonl`.
-
-```bash
-clipped browse              # show all clips (newest first)
-clipped browse "Slayer"     # search by artist / title / album
-clipped browse -n 50        # show up to 50 results
-```
-
-From the browse TUI you can re-render any past clip in a new template or for a new platform.
 
 ---
 

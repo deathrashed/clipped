@@ -83,7 +83,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
     "youtube": PlatformProfile(
         name="youtube",
         label="YouTube / Archive (16:9)",
-        width=1920, height=816,
+        width=1920, height=1080,
         max_duration=None, max_size_mb=None,
         output_format="mp4",
         crf=18,

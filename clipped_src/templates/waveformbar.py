@@ -92,7 +92,7 @@ class WaveformBarTemplate(VideoTemplate):
             
             # Optional logo overlay (top right)
             if assets.logo:
-                logo_idx = 2 if assets.cover else 1
+                logo_idx = 2
                 logo_sz = 180
                 steps.append(
                     f"[{logo_idx}:v]scale={logo_sz}:{logo_sz}:force_original_aspect_ratio=decrease,"

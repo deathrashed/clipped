@@ -2,13 +2,10 @@
 Clipped — main TUI / CLI entrypoint.
 
 Commands:
-  clipped               → interactive TUI (default)
   clipped audio         → clip audio
   clipped video         → generate video
-  clipped browse        → browse / search clip library
   clipped templates     → list available video templates
   clipped platforms     → list available platform profiles
-  clipped --preset NAME → load a named preset
   clipped --version     → show version
 """
 from __future__ import annotations
@@ -26,11 +23,44 @@ from rich import box
 from . import __version__
 from .audio import process_clip, mark_start, mark_end
 from .config import HISTORY_FILE, get_config, get_preset
-from .library import Library
 from .platforms import list_platforms, get_profile, suggested_template, PLATFORMS
 from .templates import list_templates, REGISTRY
 from .utils import parse_time
 from .video import process_video
+
+
+# ── Retro/Cyberpunk UI ────────────────────────────────────────────────────────
+
+class UI:
+    """Standardized terminal UI messages and branding."""
+    
+    @staticmethod
+    def header():
+        """Retro TUI branding."""
+        console.print(f"\n[bold cyan]┌──────────────────────────────┐[/bold cyan]")
+        console.print(f"[bold cyan]│[/bold cyan] [bold white]📀 CLIPPED[/bold white] [dim]v{__version__}[/dim]             [bold cyan]│[/bold cyan]")
+        console.print(f"[bold cyan]└──────────────────────────────┘[/bold cyan]\n")
+
+    @staticmethod
+    def sys(msg: str):
+        console.print(f"[bold cyan][SYS][/bold cyan] {msg}")
+
+    @staticmethod
+    def info(msg: str):
+        console.print(f"[bold green][INF][/bold green] {msg}")
+
+    @staticmethod
+    def warn(msg: str):
+        console.print(f"[bold yellow][WRN][/bold yellow] {msg}")
+
+    @staticmethod
+    def err(msg: str):
+        console.print(f"[bold red][ERR][/bold red] {msg}")
+
+    @staticmethod
+    def metadata(summary: str):
+        console.print(f"\n[bold cyan][META][/bold cyan] [white]{summary}[/white]\n")
+
 
 app     = typer.Typer(help="Clipped — high-leverage audio & video automation.", add_completion=False)
 console = Console()
@@ -79,31 +109,31 @@ def _run_interactive_menu(preset_config: dict | None = None) -> None:
 
     cfg = preset_config or get_config()
 
-    console.print(
-        f"\n[bold cyan]📀 CLIPPED[/bold cyan] [dim]v{__version__}[/dim]\n"
-    )
+    while True:
+        UI.header()
 
-    choice = questionary.select(
-        "What would you like to do?",
-        choices=[
-            "✂️  Clip Audio (File or URL)",
-            "🎬 Generate Video",
-            "📚 Browse Clip Library",
-            "ℹ️  List Templates",
-            "🚪 Exit",
-        ],
-    ).ask()
+        choice = questionary.select(
+            "What would you like to do?",
+            choices=[
+                "🎬 Generate Video",
+                "✂️  Clip Audio (File or URL)",
+                "ℹ️  List Templates",
+                "📤 List Platforms",
+                "🚪 Exit",
+            ],
+        ).ask()
 
-    if choice and choice.startswith("✂️"):
-        _interactive_audio(cfg)
-    elif choice and choice.startswith("🎬"):
-        _interactive_video(cfg)
-    elif choice and choice.startswith("📚"):
-        _browse_library()
-    elif choice and choice.startswith("ℹ️"):
-        _print_templates()
-    else:
-        sys.exit(0)
+        if not choice or "Exit" in choice:
+            break
+
+        if choice.startswith("✂️"):
+            _interactive_audio(cfg)
+        elif choice.startswith("🎬"):
+            _interactive_video(cfg)
+        elif choice.startswith("ℹ️"):
+            _print_templates()
+        elif choice.startswith("📤"):
+            platforms_cmd()
 
 
 def _interactive_audio(cfg: dict) -> None:
@@ -123,30 +153,49 @@ def _interactive_audio(cfg: dict) -> None:
     else:
         method = questionary.select(
             "Source:",
-            choices=["📁 Pick file", "🔗 Enter YouTube URL"],
+            choices=[
+                "📁 Pick file (Finder)",
+                "🎵 Current song in Swinsian",
+                "⌨️  Enter path manually",
+                "🔗 Enter YouTube URL"
+            ],
         ).ask()
-        if method and method.startswith("📁"):
-            script = 'tell app "System Events" to POSIX path of (choose file with prompt "Select audio:")'
+        
+        if not method:
+            return
+
+        if method.startswith("📁"):
+            script = 'tell application (path to frontmost application as text) to POSIX path of (choose file with prompt "Select audio:")'
             res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
             src = res.stdout.strip()
-        else:
+        elif method.startswith("🎵"):
+            script = 'tell application "Swinsian" to POSIX path of (get location of current track)'
+            res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
+            src = res.stdout.strip()
+        elif method.startswith("⌨️"):
+            src = questionary.text("File path:").ask() or ""
+            if src.startswith("~"):
+                src = str(Path(src).expanduser())
+        elif method.startswith("🔗"):
             src = questionary.text("YouTube URL:").ask() or ""
+        else:
+            return
 
     if not src:
-        console.print("[red]No source provided.[/red]")
+        UI.err("No source provided.")
         return
 
     # Metadata summary
     from .utils import resolve_assets
     if not src.startswith("http"):
         assets = resolve_assets(src)
-        console.print(f"\n[bold cyan]Metadata:[/bold cyan] {assets.summary()}\n")
+        UI.metadata(assets.summary())
 
     start = questionary.text("Start time (M:SS or seconds):", default="0").ask() or "0"
     end   = questionary.text("End time   (M:SS or seconds):").ask() or ""
 
     if not end:
-        console.print("[red]End time is required.[/red]")
+        UI.err("End time is required.")
         return
 
     # Fade prompts
@@ -173,18 +222,43 @@ def _interactive_audio(cfg: dict) -> None:
 def _interactive_video(cfg: dict) -> None:
     import questionary
 
-    # Pick audio source
-    script = 'tell app "System Events" to POSIX path of (choose file with prompt "Select audio file:" of type {"public.audio"})'
-    res    = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
-    src    = res.stdout.strip()
+    method = questionary.select(
+        "Source:",
+        choices=[
+            "📁 Pick file (Finder)",
+            "🎵 Current song in Swinsian",
+            "⌨️  Enter path manually",
+        ],
+    ).ask()
+
+    if not method:
+        return
+
+    if method.startswith("📁"):
+        script = 'tell application (path to frontmost application as text) to POSIX path of (choose file with prompt "Select audio file:" of type {"public.audio"})'
+        res    = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
+        src    = res.stdout.strip()
+    elif method.startswith("🎵"):
+        from .audio import _swinsian_current_track
+        src = _swinsian_current_track()
+        if not src:
+            UI.err("Swinsian is not playing a track.")
+            return
+    elif method.startswith("⌨️"):
+        src = questionary.text("File path:").ask() or ""
+        if src.startswith("~"):
+            src = str(Path(src).expanduser())
+    else:
+        return
+
     if not src:
-        console.print("[red]No file selected.[/red]")
+        UI.err("No file selected.")
         return
 
     # Metadata summary
     from .utils import resolve_assets
     assets = resolve_assets(src)
-    console.print(f"\n[bold cyan]Metadata:[/bold cyan] {assets.summary()}\n")
+    UI.metadata(assets.summary())
 
     # Template picker
     template_name = _pick_template()
@@ -197,63 +271,10 @@ def _interactive_video(cfg: dict) -> None:
         return
 
     # Custom fade sequence
-    sequence = None
-    if template_name == "fade":
-        from .utils import resolve_assets
-        assets = resolve_assets(src)
-        if assets.all_images:
-            if questionary.confirm("Build custom image sequence?").ask():
-                sequence = []
-                remaining = assets.all_images.copy()
-                while remaining:
-                    img = questionary.select(
-                        "Add image (or Done):",
-                        choices=[str(p.name) for p in remaining] + ["Done"],
-                    ).ask()
-                    if img == "Done":
-                        break
-                    path = next(p for p in remaining if p.name == img)
-                    dur  = questionary.text(f"Duration for {img} (seconds):", default="5.0").ask()
-                    sequence.append((path, float(dur)))
-                    remaining.remove(path)
-                    if not questionary.confirm("Add another?").ask():
-                        break
+    sequence = _build_fade_sequence(assets) if template_name == "fade" else None
 
-    # Custom waveform options (only shown when waveformbar is chosen)
-    waveform_cfg = {}
-    if template_name == "waveformbar":
-        wf_mode = questionary.select(
-            "Waveform style:",
-            choices=[
-                "line   — smooth continuous line (recommended)",
-                "cline  — centered line (mirror up/down)",
-                "p2p    — peak-to-peak bars",
-                "point  — point scatter",
-            ],
-        ).ask()
-        if wf_mode:
-            waveform_cfg["waveform_mode"] = wf_mode.split()[0]
-        color_custom = questionary.select(
-            "Waveform colour:",
-            choices=[
-                "Cyan   (0x00E5FF) — default",
-                "White  (0xFFFFFF)",
-                "Gold   (0xFFD700)",
-                "Red    (0xFF2D55)",
-                "Green  (0x00FF88)",
-                "Custom (enter hex)",
-            ],
-        ).ask()
-        if color_custom:
-            if color_custom.startswith("Custom"):
-                hex_val = questionary.text("Hex colour (e.g. 0xFF0000):").ask() or "0x00E5FF"
-                waveform_cfg["waveform_color"] = hex_val
-            else:
-                # Extract hex from choice string  e.g. "Cyan   (0x00E5FF) — default"
-                import re
-                m = re.search(r"(0x[0-9A-Fa-f]{6})", color_custom)
-                if m:
-                    waveform_cfg["waveform_color"] = m.group(1)
+    # Custom waveform options
+    waveform_cfg = _build_waveform_config() if template_name == "waveformbar" else {}
 
     start = questionary.text("Start time (optional):", default="0").ask() or "0"
     end   = questionary.text("End time (optional, leave blank for full file):").ask() or ""
@@ -280,6 +301,7 @@ def audio_cmd(
     mark_e:  bool = typer.Option(False, "--mark-end",    help="Mark end in Swinsian and clip"),
     history: bool = typer.Option(False, "--history",     help="Use last source"),
     dry_run: bool = typer.Option(False, "--dry-run",     help="Print command, don't run"),
+    output:  Optional[str] = typer.Option(None, "--output", "-o", help="Output file path"),
 ):
     """Clip an audio file or YouTube URL."""
     if mark_s:
@@ -290,17 +312,17 @@ def audio_cmd(
     if history:
         if HISTORY_FILE.exists():
             src = HISTORY_FILE.read_text().strip()
-            console.print(f"[dim]Using history:[/dim] {src}")
+            UI.info(f"Using history: [dim]{src}[/dim]")
         else:
-            console.print("[red]No history found.[/red]")
+            UI.err("No history found.")
             raise typer.Exit(1)
 
     if not src:
-        script = 'tell app "System Events" to POSIX path of (choose file with prompt "Select audio:")'
+        script = 'tell application (path to frontmost application as text) to POSIX path of (choose file with prompt "Select audio:")'
         res    = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
         src    = res.stdout.strip()
         if not src:
-            console.print("[red]No source provided.[/red]")
+            UI.err("No source provided.")
             raise typer.Exit(1)
 
     import questionary
@@ -310,19 +332,35 @@ def audio_cmd(
         end = questionary.text("End time   (M:SS or seconds):").ask() or ""
 
     if not start or not end:
-        console.print("[red]Start and end times are required.[/red]")
+        UI.err("Start and end times are required.")
         raise typer.Exit(1)
 
     is_url = src.startswith("http")
-    process_clip(src, parse_time(start), parse_time(end), is_url=is_url, dry_run=dry_run)
+    out_path = Path(output) if output else None
+    process_clip(
+        src, parse_time(start), parse_time(end),
+        is_url=is_url, dry_run=dry_run,
+        output_path=out_path,
+    )
 
 
 # ── Video command ─────────────────────────────────────────────────────────────
 
 @app.command("video")
 def video_cmd(
-    src:           str           = typer.Argument(...,         help="Path to audio file"),
-    template:      str           = typer.Option("spinner",    help=f"Template: {', '.join(REGISTRY.keys())}"),
+    target: str = typer.Argument(
+        ...,
+        help="Path to audio file OR template name (if followed by path)."
+    ),
+    src: Optional[str] = typer.Argument(
+        None,
+        help="Path to audio file (only if template name was provided first)."
+    ),
+    template: str = typer.Option(
+        None,
+        "--template", "-t",
+        help=f"Template: {', '.join(REGISTRY.keys())}"
+    ),
     platform:      str           = typer.Option("default",    help=f"Platform: {', '.join(PLATFORMS.keys())}"),
     start:         Optional[str] = typer.Option(None,          help="Start time"),
     end:           Optional[str] = typer.Option(None,          help="End time"),
@@ -334,23 +372,50 @@ def video_cmd(
     fade_in:       Optional[float] = typer.Option(None, "--fade-in",      help="Audio fade-in duration (seconds)"),
     fade_out:      Optional[float] = typer.Option(None, "--fade-out",     help="Audio fade-out duration (seconds)"),
     dry_run:       bool          = typer.Option(False, "--dry-run", help="Print FFmpeg command, don't run"),
+    output:        Optional[str] = typer.Option(None, "--output", "-o", help="Output file path"),
 ):
-    """Generate a video from an audio file."""
+    """
+    Generate a video from an audio file.
+    
+    Examples:
+      clipped video myaudio.mp3
+      clipped video vertical myaudio.mp3  (shorthand)
+      clipped video --template reel myaudio.mp3
+    """
+    # Logic to handle 'clipped video template src' vs 'clipped video src'
+    final_src = src
+    final_template = template
+
+    # If target matches a template name, and src is provided, it's shorthand
+    if target in REGISTRY and src:
+        final_template = target
+        final_src = src
+    elif not src:
+        # Standard usage: target is the src file
+        final_src = target
+        if not final_template:
+            final_template = "spinner" # Default
+    else:
+        # ambiguous? assume target is src and ignore src unless it's a known conflict
+        final_src = target
+
     if preset:
         try:
             cfg = get_preset(preset)
-            template = cfg.get("default_template", template)
+            final_template = cfg.get("default_template", final_template)
             platform = cfg.get("default_platform", platform)
         except ValueError as e:
-            console.print(f"[red]{e}[/red]"); raise typer.Exit(1)
+            UI.err(str(e)); raise typer.Exit(1)
 
     extra: dict = {}
     if waveform_mode:  extra["waveform_mode"]  = waveform_mode
     if waveform_color: extra["waveform_color"] = waveform_color
 
+    out_path = Path(output) if output else None
+
     process_video(
-        src,
-        template_name=template,
+        final_src,
+        template_name=final_template,
         platform_name=platform,
         start=parse_time(start) if start else 0,
         end=parse_time(end)   if end   else None,
@@ -358,76 +423,11 @@ def video_cmd(
         extra_config=extra or None,
         fade_in=fade_in,
         fade_out=fade_out,
+        output_path=out_path,
     )
 
 
 # ── Browse command ────────────────────────────────────────────────────────────
-
-@app.command("browse")
-def browse_cmd(
-    query: Optional[str] = typer.Argument(None, help="Search query (artist, title, album)"),
-    limit: int           = typer.Option(20, "--limit", "-n", help="Max results to show"),
-):
-    """Browse or search the clip library."""
-    lib = Library()
-    entries = lib.search(query) if query else lib.all()
-
-    if not entries:
-        msg = f"No clips found for '{query}'." if query else "No clips yet. Make some!"
-        console.print(f"[dim]{msg}[/dim]")
-        return
-
-    entries = entries[:limit]
-
-    table = Table(
-        title=f"📚 Clip Library{f' — "{query}"' if query else ''} "
-              f"({len(entries)} result{'s' if len(entries) != 1 else ''})",
-        box=box.ROUNDED,
-        highlight=True,
-    )
-    table.add_column("#",       style="dim",   width=4,  no_wrap=True)
-    table.add_column("Artist",  style="cyan",  width=20, no_wrap=True)
-    table.add_column("Title",   style="white", width=28, no_wrap=True)
-    table.add_column("Dur",     style="green", width=7,  no_wrap=True)
-    table.add_column("Tmpl",    style="magenta", width=10, no_wrap=True)
-    table.add_column("Platform",style="yellow", width=12, no_wrap=True)
-    table.add_column("Date",    style="dim",   width=12, no_wrap=True)
-
-    for i, e in enumerate(entries, 1):
-        date = e.created_at[:10] if e.created_at else ""
-        table.add_row(
-            str(i),
-            e.artist[:18] or "—",
-            e.title[:26]  or Path(e.source).stem[:26],
-            f"{e.duration:.0f}s",
-            e.template,
-            e.platform,
-            date,
-        )
-
-    console.print(table)
-
-    # Interactive re-render prompt
-    import questionary
-    if questionary.confirm("Re-render a clip as video?", default=False).ask():
-        idx = questionary.text(f"Entry # (1–{len(entries)}):").ask()
-        try:
-            entry = entries[int(idx) - 1]
-        except (ValueError, IndexError):
-            console.print("[red]Invalid selection.[/red]"); return
-
-        src_path = entry.output_audio or entry.source
-        
-        t_name = _pick_template()
-        if not t_name: return
-        
-        p_name = _pick_platform()
-        if not p_name: return
-
-        process_video(src_path, template_name=t_name, platform_name=p_name)
-
-
-# ── Templates info command ────────────────────────────────────────────────────
 
 @app.command("templates")
 def templates_cmd():
@@ -436,6 +436,71 @@ def templates_cmd():
 
 
 # ── UI Helpers ────────────────────────────────────────────────────────────────
+
+def _build_fade_sequence(assets: "MediaAssets") -> list | None:
+    """Interactive builder for image sequences."""
+    import questionary
+    if not assets.all_images:
+        return None
+    if not questionary.confirm("Build custom image sequence?").ask():
+        return None
+    
+    sequence = []
+    remaining = assets.all_images.copy()
+    while remaining:
+        img = questionary.select(
+            "Add image (or Done):",
+            choices=[str(p.name) for p in remaining] + ["Done"],
+        ).ask()
+        if img == "Done":
+            break
+        path = next(p for p in remaining if p.name == img)
+        dur  = questionary.text(f"Duration for {img} (seconds):", default="5.0").ask()
+        sequence.append((path, float(dur)))
+        remaining.remove(path)
+        if not questionary.confirm("Add another?").ask():
+            break
+    return sequence
+
+
+def _build_waveform_config() -> dict:
+    """Interactive builder for waveformbar options."""
+    import questionary
+    import re
+    cfg = {}
+    wf_mode = questionary.select(
+        "Waveform style:",
+        choices=[
+            "line   — smooth continuous line (recommended)",
+            "cline  — centered line (mirror up/down)",
+            "p2p    — peak-to-peak bars",
+            "point  — point scatter",
+        ],
+    ).ask()
+    if wf_mode:
+        cfg["waveform_mode"] = wf_mode.split()[0]
+    
+    color_custom = questionary.select(
+        "Waveform colour:",
+        choices=[
+            "Cyan   (0x00E5FF) — default",
+            "White  (0xFFFFFF)",
+            "Gold   (0xFFD700)",
+            "Red    (0xFF2D55)",
+            "Green  (0x00FF88)",
+            "Custom (enter hex)",
+        ],
+    ).ask()
+    if color_custom:
+        if color_custom.startswith("Custom"):
+            hex_val = questionary.text("Hex colour (e.g. 0xFF0000):").ask() or "0x00E5FF"
+            cfg["waveform_color"] = hex_val
+        else:
+            m = re.search(r"(0x[0-9A-Fa-f]{6})", color_custom)
+            if m:
+                cfg["waveform_color"] = m.group(1)
+    return cfg
+
 
 def _pick_template() -> str | None:
     import questionary
@@ -492,6 +557,10 @@ def platforms_cmd():
             suggested_template(p.name),
         )
     console.print(table)
+
+
+def _print_platforms():
+    platforms_cmd()
 
 
 if __name__ == "__main__":
