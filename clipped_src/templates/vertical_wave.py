@@ -70,12 +70,7 @@ class VerticalWaveTemplate(VideoTemplate):
         f_dur   = 1.0
         
         # Safe alpha expression for FFmpeg
-        alpha = (
-            f"if(lt(t,{t_start}),0,"
-            f"if(lt(t,{t_start+f_dur}),(t-{t_start})/{f_dur},"
-            f"if(lt(t,{t_end-f_dur}),1,"
-            f"if(lt(t,{t_end}),1-(t-({t_end-f_dur}))/{f_dur},0))))"
-        )
+        alpha = self.get_fade_alpha(t_start, t_end, f_dur)
 
         return (
             f"{link_in}"

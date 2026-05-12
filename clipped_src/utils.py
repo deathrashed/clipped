@@ -18,18 +18,34 @@ from pathlib import Path
 # ── Time parsing ──────────────────────────────────────────────────────────────
 
 def parse_time(time_str: str | None) -> float:
+    """
+    Parse a time string into float seconds.
+    Supported formats: "SS", "SS.ms", "M:SS", "H:MM:SS"
+    """
     if not time_str:
         return 0.0
+    
+    s = str(time_str).strip()
+    if not s:
+        return 0.0
+
+    # 1. Direct float/int
     try:
-        return float(time_str)
-    except (ValueError, TypeError):
+        return float(s)
+    except ValueError:
         pass
-    if ":" in str(time_str):
-        parts = str(time_str).split(":")
-        if len(parts) == 3:
-            return float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
-        if len(parts) == 2:
-            return float(parts[0]) * 60 + float(parts[1])
+
+    # 2. Colon formats
+    if ":" in s:
+        try:
+            parts = [float(p) for p in s.split(":")]
+            if len(parts) == 3:    # H:MM:SS
+                return parts[0] * 3600 + parts[1] * 60 + parts[2]
+            if len(parts) == 2:    # M:SS
+                return parts[0] * 60 + parts[1]
+        except (ValueError, IndexError):
+            pass
+            
     return 0.0
 
 
@@ -234,41 +250,80 @@ class MediaAssets:
     # ── Internal helpers ──────────────────────────────────────────────────────
 
     def _find(self, names: list[str], directory: Path) -> Path | None:
-        if not directory.exists():
+        if not directory.exists() or not directory.is_dir():
             return None
-        # List all files once to avoid multiple disk reads
+        
         try:
             files = list(directory.iterdir())
         except OSError:
             return None
 
-        # 1. Try exact matches first (case-insensitive)
-        for name in names:
-            for f in files:
-                if f.stem.lower() == name.lower() and f.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp"]:
+        img_exts = {".jpg", ".jpeg", ".png", ".webp"}
+        names_lower = [n.lower() for n in names]
+
+        # 1. Try exact matches first
+        for f in files:
+            if f.suffix.lower() in img_exts:
+                stem_lower = f.stem.lower()
+                if any(stem_lower == n for n in names_lower):
                     return f
 
         # 2. Try substring matches
-        for name in names:
-            for f in files:
-                if name.lower() in f.stem.lower() and f.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp"]:
+        for f in files:
+            if f.suffix.lower() in img_exts:
+                stem_lower = f.stem.lower()
+                if any(n in stem_lower for n in names_lower):
                     return f
         return None
 
     def _find_all(self, dirs: list[Path]) -> list[Path]:
-        images: list[Path] = []
+        images: set[Path] = set()
+        img_exts = {".jpg", ".jpeg", ".png", ".webp"}
         for d in dirs:
-            if not d.exists():
-                continue
-            for ext in [".jpg", ".jpeg", ".png", ".webp"]:
-                images.extend(d.glob(f"*{ext}"))
-        return sorted(set(images))
+            if d.exists() and d.is_dir():
+                for f in d.iterdir():
+                    if f.suffix.lower() in img_exts:
+                        images.add(f)
+        return sorted(images)
 
 
 # ── Convenience wrapper ───────────────────────────────────────────────────────
 
 def resolve_assets(filepath: str) -> MediaAssets:
     return MediaAssets(Path(filepath))
+
+
+# ── Output Path Generation ──────────────────────────────────────────────────
+
+def get_output_path(
+    base_dir: Path,
+    artist: str = "",
+    title: str = "",
+    fallback_stem: str = "",
+    template: str = "",
+    extension: str = "mp3"
+) -> Path:
+    """
+    Generate a sanitized output file path.
+    Format: "Artist - Title.ext" or "Artist - Title (Template).ext"
+    """
+    base_dir = base_dir.expanduser()
+    base_dir.mkdir(parents=True, exist_ok=True)
+
+    if artist and title:
+        name = f"{artist} - {title}"
+        if template:
+            name += f" ({template})"
+    else:
+        name = title or fallback_stem
+        if template:
+            name += f"_{template}"
+
+    # Robust sanitization
+    safe = "".join(c for c in name if c.isalnum() or c in " -_").strip()
+    safe = safe.replace("  ", " ")
+    
+    return base_dir / f"{safe}.{extension}"
 
 
 # ── YouTube title probe ───────────────────────────────────────────────────────

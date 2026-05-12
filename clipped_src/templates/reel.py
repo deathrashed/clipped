@@ -117,27 +117,16 @@ class ReelTemplate(VideoTemplate):
         font_style = "font=Helvetica\\ Neue:shadowcolor=black@0.5:shadowx=2:shadowy=2"
         
         # Track Fade (starts at t_text_start)
-        alpha_title = (
-            f"if(lt(t\\,{t_text_start})\\,0\\,"
-            f"if(lt(t\\,{t_text_start+f_dur})\\,(t-{t_text_start})/{f_dur}\\,"
-            f"if(lt(t\\,{t_end-f_dur})\\,1\\,"
-            f"if(lt(t\\,{t_end})\\,1-(t-({t_end-f_dur}))/{f_dur}\\,0))))"
-        )
+        alpha_title = self.get_fade_alpha(t_text_start, t_end, f_dur)
         
         # Artist Fade (starts shortly later)
-        t_artist_fade = t_text_start + 1.2
-        alpha_artist = (
-            f"if(lt(t\\,{t_artist_fade})\\,0\\,"
-            f"if(lt(t\\,{t_artist_fade+f_dur})\\,(t-{t_artist_fade})/{f_dur}\\,"
-            f"if(lt(t\\,{t_end-f_dur})\\,1\\,"
-            f"if(lt(t\\,{t_end})\\,1-(t-({t_end-f_dur}))/{f_dur}\\,0))))"
-        )
+        alpha_artist = self.get_fade_alpha(t_text_start + 1.2, t_end, f_dur)
 
         return (
             f"{link_in}"
             f"drawtext=text={title}:fontcolor=white:fontsize=90:{font_style}"
-            f":x=(w-text_w)/2:y=1250:enable=gt(t\\,{t_text_start}):alpha={alpha_title},"
+            f":x=(w-text_w)/2:y=1250:enable='gt(t,{t_text_start})':alpha='{alpha_title}',"
             f"drawtext=text={artist}:fontcolor=0x00E5FF:fontsize=60:{font_style}"
-            f":x=(w-text_w)/2:y=1365:enable=gt(t\\,{t_artist_fade}):alpha={alpha_artist}"
+            f":x=(w-text_w)/2:y=1365:enable='gt(t,{t_artist_fade})':alpha='{alpha_artist}'"
             f"[v]"
         )

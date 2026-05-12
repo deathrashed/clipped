@@ -136,18 +136,18 @@ def _interactive_audio(cfg: dict) -> None:
         console.print("[red]No source provided.[/red]")
         return
 
+    # Metadata summary
+    from .utils import resolve_assets
+    if not src.startswith("http"):
+        assets = resolve_assets(src)
+        console.print(f"\n[bold cyan]Metadata:[/bold cyan] {assets.summary()}\n")
+
     start = questionary.text("Start time (M:SS or seconds):", default="0").ask() or "0"
     end   = questionary.text("End time   (M:SS or seconds):").ask() or ""
 
     if not end:
         console.print("[red]End time is required.[/red]")
         return
-
-    # Metadata summary
-    from .utils import resolve_assets
-    if not src.startswith("http"):
-        assets = resolve_assets(src)
-        console.print(f"\n[bold cyan]Metadata:[/bold cyan] {assets.summary()}\n")
 
     # Fade prompts
     fade_in = questionary.text(
@@ -186,27 +186,15 @@ def _interactive_video(cfg: dict) -> None:
     assets = resolve_assets(src)
     console.print(f"\n[bold cyan]Metadata:[/bold cyan] {assets.summary()}\n")
 
-    # Template picker (with descriptions)
-    templates = list_templates()
-    template_choices = [
-        f"{t.info.label}  [dim]— {t.info.description}[/dim]"
-        for t in templates
-    ]
-    t_choice = questionary.select("Video template:", choices=template_choices).ask()
-    if not t_choice:
+    # Template picker
+    template_name = _pick_template()
+    if not template_name:
         return
-    template_name = templates[template_choices.index(t_choice)].info.name
 
     # Platform picker
-    platform_choices = [
-        f"{p.label}" + (f"  [dim]{p.notes}[/dim]" if p.notes else "")
-        for p in list_platforms()
-    ]
-    p_names = [p.name for p in list_platforms()]
-    p_choice = questionary.select("Platform:", choices=platform_choices).ask()
-    if not p_choice:
+    platform_name = _pick_platform()
+    if not platform_name:
         return
-    platform_name = p_names[platform_choices.index(p_choice)]
 
     # Custom fade sequence
     sequence = None
@@ -429,18 +417,14 @@ def browse_cmd(
             console.print("[red]Invalid selection.[/red]"); return
 
         src_path = entry.output_audio or entry.source
-        t_choices = [f"{t.info.label}" for t in list_templates()]
-        t_names   = [t.info.name for t in list_templates()]
-        t_choice  = questionary.select("Template:", choices=t_choices).ask()
-        p_choices = [p.label for p in list_platforms()]
-        p_names   = [p.name  for p in list_platforms()]
-        p_choice  = questionary.select("Platform:", choices=p_choices).ask()
+        
+        t_name = _pick_template()
+        if not t_name: return
+        
+        p_name = _pick_platform()
+        if not p_name: return
 
-        process_video(
-            src_path,
-            template_name=t_names[t_choices.index(t_choice)],
-            platform_name=p_names[p_choices.index(p_choice)],
-        )
+        process_video(src_path, template_name=t_name, platform_name=p_name)
 
 
 # ── Templates info command ────────────────────────────────────────────────────
@@ -449,6 +433,24 @@ def browse_cmd(
 def templates_cmd():
     """List all available video templates."""
     _print_templates()
+
+
+# ── UI Helpers ────────────────────────────────────────────────────────────────
+
+def _pick_template() -> str | None:
+    import questionary
+    templates = list_templates()
+    choices = [f"{t.info.label} [dim]({t.info.name})[/dim]" for t in templates]
+    res = questionary.select("Select template:", choices=choices).ask()
+    return templates[choices.index(res)].info.name if res else None
+
+
+def _pick_platform() -> str | None:
+    import questionary
+    platforms = list_platforms()
+    choices = [f"{p.label} [dim]({p.name})[/dim]" for p in platforms]
+    res = questionary.select("Select platform:", choices=choices).ask()
+    return platforms[choices.index(res)].name if res else None
 
 
 def _print_templates():
