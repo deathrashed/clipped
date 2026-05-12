@@ -63,7 +63,15 @@ class VideoTemplate(ABC):
 
     def _escape(self, text: str) -> str:
         """Escape text for safe use in FFmpeg drawtext filter."""
-        return text.replace("'", "\\'").replace(":", "\\:")
+        # Colons separate arguments in FFmpeg filters
+        text = text.replace(":", "\\:")
+        # Single quotes break the text='...' wrapping. 
+        # In FFmpeg's filter parser, ' inside '...' is escaped as '\''
+        # But wait, the standard way is to use a backslash if not in quotes, 
+        # or special sequence if in quotes. 
+        # Safer: replace ' with a "smart" quote or just escape it if drawtext allows.
+        # Actually, drawtext text parameter handles ' if escaped with \
+        return text.replace("'", "\\'")
 
     def _drawtext_overlay(self, assets: "MediaAssets", link_in: str = "[outv]", link_out: str = "[v]") -> str:
         """
@@ -85,11 +93,11 @@ class VideoTemplate(ABC):
         return (
             f"{link_in}"
             f"drawtext=text='{title}':fontcolor=white:fontsize=70"
-            f":x=(w-text_w)/2:y={y_title}:enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
+            f":x=(w-text_w)/2:y={y_title}:enable='gt(t,1)':alpha='if(lt(t\\,2)\\,t-1\\,1)',"
             f"drawtext=text='{artist}':fontcolor=0xAAAAAA:fontsize=45"
-            f":x=(w-text_w)/2:y={y_artist}:enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)',"
-            f"drawtext=text='{album}':fontcolor=0x888888:fontsize=35:fontstyle=italic"
-            f":x=(w-text_w)/2:y={y_album}:enable='gt(t,2)':alpha='if(lt(t,3),t-2,1)'"
+            f":x=(w-text_w)/2:y={y_artist}:enable='gt(t,1.5)':alpha='if(lt(t\\,2.5)\\,t-1.5\\,1)',"
+            f"drawtext=text='{album}':fontcolor=0x888888:fontsize=35"
+            f":x=(w-text_w)/2:y={y_album}:enable='gt(t,2)':alpha='if(lt(t\\,3)\\,t-2\\,1)'"
             f"{link_out}"
         )
 
