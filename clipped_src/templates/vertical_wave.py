@@ -62,8 +62,11 @@ class VerticalWaveTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape_drawtext(self._wrap_text(assets.track_title, width=28, max_lines=2))
-        artist = self._escape_drawtext(self._wrap_text(assets.artist_name, width=26, max_lines=1))
+        title  = self._wrap_text(assets.track_title, width=28, max_lines=2)
+        artist = self._wrap_text(assets.artist_name, width=26, max_lines=1)
+
+        title_src  = self._drawtext_source(title, prefix="title")
+        artist_src = self._drawtext_source(artist, prefix="artist")
 
         t_start = duration / 2
         t_end   = duration - 5
@@ -74,9 +77,9 @@ class VerticalWaveTemplate(VideoTemplate):
 
         return (
             f"{link_in}"
-            f"drawtext=text='{title}':fontcolor=white:fontsize=80:fontweight=bold"
+            f"drawtext={title_src}:fontcolor=white:fontsize=80:fontweight=bold"
             f":x=(w-text_w)/2:y=1400:enable='between(t,{t_start},{t_end})':alpha='{alpha}',"
-            f"drawtext=text='{artist}':fontcolor=0x00E5FF:fontsize=50"
+            f"drawtext={artist_src}:fontcolor=0x00E5FF:fontsize=50"
             f":x=(w-text_w)/2:y=1500:enable='between(t,{t_start+0.5},{t_end})':alpha='{alpha}'"
             f"{link_out}"
         )

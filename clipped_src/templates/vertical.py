@@ -83,8 +83,8 @@ class VerticalTemplate(VideoTemplate):
         title  = assets.track_title.strip().strip('"').strip("'")
         artist = assets.artist_name.strip().strip('"').strip("'")
         
-        title_esc  = self._escape_drawtext(self._wrap_text(title, width=24, max_lines=2))
-        artist_esc = self._escape_drawtext(self._wrap_text(artist, width=24, max_lines=2))
+        title_src  = self._drawtext_source(self._wrap_text(title, width=24, max_lines=2), prefix="title")
+        artist_src = self._drawtext_source(self._wrap_text(artist, width=24, max_lines=2), prefix="artist")
 
         # Timing: In at configured percentage, Out at reveal + overlap
         t_text_start = duration * t_in_p
@@ -99,9 +99,9 @@ class VerticalTemplate(VideoTemplate):
         # Using white for both, increased contrast, and expansion=none for safety
         return (
             f"{link_in}"
-            f"drawtext=text='{title_esc}':fontcolor=white:fontsize=85:expansion=none"
+            f"drawtext={title_src}:fontcolor=white:fontsize=85:expansion=none"
             f":x=(w-text_w)/2:y=1280:alpha='{alpha_title}',"
-            f"drawtext=text='{artist_esc}':fontcolor=white:fontsize=60:expansion=none"
+            f"drawtext={artist_src}:fontcolor=white:fontsize=60:expansion=none"
             f":x=(w-text_w)/2:y=1400:alpha='{alpha_artist}'"
             f"{link_out}"
         )

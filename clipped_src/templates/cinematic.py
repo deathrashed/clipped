@@ -49,16 +49,19 @@ class CinematicTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape_drawtext(self._wrap_text(assets.track_title, width=36, max_lines=2))
+        title  = self._wrap_text(assets.track_title, width=36, max_lines=2)
         artist = self._wrap_text(assets.artist_name, width=28, max_lines=1)
         album  = self._wrap_text(assets.album_name, width=30, max_lines=1)
-        artist_album = self._escape_drawtext(f"{artist}  ·  {album}")
+        artist_album = f"{artist}  ·  {album}"
+
+        title_src       = self._drawtext_source(title, prefix="title")
+        artist_album_src = self._drawtext_source(artist_album, prefix="artist_album")
 
         return (
             f"{link_in}"
-            f"drawtext=text='{title}':fontcolor=white:fontsize=52"
+            f"drawtext={title_src}:fontcolor=white:fontsize=52"
             f":x=80:y=690:enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
-            f"drawtext=text='{artist_album}':fontcolor=0xAAAAAA:fontsize=32"
+            f"drawtext={artist_album_src}:fontcolor=0xAAAAAA:fontsize=32"
             f":x=80:y=752:enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)'"
             f"{link_out}"
         )

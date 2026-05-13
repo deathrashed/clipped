@@ -122,9 +122,13 @@ class WaveformBarTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape_drawtext(self._wrap_text(assets.track_title, width=30, max_lines=2))
-        artist = self._escape_drawtext(self._wrap_text(assets.artist_name, width=28, max_lines=1))
-        album  = self._escape_drawtext(self._wrap_text(assets.album_name, width=30, max_lines=1))
+        title  = self._wrap_text(assets.track_title, width=30, max_lines=2)
+        artist = self._wrap_text(assets.artist_name, width=28, max_lines=1)
+        album  = self._wrap_text(assets.album_name, width=30, max_lines=1)
+
+        title_src  = self._drawtext_source(title, prefix="title")
+        artist_src = self._drawtext_source(artist, prefix="artist")
+        album_src  = self._drawtext_source(album, prefix="album")
 
         y_title  = _BAR_Y + 12
         y_artist = _BAR_Y + 95
@@ -133,15 +137,15 @@ class WaveformBarTemplate(VideoTemplate):
         return (
             f"{link_in}"
             # Track title — large, white, bold
-            f"drawtext=text='{title}':fontcolor=white:fontsize=52"
+            f"drawtext={title_src}:fontcolor=white:fontsize=52"
             f":x=(w-text_w)/2:y={y_title}"
             f":enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
             # Artist — medium, cyan
-            f"drawtext=text='{artist}':fontcolor=0x00E5FF:fontsize=36"
+            f"drawtext={artist_src}:fontcolor=0x00E5FF:fontsize=36"
             f":x=(w-text_w)/2:y={y_artist}"
             f":enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)',"
             # Album — dim, italic
-            f"drawtext=text='{album}':fontcolor=0x777777:fontsize=28:fontstyle=italic"
+            f"drawtext={album_src}:fontcolor=0x777777:fontsize=28:fontstyle=italic"
             f":x=(w-text_w)/2:y={y_album}"
             f":enable='gt(t,2)':alpha='if(lt(t,3),t-2,1)'"
             f"{link_out}"
