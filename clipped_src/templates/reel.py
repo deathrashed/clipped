@@ -131,8 +131,10 @@ class ReelTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null[v]"
 
-        title  = self._escape_drawtext(self._wrap_text(assets.track_title, width=28, max_lines=2))
-        artist = self._escape_drawtext(self._wrap_text(assets.artist_name, width=26, max_lines=2))
+        title  = self._wrap_text(assets.track_title, width=28, max_lines=2)
+        artist = self._wrap_text(assets.artist_name, width=26, max_lines=2)
+        title_src  = self._drawtext_source(title, prefix="title")
+        artist_src = self._drawtext_source(artist, prefix="artist")
 
         t_end = duration - 1.5
         f_dur = 1.0
@@ -142,10 +144,10 @@ class ReelTemplate(VideoTemplate):
 
         return (
             f"{link_in}"
-            f"drawtext=text='{title}':fontcolor=white:fontsize=90"
+            f"drawtext={title_src}:fontcolor=white:fontsize=90"
             f":x=(w-text_w)/2:y={_Y_TITLE}"
             f":enable='gt(t,{t_text_start})':alpha='{alpha_title}',"
-            f"drawtext=text='{artist}':fontcolor=0x00E5FF:fontsize=60"
+            f"drawtext={artist_src}:fontcolor=0x00E5FF:fontsize=60"
             f":x=(w-text_w)/2:y={_Y_ARTIST}"
             f":enable='gt(t,{t_text_start + 1.2})':alpha='{alpha_artist}'"
             f"[v]"

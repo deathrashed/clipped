@@ -172,15 +172,33 @@ def process_video(
         f"for [bold magenta]{profile.label}[/bold magenta]…"
     )
 
-    run_ffmpeg_with_progress(
-        cmd,
-        duration_secs=calc_dur,
-        label=f"{template.info.label} → {profile.label}",
-        dry_run=dry_run,
-    )
+    try:
+        run_ffmpeg_with_progress(
+            cmd,
+            duration_secs=calc_dur,
+            label=f"{template.info.label} → {profile.label}",
+            dry_run=dry_run,
+        )
 
-    if dry_run:
-        return None
+        if dry_run:
+            return None
+
+        _get_ui().info(f"Video saved: [white]{output_path.name}[/white]")
+
+        if config.get("copy_to_clipboard", True):
+            subprocess.run(
+                ["osascript", "-e", f'set the clipboard to (POSIX file "{output_path}")']
+            )
+            _get_ui().sys("Copied to clipboard.")
+
+        subprocess.run(
+            ["osascript", "-e", f'display notification "{output_path.name}" with title "Clipped"'],
+            capture_output=True,
+        )
+
+        return output_path
+    finally:
+        template.cleanup()
 
     _get_ui().info(f"Video saved: [white]{output_path.name}[/white]")
 

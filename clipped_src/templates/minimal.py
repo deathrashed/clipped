@@ -53,17 +53,21 @@ class MinimalTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape_drawtext(self._wrap_text(assets.track_title, width=28, max_lines=2))
-        artist = self._escape_drawtext(self._wrap_text(assets.artist_name, width=26, max_lines=1))
-        album  = self._escape_drawtext(self._wrap_text(assets.album_name, width=28, max_lines=1))
+        title  = self._wrap_text(assets.track_title, width=28, max_lines=2)
+        artist = self._wrap_text(assets.artist_name, width=26, max_lines=1)
+        album  = self._wrap_text(assets.album_name, width=28, max_lines=1)
+
+        title_src  = self._drawtext_source(title, prefix="title")
+        artist_src = self._drawtext_source(artist, prefix="artist")
+        album_src  = self._drawtext_source(album, prefix="album")
 
         return (
             f"{link_in}"
-            f"drawtext=text='{title}':fontcolor=white:fontsize=64:fontweight=bold"
+            f"drawtext={title_src}:fontcolor=white:fontsize=64:fontweight=bold"
             f":x=(w-text_w)/2:y=780:enable='gt(t,0.5)':alpha='if(lt(t,1.5),t-0.5,1)',"
-            f"drawtext=text='{artist}':fontcolor=0xBBBBBB:fontsize=42"
+            f"drawtext={artist_src}:fontcolor=0xBBBBBB:fontsize=42"
             f":x=(w-text_w)/2:y=860:enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
-            f"drawtext=text='{album}':fontcolor=0x777777:fontsize=32:fontstyle=italic"
+            f"drawtext={album_src}:fontcolor=0x777777:fontsize=32:fontstyle=italic"
             f":x=(w-text_w)/2:y=915:enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)'"
             f"{link_out}"
         )
