@@ -62,8 +62,8 @@ class VerticalWaveTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape(assets.track_title)
-        artist = self._escape(assets.artist_name)
+        title  = self._escape_drawtext(self._wrap_text(assets.track_title, width=28, max_lines=2))
+        artist = self._escape_drawtext(self._wrap_text(assets.artist_name, width=26, max_lines=1))
 
         t_start = duration / 2
         t_end   = duration - 5

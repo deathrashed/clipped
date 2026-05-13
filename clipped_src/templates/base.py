@@ -11,8 +11,11 @@ To add a new template:
 from __future__ import annotations
 
 import subprocess
+import tempfile
+import textwrap
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional
 
 # Lazy import to avoid circular dependency
@@ -43,6 +46,7 @@ class VideoTemplate(ABC):
     def __init__(self, config: dict | None = None):
         self.config = config or {}
         self._has_drawtext: Optional[bool] = None
+        self._temp_text_files: list[Path] = []
 
     # ── Capability detection ──────────────────────────────────────────────
 
@@ -71,6 +75,60 @@ class VideoTemplate(ABC):
             text = text.replace(char, "\\" + char)
         return text
 
+    def _escape_drawtext(self, text: str) -> str:
+        """Escape text for safe use inside quoted FFmpeg drawtext strings."""
+        if not text:
+            return ""
+        text = text.replace("\\", "\\\\")
+        text = text.replace("'", "\\'")
+        return text.replace("\n", "\\n")
+
+    def _escape_path(self, text: str) -> str:
+        """Escape a file path for use in an FFmpeg drawtext textfile parameter."""
+        if not text:
+            return ""
+        return text.replace("\\", "\\\\").replace("'", "\\'")
+
+    def _make_textfile(self, text: str, prefix: str = "clipped_text", suffix: str = ".txt") -> str:
+        """Write wrapped text to a temporary file for textfile-based drawtext."""
+        tmp = tempfile.NamedTemporaryFile(delete=False, prefix=prefix, suffix=suffix, mode="w", encoding="utf-8")
+        tmp.write(text)
+        tmp.close()
+        path = Path(tmp.name)
+        self._temp_text_files.append(path)
+        return str(path)
+
+    def _drawtext_source(self, text: str, prefix: str = "clipped_text") -> str:
+        """Create a drawtext source clause pointing at a temporary text file."""
+        path = self._make_textfile(text, prefix=prefix)
+        return f"textfile='{self._escape_path(path)}'"
+
+    def cleanup(self) -> None:
+        """Remove temporary text files created while building filter graphs."""
+        for path in list(self._temp_text_files):
+            try:
+                path.unlink()
+            except Exception:
+                pass
+        self._temp_text_files.clear()
+
+    def _wrap_text(self, text: str, width: int = 28, max_lines: int = 2) -> str:
+        """Wrap long text into multiple lines for FFmpeg drawtext."""
+        if not text:
+            return ""
+        normalized = " ".join(text.strip().split())
+        lines = textwrap.wrap(
+            normalized,
+            width=width,
+            break_long_words=False,
+            break_on_hyphens=False,
+            max_lines=max_lines,
+        )
+        if len(lines) == max_lines and len(" ".join(lines)) < len(normalized):
+            last = lines[-1].rstrip(" .,;:?!")
+            lines[-1] = f"{last}..."
+        return "\n".join(lines)
+
     def _drawtext_overlay(self, assets: "MediaAssets", link_in: str = "[outv]", link_out: str = "[v]") -> str:
         """
         Standard three-line metadata overlay: title / artist / album.
@@ -79,9 +137,9 @@ class VideoTemplate(ABC):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape(assets.track_title)
-        artist = self._escape(assets.artist_name)
-        album  = self._escape(assets.album_name)
+        title_src  = self._drawtext_source(self._wrap_text(assets.track_title, width=28, max_lines=2), prefix="title")
+        artist_src = self._drawtext_source(self._wrap_text(assets.artist_name, width=28, max_lines=2), prefix="artist")
+        album_src  = self._drawtext_source(self._wrap_text(assets.album_name, width=32, max_lines=2), prefix="album")
 
         w, h = self.info.aspect
         y_title  = h - 220
@@ -90,11 +148,11 @@ class VideoTemplate(ABC):
 
         return (
             f"{link_in}"
-            f"drawtext=text={title}:fontcolor=white:fontsize=70"
+            f"drawtext={title_src}:fontcolor=white:fontsize=70"
             f":x=(w-text_w)/2:y={y_title}:enable='gt(t,1)':alpha='{self.get_fade_alpha(1.0, 0, 1.0)}',"
-            f"drawtext=text={artist}:fontcolor=0xAAAAAA:fontsize=45"
+            f"drawtext={artist_src}:fontcolor=0xAAAAAA:fontsize=45"
             f":x=(w-text_w)/2:y={y_artist}:enable='gt(t,1.5)':alpha='{self.get_fade_alpha(1.5, 0, 1.0)}',"
-            f"drawtext=text={album}:fontcolor=0x888888:fontsize=35"
+            f"drawtext={album_src}:fontcolor=0x888888:fontsize=35"
             f":x=(w-text_w)/2:y={y_album}:enable='gt(t,2)':alpha='{self.get_fade_alpha(2.0, 0, 1.0)}'"
             f"{link_out}"
         )

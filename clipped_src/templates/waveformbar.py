@@ -122,9 +122,9 @@ class WaveformBarTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._escape(assets.track_title)
-        artist = self._escape(assets.artist_name)
-        album  = self._escape(assets.album_name)
+        title  = self._escape_drawtext(self._wrap_text(assets.track_title, width=30, max_lines=2))
+        artist = self._escape_drawtext(self._wrap_text(assets.artist_name, width=28, max_lines=1))
+        album  = self._escape_drawtext(self._wrap_text(assets.album_name, width=30, max_lines=1))
 
         y_title  = _BAR_Y + 12
         y_artist = _BAR_Y + 95
