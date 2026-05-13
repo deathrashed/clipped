@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -193,6 +194,9 @@ class MediaAssets:
         self.logo   = self._find(["logo"],                              self.artist_dir)
         self.artist = self._find(["artist", "band", "photo"],           self.artist_dir)
 
+        if not self.cover:
+            self.cover = self._extract_embedded_cover()
+
         # Fallbacks: if cover is missing in album dir, look in artist dir for anything
         if not self.cover:
             self.cover = self.logo or self.artist
@@ -274,6 +278,12 @@ class MediaAssets:
                 stem_lower = f.stem.lower()
                 if any(n in stem_lower for n in names_lower):
                     return f
+
+        # 3. If there is exactly one image in the directory, use it as a fallback.
+        img_files = [f for f in files if f.suffix.lower() in img_exts]
+        if len(img_files) == 1:
+            return img_files[0]
+
         return None
 
     def _find_all(self, dirs: list[Path]) -> list[Path]:
@@ -285,6 +295,39 @@ class MediaAssets:
                     if f.suffix.lower() in img_exts:
                         images.add(f)
         return sorted(images)
+
+    def _extract_embedded_cover(self) -> Path | None:
+        try:
+            from mutagen import File as MutagenFile
+        except ImportError:
+            return None
+
+        try:
+            f = MutagenFile(str(self.audio_path))
+            if f is None or not getattr(f, "tags", None):
+                return None
+
+            images: list[bytes] = []
+            tags = f.tags
+            if hasattr(tags, "getall"):
+                images.extend(frame.data for frame in tags.getall("APIC") if hasattr(frame, "data"))
+            if "covr" in tags:
+                images.extend(bytes(img) for img in tags.get("covr", []) if img)
+            if "metadata_block_picture" in tags:
+                images.extend(bytes(pic) for pic in tags.get("metadata_block_picture", []) if pic)
+            if hasattr(f, "pictures"):
+                images.extend(bytes(pic) for pic in getattr(f, "pictures", []) if pic)
+
+            if not images:
+                return None
+
+            data = images[0]
+            suffix = ".jpg" if data.startswith(b"\xff\xd8") else ".png"
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                tmp.write(data)
+                return Path(tmp.name)
+        except Exception:
+            return None
 
 
 # ── Convenience wrapper ───────────────────────────────────────────────────────
