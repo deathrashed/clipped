@@ -53,21 +53,29 @@ class MinimalTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._wrap_text(assets.track_title, width=28, max_lines=2)
-        artist = self._wrap_text(assets.artist_name, width=26, max_lines=1)
-        album  = self._wrap_text(assets.album_name, width=28, max_lines=1)
+        title_text  = self._wrap_text(assets.track_title, width=28, max_lines=2)
+        artist_text = self._wrap_text(assets.artist_name, width=26, max_lines=1)
+        album_text  = self._wrap_text(assets.album_name,  width=28, max_lines=1)
 
-        title_src  = self._drawtext_source(title, prefix="title")
-        artist_src = self._drawtext_source(artist, prefix="artist")
-        album_src  = self._drawtext_source(album, prefix="album")
+        title_src  = self._drawtext_source(title_text,  prefix="title")
+        artist_src = self._drawtext_source(artist_text, prefix="artist")
+        album_src  = self._drawtext_source(album_text,  prefix="album")
+
+        title_fs = 64
+        line_gap = 8
+        title_extra = (title_fs + line_gap) * (self._line_count(title_text) - 1)
+
+        y_title  = 780 - title_extra
+        y_artist = 860 - title_extra
+        y_album  = 915 - title_extra
 
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize=64:fontweight=bold"
-            f":x=(w-text_w)/2:y=780:enable='gt(t,0.5)':alpha='if(lt(t,1.5),t-0.5,1)',"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}:fontweight=bold"
+            f":x=(w-text_w)/2:y={y_title}:enable='gt(t,0.5)':alpha='if(lt(t,1.5),t-0.5,1)',"
             f"drawtext={artist_src}:fontcolor=0xBBBBBB:fontsize=42"
-            f":x=(w-text_w)/2:y=860:enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
+            f":x=(w-text_w)/2:y={y_artist}:enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
             f"drawtext={album_src}:fontcolor=0x777777:fontsize=32:fontstyle=italic"
-            f":x=(w-text_w)/2:y=915:enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)'"
+            f":x=(w-text_w)/2:y={y_album}:enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)'"
             f"{link_out}"
         )

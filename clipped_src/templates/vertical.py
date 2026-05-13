@@ -82,26 +82,32 @@ class VerticalTemplate(VideoTemplate):
         # Aggressive cleanup: strip quotes and leading/trailing whitespace
         title  = assets.track_title.strip().strip('"').strip("'")
         artist = assets.artist_name.strip().strip('"').strip("'")
-        
-        title_src  = self._drawtext_source(self._wrap_text(title, width=24, max_lines=2), prefix="title")
-        artist_src = self._drawtext_source(self._wrap_text(artist, width=24, max_lines=2), prefix="artist")
+
+        title_text  = self._wrap_text(title,  width=24, max_lines=2)
+        artist_text = self._wrap_text(artist, width=24, max_lines=2)
+        title_src   = self._drawtext_source(title_text,  prefix="title")
+        artist_src  = self._drawtext_source(artist_text, prefix="artist")
 
         # Timing: In at configured percentage, Out at reveal + overlap
         t_text_start = duration * t_in_p
         t_end = t_out_video + overlap
-        
-        # Track Fade (starts at t_text_start)
-        alpha_title = self.get_fade_alpha(t_text_start, t_end, f_dur)
-        
-        # Artist Fade (starts shortly later)
+
+        alpha_title  = self.get_fade_alpha(t_text_start,       t_end, f_dur)
         alpha_artist = self.get_fade_alpha(t_text_start + 1.2, t_end, f_dur)
 
-        # Using white for both, increased contrast, and expansion=none for safety
+        # Shift the whole block up when the title wraps to a second line
+        title_fs    = 85
+        line_gap    = 10
+        title_extra = (title_fs + line_gap) * (self._line_count(title_text) - 1)
+
+        y_title  = 1280 - title_extra
+        y_artist = 1400 - title_extra
+
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize=85:expansion=none"
-            f":x=(w-text_w)/2:y=1280:alpha='{alpha_title}',"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}:expansion=none"
+            f":x=(w-text_w)/2:y={y_title}:alpha='{alpha_title}',"
             f"drawtext={artist_src}:fontcolor=white:fontsize=60:expansion=none"
-            f":x=(w-text_w)/2:y=1400:alpha='{alpha_artist}'"
+            f":x=(w-text_w)/2:y={y_artist}:alpha='{alpha_artist}'"
             f"{link_out}"
         )

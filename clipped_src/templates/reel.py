@@ -131,10 +131,10 @@ class ReelTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null[v]"
 
-        title  = self._wrap_text(assets.track_title, width=28, max_lines=2)
-        artist = self._wrap_text(assets.artist_name, width=26, max_lines=2)
-        title_src  = self._drawtext_source(title, prefix="title")
-        artist_src = self._drawtext_source(artist, prefix="artist")
+        title_text  = self._wrap_text(assets.track_title, width=28, max_lines=2)
+        artist_text = self._wrap_text(assets.artist_name, width=26, max_lines=2)
+        title_src  = self._drawtext_source(title_text,  prefix="title")
+        artist_src = self._drawtext_source(artist_text, prefix="artist")
 
         t_end = duration - 1.5
         f_dur = 1.0
@@ -142,13 +142,21 @@ class ReelTemplate(VideoTemplate):
         alpha_title  = self.get_fade_alpha(t_text_start, t_end, f_dur)
         alpha_artist = self.get_fade_alpha(t_text_start + 1.2, t_end, f_dur)
 
+        # Shift both rows up when title wraps to a second line
+        title_fs    = 90
+        line_gap    = 10
+        title_extra = (title_fs + line_gap) * (self._line_count(title_text) - 1)
+
+        y_title  = _Y_TITLE  - title_extra
+        y_artist = _Y_ARTIST - title_extra
+
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize=90"
-            f":x=(w-text_w)/2:y={_Y_TITLE}"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}"
+            f":x=(w-text_w)/2:y={y_title}"
             f":enable='gt(t,{t_text_start})':alpha='{alpha_title}',"
             f"drawtext={artist_src}:fontcolor=0x00E5FF:fontsize=60"
-            f":x=(w-text_w)/2:y={_Y_ARTIST}"
+            f":x=(w-text_w)/2:y={y_artist}"
             f":enable='gt(t,{t_text_start + 1.2})':alpha='{alpha_artist}'"
             f"[v]"
         )

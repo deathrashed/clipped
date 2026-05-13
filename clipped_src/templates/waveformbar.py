@@ -122,22 +122,28 @@ class WaveformBarTemplate(VideoTemplate):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._wrap_text(assets.track_title, width=30, max_lines=2)
-        artist = self._wrap_text(assets.artist_name, width=28, max_lines=1)
-        album  = self._wrap_text(assets.album_name, width=30, max_lines=1)
+        title_text  = self._wrap_text(assets.track_title, width=30, max_lines=2)
+        artist_text = self._wrap_text(assets.artist_name, width=28, max_lines=1)
+        album_text  = self._wrap_text(assets.album_name,  width=30, max_lines=1)
 
-        title_src  = self._drawtext_source(title, prefix="title")
-        artist_src = self._drawtext_source(artist, prefix="artist")
-        album_src  = self._drawtext_source(album, prefix="album")
+        title_src  = self._drawtext_source(title_text,  prefix="title")
+        artist_src = self._drawtext_source(artist_text, prefix="artist")
+        album_src  = self._drawtext_source(album_text,  prefix="album")
 
-        y_title  = _BAR_Y + 12
-        y_artist = _BAR_Y + 95
-        y_album  = _BAR_Y + 148
+        title_fs = 52
+        line_gap = 8
+
+        # When title wraps to 2 lines, push the whole block up so it fits in the strip
+        title_extra = (title_fs + line_gap) * (self._line_count(title_text) - 1)
+
+        y_title  = _BAR_Y + 12  - title_extra
+        y_artist = _BAR_Y + 95  - title_extra
+        y_album  = _BAR_Y + 148 - title_extra
 
         return (
             f"{link_in}"
             # Track title — large, white, bold
-            f"drawtext={title_src}:fontcolor=white:fontsize=52"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}"
             f":x=(w-text_w)/2:y={y_title}"
             f":enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
             # Artist — medium, cyan

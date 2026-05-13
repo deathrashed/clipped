@@ -108,28 +108,44 @@ def _run_interactive_menu(preset_config: dict | None = None) -> None:
     import questionary
 
     cfg = preset_config or get_config()
+    last_action: dict | None = None
 
     while True:
         UI.header()
 
+        choices = []
+        if last_action:
+            choices.append(f"🔄 Rerun: {last_action['label']}")
+            choices.append(questionary.Separator())
+
+        choices += [
+            "🎬 Generate Video",
+            "✂️  Clip Audio (File or URL)",
+            "ℹ️  List Templates",
+            "📤 List Platforms",
+            "🚪 Exit",
+        ]
+
         choice = questionary.select(
             "What would you like to do?",
-            choices=[
-                "🎬 Generate Video",
-                "✂️  Clip Audio (File or URL)",
-                "ℹ️  List Templates",
-                "📤 List Platforms",
-                "🚪 Exit",
-            ],
+            choices=choices,
         ).ask()
 
         if not choice or "Exit" in choice:
             break
 
+        if "Rerun" in choice and last_action:
+            last_action["func"](*last_action["args"], **last_action["kwargs"])
+            continue
+
         if choice.startswith("✂️"):
-            _interactive_audio(cfg)
+            action = _interactive_audio(cfg)
+            if action:
+                last_action = action
         elif choice.startswith("🎬"):
-            _interactive_video(cfg)
+            action = _interactive_video(cfg)
+            if action:
+                last_action = action
         elif choice.startswith("ℹ️"):
             _print_templates()
         elif choice.startswith("📤"):
@@ -209,14 +225,23 @@ def _interactive_audio(cfg: dict) -> None:
     ).ask()
 
     is_url = src.startswith("http")
-    process_clip(
-        src,
-        parse_time(start),
-        parse_time(end),
-        is_url=is_url,
-        fade_in=float(fade_in) if fade_in else None,
-        fade_out=float(fade_out) if fade_out else None,
-    )
+    params = {
+        "src": src,
+        "start": parse_time(start),
+        "end": parse_time(end),
+        "is_url": is_url,
+        "fade_in": float(fade_in) if fade_in else None,
+        "fade_out": float(fade_out) if fade_out else None,
+    }
+
+    process_clip(**params)
+
+    return {
+        "func": process_clip,
+        "args": [],
+        "kwargs": params,
+        "label": f"Audio Clip ({Path(src).name if not is_url else src[:30]})",
+    }
 
 
 def _interactive_video(cfg: dict) -> None:
@@ -279,15 +304,24 @@ def _interactive_video(cfg: dict) -> None:
     start = questionary.text("Start time (optional):", default="0").ask() or "0"
     end   = questionary.text("End time (optional, leave blank for full file):").ask() or ""
 
-    process_video(
-        src,
-        template_name=template_name,
-        platform_name=platform_name,
-        start=parse_time(start),
-        end=parse_time(end) if end else None,
-        sequence=sequence,
-        extra_config=waveform_cfg or None,
-    )
+    params = {
+        "src": src,
+        "template_name": template_name,
+        "platform_name": platform_name,
+        "start": parse_time(start),
+        "end": parse_time(end) if end else None,
+        "sequence": sequence,
+        "extra_config": waveform_cfg or None,
+    }
+
+    process_video(**params)
+
+    return {
+        "func": process_video,
+        "args": [],
+        "kwargs": params,
+        "label": f"Video: {template_name} ({platform_name})",
+    }
 
 
 # ── Audio command ─────────────────────────────────────────────────────────────
