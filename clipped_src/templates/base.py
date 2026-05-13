@@ -113,7 +113,13 @@ class VideoTemplate(ABC):
         self._temp_text_files.clear()
 
     def _wrap_text(self, text: str, width: int = 28, max_lines: int = 2) -> str:
-        """Wrap long text into multiple lines for FFmpeg drawtext."""
+        """
+        Wrap long text into multiple lines for FFmpeg drawtext (textfile mode).
+
+        Uses character-count width as a heuristic — not pixel-perfect, but
+        good enough for fixed-size monospace-ish rendering at typical font sizes.
+        Returns a string with \\n separating lines (written to a temp file).
+        """
         if not text:
             return ""
         normalized = " ".join(text.strip().split())
@@ -129,30 +135,51 @@ class VideoTemplate(ABC):
             lines[-1] = f"{last}..."
         return "\n".join(lines)
 
+    def _line_count(self, text: str) -> int:
+        """Return the number of rendered lines in a wrapped text string."""
+        if not text:
+            return 1
+        return text.count("\n") + 1
+
     def _drawtext_overlay(self, assets: "MediaAssets", link_in: str = "[outv]", link_out: str = "[v]") -> str:
         """
         Standard three-line metadata overlay: title / artist / album.
-        Returns an empty string if drawtext is unavailable.
+
+        When the title wraps to 2 lines the entire block shifts up by one
+        title line-height so the extra line stays inside the reserved area
+        rather than overflowing into the frame below.
         """
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title_src  = self._drawtext_source(self._wrap_text(assets.track_title, width=28, max_lines=2), prefix="title")
-        artist_src = self._drawtext_source(self._wrap_text(assets.artist_name, width=28, max_lines=2), prefix="artist")
-        album_src  = self._drawtext_source(self._wrap_text(assets.album_name, width=32, max_lines=2), prefix="album")
+        title_text  = self._wrap_text(assets.track_title, width=28, max_lines=2)
+        artist_text = self._wrap_text(assets.artist_name, width=28, max_lines=2)
+        album_text  = self._wrap_text(assets.album_name,  width=32, max_lines=2)
+
+        title_src  = self._drawtext_source(title_text,  prefix="title")
+        artist_src = self._drawtext_source(artist_text, prefix="artist")
+        album_src  = self._drawtext_source(album_text,  prefix="album")
 
         w, h = self.info.aspect
-        y_title  = h - 220
-        y_artist = h - 130
-        y_album  = h - 70
+        title_fs  = 70
+        artist_fs = 45
+        album_fs  = 35
+        line_gap  = 10  # extra pixels between stacked blocks
+
+        # Extra vertical space consumed by a 2-line title
+        title_extra = (title_fs + line_gap) * (self._line_count(title_text) - 1)
+
+        y_title  = h - 220 - title_extra
+        y_artist = h - 130 - title_extra
+        y_album  = h - 70  - title_extra
 
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize=70"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}"
             f":x=(w-text_w)/2:y={y_title}:enable='gt(t,1)':alpha='{self.get_fade_alpha(1.0, 0, 1.0)}',"
-            f"drawtext={artist_src}:fontcolor=0xAAAAAA:fontsize=45"
+            f"drawtext={artist_src}:fontcolor=0xAAAAAA:fontsize={artist_fs}"
             f":x=(w-text_w)/2:y={y_artist}:enable='gt(t,1.5)':alpha='{self.get_fade_alpha(1.5, 0, 1.0)}',"
-            f"drawtext={album_src}:fontcolor=0x888888:fontsize=35"
+            f"drawtext={album_src}:fontcolor=0x888888:fontsize={album_fs}"
             f":x=(w-text_w)/2:y={y_album}:enable='gt(t,2)':alpha='{self.get_fade_alpha(2.0, 0, 1.0)}'"
             f"{link_out}"
         )
