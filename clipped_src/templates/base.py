@@ -160,26 +160,35 @@ class VideoTemplate(ABC):
         artist_src = self._drawtext_source(artist_text, prefix="artist")
         album_src  = self._drawtext_source(album_text,  prefix="album")
 
+        title_lines  = self._line_count(title_text)
+        artist_lines = self._line_count(artist_text)
+
         w, h = self.info.aspect
-        title_fs  = 70
-        artist_fs = 45
-        album_fs  = 35
-        line_gap  = 10  # extra pixels between stacked blocks
+        title_fs  = 42
+        artist_fs = 30
+        album_fs  = 24
+        gap       = 10
+        lh_factor = 1.15
 
-        # Extra vertical space consumed by a 2-line title
-        title_extra = (title_fs + line_gap) * (self._line_count(title_text) - 1)
+        # Height of each block
+        h_title  = title_lines  * title_fs  * lh_factor
+        h_artist = artist_lines * artist_fs * lh_factor
 
-        y_title  = h - 220 - title_extra
-        y_artist = h - 130 - title_extra
-        y_album  = h - 70  - title_extra
+        # Anchor: we want the whole block centered vertically in the reserved bottom area.
+        # Shifted further down (h-150) to avoid overlap with large centered art/spinners.
+        y_title  = int(h - 150 - (h_title - (title_fs * lh_factor)))
+        y_artist = int(y_title + h_title + gap)
+        y_album  = int(y_artist + h_artist + gap)
+
+        common = ":text_align=center:expansion=none"
 
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}{common}"
             f":x=(w-text_w)/2:y={y_title}:enable='gt(t,1)':alpha='{self.get_fade_alpha(1.0, 0, 1.0)}',"
-            f"drawtext={artist_src}:fontcolor=0xAAAAAA:fontsize={artist_fs}"
+            f"drawtext={artist_src}:fontcolor=0xAAAAAA:fontsize={artist_fs}{common}"
             f":x=(w-text_w)/2:y={y_artist}:enable='gt(t,1.5)':alpha='{self.get_fade_alpha(1.5, 0, 1.0)}',"
-            f"drawtext={album_src}:fontcolor=0x888888:fontsize={album_fs}"
+            f"drawtext={album_src}:fontcolor=0x888888:fontsize={album_fs}{common}"
             f":x=(w-text_w)/2:y={y_album}:enable='gt(t,2)':alpha='{self.get_fade_alpha(2.0, 0, 1.0)}'"
             f"{link_out}"
         )

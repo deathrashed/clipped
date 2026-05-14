@@ -41,7 +41,8 @@ class VerticalWaveTemplate(VideoTemplate):
 
             # ── 2. Spinning Record ────────────────────────────────────────────
             steps.append(
-                f"[1:v]scale={art_sz}:{art_sz},"
+                f"[1:v]scale={art_sz}:{art_sz}:force_original_aspect_ratio=decrease,"
+                f"pad={art_sz}:{art_sz}:(ow-iw)/2:(oh-ih)/2:color=black@0,"
                 f"format=rgba,"
                 f"geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
                 f"a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2,2)),255,0)',"
@@ -69,17 +70,28 @@ class VerticalWaveTemplate(VideoTemplate):
         artist_src = self._drawtext_source(artist, prefix="artist")
 
         t_start = duration / 2
-        t_end   = duration - 5
+        t_end   = max(t_start + 1.0, duration - 5)
         f_dur   = 1.0
         
         # Safe alpha expression for FFmpeg
         alpha = self.get_fade_alpha(t_start, t_end, f_dur)
 
+        title_fs  = 70
+        artist_fs = 45
+        gap       = 20
+        lh_factor = 1.15
+
+        h_title = self._line_count(title) * title_fs * lh_factor
+        y_title = int(1400 - (h_title - (title_fs * lh_factor)))
+        y_artist = int(y_title + h_title + gap)
+
+        common = ":text_align=center:expansion=none"
+
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize=80:fontweight=bold"
-            f":x=(w-text_w)/2:y=1400:enable='between(t,{t_start},{t_end})':alpha='{alpha}',"
-            f"drawtext={artist_src}:fontcolor=0x00E5FF:fontsize=50"
-            f":x=(w-text_w)/2:y=1500:enable='between(t,{t_start+0.5},{t_end})':alpha='{alpha}'"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}{common}"
+            f":x=(w-text_w)/2:y={y_title}:enable='between(t,{t_start},{t_end})':alpha='{alpha}',"
+            f"drawtext={artist_src}:fontcolor=0x00E5FF:fontsize={artist_fs}{common}"
+            f":x=(w-text_w)/2:y={y_artist}:enable='between(t,{t_start+0.5},{t_end})':alpha='{alpha}'"
             f"{link_out}"
         )

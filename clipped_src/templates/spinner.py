@@ -27,7 +27,8 @@ class SpinnerTemplate(VideoTemplate):
 
         if assets.cover:
             graph = (
-                "[1:v]scale=800:800[art];"
+                "[1:v]scale=800:800:force_original_aspect_ratio=decrease,"
+                "pad=800:800:(ow-iw)/2:(oh-ih)/2:color=black@0[art];"
                 "[art]format=rgba,"
                 "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
                 f"a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2,2)),255,0)'[fg];"

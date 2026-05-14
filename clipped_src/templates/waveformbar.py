@@ -50,67 +50,71 @@ class WaveformBarTemplate(VideoTemplate):
         color = self.config.get("waveform_color", "0x00E5FF")
         art_x = (_W - _ART_SZ) // 2                          # 220
 
-        # Build a flat list of filterchain steps; each is a complete filterchain
-        # (possibly chained with commas) prefixed with input pad labels.
-        # All steps are joined with "; " at the end.
         steps: list[str] = []
-
-        # ── Waveform generation from the audio stream ──────────────────────────
-        steps.append(
-            f"[0:a]showwaves=s={_W}x{_BAR_H}:mode={mode}:colors={color}:rate=30,"
-            f"format=rgba"
-            f"[wave]"
-        )
+        steps.append(self._build_waveform_step(mode, color))
 
         if assets.cover:
-            # ── Background: blurred, darkened artwork fill ────────────────────
-            steps.append(
-                f"[1:v]scale={_W}:{_H}:force_original_aspect_ratio=increase,"
-                f"crop={_W}:{_H},"
-                f"gblur=sigma=25,"
-                f"eq=brightness=-0.35:saturation=0.7"
-                f"[bgblur]"
-            )
-            # Semi-transparent black overlay to darken the blur
-            steps.append(f"color=s={_W}x{_H}:c=black@0.45[darkmask]")
-            steps.append(f"[bgblur][darkmask]overlay=0:0[bg]")
-
-            # ── Art panel: centred, padded square ─────────────────────────────
-            steps.append(
-                f"[1:v]scale={_ART_SZ}:{_ART_SZ}:force_original_aspect_ratio=decrease,"
-                f"pad={_ART_SZ}:{_ART_SZ}:(ow-iw)/2:(oh-ih)/2,"
-                f"format=rgba"
-                f"[art]"
-            )
-
-            # ── Waveform strip: dark backing + waveform ───────────────────────
-            steps.append(f"color=s={_W}x{_BAR_H}:c=black@0.75[stripbg]")
-            steps.append(f"[stripbg][wave]overlay=0:0[wavestrip]")
-
-            # ── Composite: bg → art → wavestrip ──────────────────────────────
-            steps.append(f"[bg][art]overlay={art_x}:{_ART_Y}[mid]")
-            
-            # Optional logo overlay (top right)
-            if assets.logo:
-                logo_idx = 2
-                logo_sz = 180
-                steps.append(
-                    f"[{logo_idx}:v]scale={logo_sz}:{logo_sz}:force_original_aspect_ratio=decrease,"
-                    f"format=rgba[logo]"
-                )
-                steps.append(f"[mid][logo]overlay=W-w-40:40[mid_logo]")
-                steps.append(f"[mid_logo][wavestrip]overlay=0:{_BAR_Y}[outv]")
-            else:
-                steps.append(f"[mid][wavestrip]overlay=0:{_BAR_Y}[outv]")
+            steps.extend(self._build_cover_background_steps(assets, art_x))
         else:
-            # ── No cover: plain dark background ──────────────────────────────
-            steps.append(f"color=s={_W}x{_H}:c=#0a0a0a[bg]")
-            steps.append(f"color=s={_W}x{_BAR_H}:c=#1a1a1a[stripbg]")
-            steps.append(f"[stripbg][wave]overlay=0:0[wavestrip]")
-            steps.append(f"[bg][wavestrip]overlay=0:{_BAR_Y}[outv]")
+            steps.extend(self._build_plain_background_steps())
 
         graph = ";".join(steps)
         return graph + ";" + self._drawtext_overlay(assets)
+
+    def _build_waveform_step(self, mode: str, color: str) -> str:
+        return (
+            f"[0:a]showwaves=s={_W}x{_BAR_H}:mode={mode}:colors={color}:rate=30,"
+            f"format=rgba[wave]"
+        )
+
+    def _build_cover_background_steps(self, assets: "MediaAssets", art_x: int) -> list[str]:
+        steps: list[str] = [
+            f"[1:v]scale={_W}:{_H}:force_original_aspect_ratio=increase,"
+            f"crop={_W}:{_H},gblur=sigma=25,eq=brightness=-0.35:saturation=0.7[bgblur]",
+            f"color=s={_W}x{_H}:c=black@0.45[darkmask]",
+            f"[bgblur][darkmask]overlay=0:0[bg]",
+            f"[1:v]scale={_ART_SZ}:{_ART_SZ}:force_original_aspect_ratio=decrease,"
+            f"pad={_ART_SZ}:{_ART_SZ}:(ow-iw)/2:(oh-ih)/2,format=rgba[art]",
+            f"[bg][art]overlay={art_x}:{_ART_Y}[mid]",
+            f"[wave]colorkey=black:0.1:0.1[wave_trans]",
+        ]
+
+        if assets.logo:
+            logo_sz = 180
+            steps.extend([
+                f"[2:v]scale={logo_sz}:{logo_sz}:force_original_aspect_ratio=decrease,format=rgba[logo]",
+                f"[mid][logo]overlay=W-w-40:40[mid_logo]",
+                f"[mid_logo][wave_trans]overlay=0:{_BAR_Y}[outv]",
+            ])
+        else:
+            steps.append(f"[mid][wave_trans]overlay=0:{_BAR_Y}[outv]")
+
+        return steps
+
+    def _build_plain_background_steps(self) -> list[str]:
+        return [
+            f"[wave]colorkey=black:0.1:0.1[wave_trans]",
+            f"color=s={_W}x{_H}:c=#0a0a0a[bg]",
+            f"[bg][wave_trans]overlay=0:{_BAR_Y}[outv]",
+        ]
+
+    def _layout_text_positions(
+        self,
+        title_lines: int,
+        artist_lines: int,
+        album_lines: int,
+        title_fs: int,
+        artist_fs: int,
+        album_fs: int,
+        lh_factor: float = 1.15,
+        gap: int = 8,
+    ) -> tuple[int, int, int]:
+        title_height = title_lines * title_fs * lh_factor
+        artist_height = artist_lines * artist_fs * lh_factor
+        y_title = _BAR_Y + 16
+        y_artist = int(y_title + title_height + gap)
+        y_album = int(y_artist + artist_height + gap)
+        return y_title, y_artist, y_album
 
     def _drawtext_overlay(
         self,
@@ -123,35 +127,41 @@ class WaveformBarTemplate(VideoTemplate):
             return f"{link_in}null{link_out}"
 
         title_text  = self._wrap_text(assets.track_title, width=30, max_lines=2)
-        artist_text = self._wrap_text(assets.artist_name, width=28, max_lines=1)
-        album_text  = self._wrap_text(assets.album_name,  width=30, max_lines=1)
+        artist_text = self._wrap_text(assets.artist_name, width=28, max_lines=2)
+        album_text  = self._wrap_text(assets.album_name,  width=30, max_lines=2)
 
         title_src  = self._drawtext_source(title_text,  prefix="title")
         artist_src = self._drawtext_source(artist_text, prefix="artist")
         album_src  = self._drawtext_source(album_text,  prefix="album")
 
-        title_fs = 52
-        line_gap = 8
+        title_lines  = self._line_count(title_text)
+        artist_lines = self._line_count(artist_text)
+        album_lines  = self._line_count(album_text)
 
-        # When title wraps to 2 lines, push the whole block up so it fits in the strip
-        title_extra = (title_fs + line_gap) * (self._line_count(title_text) - 1)
+        title_fs  = 34
+        artist_fs = 28
+        album_fs  = 24
+        gap       = 8
+        lh_factor = 1.15
 
-        y_title  = _BAR_Y + 12  - title_extra
-        y_artist = _BAR_Y + 95  - title_extra
-        y_album  = _BAR_Y + 148 - title_extra
+        y_title, y_artist, y_album = self._layout_text_positions(
+            title_lines, artist_lines, album_lines,
+            title_fs, artist_fs, album_fs,
+            lh_factor=lh_factor,
+            gap=gap,
+        )
+
+        common = ":text_align=center:expansion=none"
 
         return (
             f"{link_in}"
-            # Track title — large, white, bold
-            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}{common}"
             f":x=(w-text_w)/2:y={y_title}"
             f":enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
-            # Artist — medium, cyan
-            f"drawtext={artist_src}:fontcolor=0x00E5FF:fontsize=36"
+            f"drawtext={artist_src}:fontcolor=0x00E5FF:fontsize={artist_fs}{common}"
             f":x=(w-text_w)/2:y={y_artist}"
             f":enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)',"
-            # Album — dim, italic
-            f"drawtext={album_src}:fontcolor=0x777777:fontsize=28:fontstyle=italic"
+            f"drawtext={album_src}:fontcolor=0x777777:fontsize={album_fs}{common}"
             f":x=(w-text_w)/2:y={y_album}"
             f":enable='gt(t,2)':alpha='if(lt(t,3),t-2,1)'"
             f"{link_out}"

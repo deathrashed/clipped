@@ -59,9 +59,9 @@ class CinematicTemplate(VideoTemplate):
 
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize=52"
+            f"drawtext={title_src}:fontcolor=white:fontsize=42:expansion=none"
             f":x=80:y=690:enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
-            f"drawtext={artist_album_src}:fontcolor=0xAAAAAA:fontsize=32"
+            f"drawtext={artist_album_src}:fontcolor=0xAAAAAA:fontsize=26:expansion=none"
             f":x=80:y=752:enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)'"
             f"{link_out}"
         )
