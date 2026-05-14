@@ -1,0 +1,63 @@
+
+import subprocess
+import sys
+import os
+
+SRC = "/Volumes/Eksternal/Audio/Metal/D/Demolition Hammer/1988 - Skull Fracturing Nightmare/02. Corpse Content (Happy Death).mp3"
+TEMPLATES = [
+    "spinner", "fade", "static", "vertical", "minimal", 
+    "cinematic", "waveformbar", "vertical_wave", "reel"
+]
+
+def run_test(template):
+    print(f"\n--- Testing Template: {template} ---")
+    platform = "default"
+    if template in ["vertical", "vertical_wave", "reel"]:
+        platform = "instagram"
+    elif template == "cinematic":
+        platform = "youtube"
+
+    cmd = [
+        ".venv/bin/python", "-m", "clipped_src.main", 
+        "video", SRC, 
+        "--template", template, 
+        "--start", "00:30", 
+        "--end", "00:32",
+        "--platform", platform
+    ]
+    
+    try:
+        # Run and capture output
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        
+        if result.returncode == 0:
+            print(f"✅ {template}: Success")
+            return True
+        else:
+            print(f"❌ {template}: Failed (Exit {result.returncode})")
+            print("--- STDERR ---")
+            print(result.stderr)
+            return False
+    except Exception as e:
+        print(f"❌ {template}: Error: {e}")
+        return False
+
+def main():
+    if not os.path.exists(SRC):
+        print(f"Error: Source file not found: {SRC}")
+        sys.exit(1)
+        
+    failed = []
+    for t in TEMPLATES:
+        if not run_test(t):
+            failed.append(t)
+    
+    print("\n" + "="*40)
+    if not failed:
+        print("🎉 ALL TEMPLATES PASSED")
+    else:
+        print(f"💀 FAILED TEMPLATES: {', '.join(failed)}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

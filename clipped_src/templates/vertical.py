@@ -43,7 +43,8 @@ class VerticalTemplate(VideoTemplate):
         if assets.cover:
             # 1. Spinner (Circular, Rotating, Fades OUT at t_out)
             fg_spinner = (
-                "[1:v]scale=720:720[art_circle];"
+                "[1:v]scale=720:720:force_original_aspect_ratio=decrease,"
+                "pad=720:720:(ow-iw)/2:(oh-ih)/2:color=black@0[art_circle];"
                 "[art_circle]format=rgba,"
                 "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
                 f"a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2,2)),255,0)'[fg_circle];"
@@ -53,7 +54,8 @@ class VerticalTemplate(VideoTemplate):
             
             # 2. Square Cover (Full, Non-Rotating, Fades IN at t_out)
             fg_square = (
-                "[1:v]scale=900:900[art_square];"
+                "[1:v]scale=900:900:force_original_aspect_ratio=decrease,"
+                "pad=900:900:(ow-iw)/2:(oh-ih)/2:color=black@0[art_square];"
                 "[art_square]format=rgba,"
                 f"fade=t=in:st={t_out}:d={f_dur}:alpha=1[sq];"
             )
@@ -95,19 +97,28 @@ class VerticalTemplate(VideoTemplate):
         alpha_title  = self.get_fade_alpha(t_text_start,       t_end, f_dur)
         alpha_artist = self.get_fade_alpha(t_text_start + 1.2, t_end, f_dur)
 
-        # Shift the whole block up when the title wraps to a second line
-        title_fs    = 85
-        line_gap    = 10
-        title_extra = (title_fs + line_gap) * (self._line_count(title_text) - 1)
+        title_lines  = self._line_count(title_text)
+        artist_lines = self._line_count(artist_text)
 
-        y_title  = 1280 - title_extra
-        y_artist = 1400 - title_extra
+        # Height calculation
+        title_fs  = 48
+        artist_fs = 34
+        lh_factor = 1.15
+        gap       = 15
+
+        h_title = title_lines * title_fs * lh_factor
+
+        # Positioning: Anchor the title area, then stack artist below it
+        y_title  = int(1280 - (h_title - (title_fs * lh_factor)))
+        y_artist = int(y_title + h_title + gap)
+
+        common = ":text_align=center:expansion=none"
 
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}:expansion=none"
+            f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}{common}"
             f":x=(w-text_w)/2:y={y_title}:alpha='{alpha_title}',"
-            f"drawtext={artist_src}:fontcolor=white:fontsize=60:expansion=none"
+            f"drawtext={artist_src}:fontcolor=white:fontsize={artist_fs}{common}"
             f":x=(w-text_w)/2:y={y_artist}:alpha='{alpha_artist}'"
             f"{link_out}"
         )
