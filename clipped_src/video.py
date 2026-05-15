@@ -1,4 +1,4 @@
-/var/folders/vn/k5r5qwp17159hnjdwc7xcsxh0000gn/T/images/Antigravity 2026-05-13 16.36.48.png"""
+"""
 Video engine for Clipped.
 
 Thin coordinator: resolves assets → delegates to a VideoTemplate → applies

@@ -1,35 +1,41 @@
 """
 Template registry — maps string keys to VideoTemplate classes.
 
-To register a new template, add it here. The TUI and CLI both query this registry.
+Templates are discovered automatically from the `clipped_src/templates/`
+package. Add a new template file and subclass `VideoTemplate` to expose it.
 """
 from __future__ import annotations
+
+import importlib
+import pkgutil
+from pathlib import Path
 from typing import Type
 
 from .base import VideoTemplate
-from .spinner      import SpinnerTemplate
-from .fade         import FadeTemplate
-from .static       import StaticTemplate
-from .vertical     import VerticalTemplate
-from .minimal      import MinimalTemplate
-from .cinematic    import CinematicTemplate
-from .waveformbar  import WaveformBarTemplate
-from .vertical_wave import VerticalWaveTemplate
-from .reel          import ReelTemplate
 
 # ── Registry ──────────────────────────────────────────────────────────────────
-# Ordered dict — insertion order determines TUI display order.
-REGISTRY: dict[str, Type[VideoTemplate]] = {
-    "spinner":     SpinnerTemplate,
-    "fade":        FadeTemplate,
-    "static":      StaticTemplate,
-    "vertical":    VerticalTemplate,
-    "minimal":     MinimalTemplate,
-    "cinematic":   CinematicTemplate,
-    "waveformbar": WaveformBarTemplate,
-    "vertical_wave": VerticalWaveTemplate,
-    "reel":          ReelTemplate,
-}
+# Template modules are discovered dynamically to reduce registry maintenance.
+
+
+def _discover_templates() -> dict[str, Type[VideoTemplate]]:
+    registry: dict[str, Type[VideoTemplate]] = {}
+    package = __name__.rsplit(".", 1)[0]
+    template_dir = Path(__file__).resolve().parent
+
+    for module_info in sorted(pkgutil.iter_modules([str(template_dir)]), key=lambda m: m.name):
+        if module_info.name in {"__init__", "base", Path(__file__).stem}:
+            continue
+        module = importlib.import_module(f"{package}.{module_info.name}")
+        for obj in vars(module).values():
+            if isinstance(obj, type) and issubclass(obj, VideoTemplate) and obj is not VideoTemplate:
+                info = getattr(obj, "info", None)
+                if info is None:
+                    continue
+                registry[info.name] = obj
+    return registry
+
+
+REGISTRY: dict[str, Type[VideoTemplate]] = _discover_templates()
 
 
 def get_template(name: str, config: dict | None = None, **kwargs) -> VideoTemplate:
@@ -42,7 +48,7 @@ def get_template(name: str, config: dict | None = None, **kwargs) -> VideoTempla
     cls = REGISTRY.get(name)
     if cls is None:
         raise ValueError(
-            f"Unknown template '{name}'. Available: {list(REGISTRY.keys())}"
+            f"Unknown template '{name}'. Available: {sorted(REGISTRY.keys())}"
         )
     return cls(config=config, **kwargs)
 
