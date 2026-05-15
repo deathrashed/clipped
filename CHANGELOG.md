@@ -25,6 +25,11 @@ Format: [Semantic Versioning](https://semver.org/).
 - Swinsian track shown in TUI source selection.
 - `process_clip` / `process_video` accept `output_path` parameter.
 - 300s timeout on yt-dlp; zero-length clip raises `ValueError`.
+- Added `clipped doctor` for environment and config diagnostics.
+- Added `clipped config` subcommands for showing, editing, initializing, and resetting config.
+- Added `clipped test templates` smoke-test command for template validation.
+- Added `clipped batch` for directory batch processing and `clipped watch` for folder watch mode.
+- Added `clipped docs generate` to regenerate CLI documentation from live config.
 
 ---
 

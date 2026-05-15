@@ -9,6 +9,8 @@ copy_to_clipboard = true
 # Show an interactive TUI for previewing and adjusting the clip.
 interactive_preview = true
 
+# Manage this file with: clipped config show | edit | init | reset
+
 # Automatically apply a fade-in and fade-out to the clipped audio.
 auto_fade = true
 

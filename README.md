@@ -8,7 +8,7 @@
 
 **A high-leverage media toolkit for automated audio clipping, multi-template video generation, platform-aware export, and metadata-aware workflows.**
 
-[Quick Start](#-quick-start) • [Templates](#-video-templates) • [Platforms](#-platform-profiles) • [Presets](#-named-presets) • [Library](#-clip-library) • [Hotkeys](#-keyboard-maestro-hotkeys)
+[Quick Start](#-quick-start) • [Templates](#-video-templates) • [Platforms](#-platform-profiles) • [Presets](#-named-presets) • [Hotkeys](#-keyboard-maestro-hotkeys)
 
 </div>
 
@@ -47,6 +47,19 @@ clipped --version     # v2.0.0
 ```
 clipped templates
 ```
+
+## 🧰 New CLI Commands
+
+The toolkit now includes additional commands for developers and power users:
+
+- `clipped doctor` — verify environment dependencies, config, templates, and platforms
+- `clipped config` — manage `~/.config/clipped/config.toml`
+- `clipped test templates` — smoke-test installed templates against a sample audio file
+- `clipped batch` — batch process audio or video for directories of files
+- `clipped watch` — watch a directory and process new audio files as they arrive
+- `clipped docs generate` — regenerate CLI docs from the current config and templates
+
+---
 
 | Name | Label | Size | Ideal For |
 |------|-------|------|-----------|
@@ -152,7 +165,6 @@ clipped video clip.mp3 --dry-run           # preview FFmpeg command
 │   ├── main.py                 # TUI / Typer CLI entrypoint
 │   ├── audio.py                # Audio engine (clipping, hotkeys)
 │   ├── video.py                # Video engine (coordinates templates + platforms)
-│   ├── library.py              # Clip library (JSONL append-only store)
 │   ├── platforms.py            # Platform export profiles
 │   ├── progress.py             # FFmpeg progress bar
 │   ├── config.py               # XDG config + presets

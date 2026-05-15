@@ -23,8 +23,13 @@ from rich import box
 from . import __version__
 from .audio import process_clip, mark_start, mark_end
 from .config import HISTORY_FILE, get_config, get_preset
+from .config_cmd import config_app
+from .doctor import run_diagnostics
 from .platforms import list_platforms, get_profile, suggested_template, PLATFORMS
+from .qa import test_app
 from .templates import list_templates, REGISTRY
+from .batch import batch_app, watch_directory
+from .docsgen import docs_app
 from .utils import parse_time
 from .video import process_video
 
@@ -33,7 +38,7 @@ from .video import process_video
 
 class UI:
     """Standardized terminal UI messages and branding."""
-    
+
     @staticmethod
     def header():
         """Retro TUI branding."""
@@ -64,6 +69,11 @@ class UI:
 
 app     = typer.Typer(help="Clipped — high-leverage audio & video automation.", add_completion=False)
 console = Console()
+
+app.add_typer(config_app, name="config")
+app.add_typer(test_app, name="test")
+app.add_typer(batch_app, name="batch")
+app.add_typer(docs_app, name="docs")
 
 
 # ── Version ───────────────────────────────────────────────────────────────────
@@ -100,6 +110,40 @@ def main_callback(
                 console.print(f"[red]{e}[/red]")
                 raise typer.Exit(1)
         _run_interactive_menu(preset_config=preset_config)
+
+
+@app.command("doctor")
+def doctor_cmd() -> None:
+    """Run diagnostics on the Clipped environment and configuration."""
+    run_diagnostics()
+
+
+@app.command("watch")
+def watch_cmd(
+    input_dir: str = typer.Option(..., "--input-dir", help="Directory to watch for new audio files."),
+    pattern: str = typer.Option("*.mp3", help="Glob pattern for new audio files."),
+    recursive: bool = typer.Option(False, "--recursive", help="Search subdirectories."),
+    mode: str = typer.Option("video", "--type", help="Processing mode: audio or video."),
+    template: str = typer.Option("spinner", help="Template to use for video mode."),
+    platform: str = typer.Option("default", help="Platform profile to use for video mode."),
+    start: str = typer.Option("0", help="Start time for all clips."),
+    end: str = typer.Option(None, help="End time for all clips."),
+    interval: float = typer.Option(5.0, help="Polling interval in seconds."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Print commands without running."),
+) -> None:
+    """Watch a directory and process new audio files as they appear."""
+    watch_directory(
+        Path(input_dir),
+        pattern=pattern,
+        recursive=recursive,
+        mode=mode,
+        template=template,
+        platform=platform,
+        start=start,
+        end=end,
+        interval=interval,
+        dry_run=dry_run,
+    )
 
 
 # ── Interactive TUI ───────────────────────────────────────────────────────────
@@ -176,7 +220,7 @@ def _interactive_audio(cfg: dict) -> None:
                 "🔗 Enter YouTube URL"
             ],
         ).ask()
-        
+
         if not method:
             return
 
@@ -410,7 +454,7 @@ def video_cmd(
 ):
     """
     Generate a video from an audio file.
-    
+
     Examples:
       clipped video myaudio.mp3
       clipped video vertical myaudio.mp3  (shorthand)
@@ -478,7 +522,7 @@ def _build_fade_sequence(assets: "MediaAssets") -> list | None:
         return None
     if not questionary.confirm("Build custom image sequence?").ask():
         return None
-    
+
     sequence = []
     remaining = assets.all_images.copy()
     while remaining:
@@ -513,7 +557,7 @@ def _build_waveform_config() -> dict:
     ).ask()
     if wf_mode:
         cfg["waveform_mode"] = wf_mode.split()[0]
-    
+
     color_custom = questionary.select(
         "Waveform colour:",
         choices=[
