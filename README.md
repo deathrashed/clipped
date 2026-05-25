@@ -1,197 +1,187 @@
 <div align="center">
-<h1>📀 CLIPPED</h1>
+  <img src="assets/icon.png" alt="Clipped icon" width="144">
 
-[![PYTHON](https://img.shields.io/badge/language%20—%20python-black?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![FFMPEG](https://img.shields.io/badge/engine%20—%20ffmpeg-black?style=for-the-badge&logo=ffmpeg&logoColor=white)](https://ffmpeg.org/)
-[![PLATFORM](https://img.shields.io/badge/System%20—%20macOS-black?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos/)
-[![VERSION](https://img.shields.io/badge/version-2.0.0-blue?style=for-the-badge)](CHANGELOG.md)
+  <h1>CLIPPED</h1>
 
-**A high-leverage media toolkit for automated audio clipping, multi-template video generation, platform-aware export, and metadata-aware workflows.**
+  <p><strong>Metadata-aware audio clipping and video generation for macOS music workflows.</strong></p>
 
-[Quick Start](#-quick-start) • [Templates](#-video-templates) • [Platforms](#-platform-profiles) • [Presets](#-named-presets) • [Hotkeys](#-keyboard-maestro-hotkeys)
+  <p>
+    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-111111?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.12+"></a>
+    <a href="https://ffmpeg.org/"><img src="https://img.shields.io/badge/ffmpeg-required-111111?style=for-the-badge&logo=ffmpeg&logoColor=white" alt="FFmpeg required"></a>
+    <a href="https://www.apple.com/macos/"><img src="https://img.shields.io/badge/macOS-automation-111111?style=for-the-badge&logo=apple&logoColor=white" alt="macOS automation"></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-2.0.0-2563eb?style=for-the-badge" alt="Version 2.0.0"></a>
+  </p>
 
+  <p>
+    <a href="#quick-start">Quick Start</a> |
+    <a href="#examples">Examples</a> |
+    <a href="#video-templates">Templates</a> |
+    <a href="#keyboard-maestro">Keyboard Maestro</a> |
+    <a href="#configuration">Configuration</a>
+  </p>
 </div>
 
 ---
 
-## ⚡ Quick Start
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Examples](#examples)
+- [What It Does](#what-it-does)
+- [Core Workflows](#core-workflows)
+- [Video Templates](#video-templates)
+- [Platform Profiles](#platform-profiles)
+- [Keyboard Maestro](#keyboard-maestro)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Developer Commands](#developer-commands)
+- [Adding a Template](#adding-a-template)
+- [Troubleshooting](#troubleshooting)
+
+## Quick Start
 
 ```bash
-git clone https://github.com/deathrashed/clipped.git ~/Music/clipped
-cd ~/Music/clipped
-python -m venv .venv && source .venv/bin/activate
+git clone https://github.com/deathrashed/clipped.git ~/Scripts/Riley/clipped
+cd ~/Scripts/Riley/clipped
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-clipped               # interactive TUI
-clipped --version     # v2.0.0
+./install.sh
+clipped --version
 ```
 
----
+The codebase lives at `~/Scripts/Riley/clipped`. Generated audio and video stay in `~/Music/clipped/_audio` and `~/Music/clipped/_video` so the working tree does not fill up with exports.
 
-## ✨ Features
+## Examples
 
-| Feature | Description |
-|---------|-------------|
-| **✂️ Precision Clipping** | Clip audio from local files or YouTube URLs with sample-accurate times |
-| **🎬 6 Video Templates** | Spinner, Fade, Static, Vertical (9:16), Minimal, Cinematic — each a self-contained module |
-| **📤 8 Platform Profiles** | Instagram, TikTok, YouTube Shorts, Twitter/X, Discord, YouTube, Bandcamp, Default |
-| **⚙️ Named Presets** | `--preset instagram` skips all menus and uses the right template + platform |
-| **📊 Live Progress Bar** | Real-time FFmpeg encoding progress (no more silent hangs) |
-| **🎹 KM Macro Bundle** | Double-click `macros/clipped.kmmacros` — 5 hotkeys, ready to use |
-| ** macOS Native** | AppleScript file picker, `afplay` preview, clipboard copy, Swinsian integration |
-| **⚡ Dry Run** | `--dry-run` prints the exact FFmpeg command without processing |
+The dynamic reel template combines a logo intro, spinning album art, metadata text, and a final full-square album-art reveal.
 
----
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <video src="assets/examples/200-stab-wounds-masters-of-morbidity-reel.mp4" controls muted playsinline width="100%"></video>
+      <br>
+      <strong>200 Stab Wounds - Masters of Morbidity</strong>
+    </td>
+    <td width="50%" align="center">
+      <video src="assets/examples/suicideboys-paris-reel.mp4" controls muted playsinline width="100%"></video>
+      <br>
+      <strong>$uicideboy$ - Paris</strong>
+    </td>
+  </tr>
+</table>
 
-## 🎬 Video Templates
-
+```bash
+clipped video "track.mp3" --template reel --platform instagram --start 2:45 --end 3:45
+clipped video "track.mp3" --template reel --platform vertical_full --start 0 --end 4:20
 ```
+
+## What It Does
+
+| Area | Details |
+| --- | --- |
+| Audio clipping | Clip local files or YouTube URLs by seconds or `M:SS` timestamps. |
+| Video rendering | Generate square, vertical, cinematic, waveform, spinner, and dynamic reel videos through FFmpeg. |
+| Metadata | Reads track, artist, cover art, folder images, and logo assets where available. |
+| Platform exports | Apply size, duration, and format profiles for Instagram, TikTok, YouTube, Discord, Twitter/X, Bandcamp, and full-length vertical reels. |
+| Automation | Includes Keyboard Maestro macros for Swinsian, Finder, clipboard URLs, and prompt-driven reel creation. |
+| Validation | `doctor`, template smoke tests, dry runs, and progress output help catch missing dependencies early. |
+
+## Core Workflows
+
+### Interactive TUI
+
+```bash
+clipped
+```
+
+### Audio Clip
+
+```bash
+clipped audio "track.mp3" 2:45 3:45
+clipped audio "https://youtube.com/watch?v=..." 0:30 1:15
+```
+
+### Video Render
+
+```bash
+clipped video "track.mp3" --template reel --platform instagram --start 2:45 --end 3:45
+clipped video "clip.mp3" --template spinner --platform default
+clipped video "track.mp3" --template vertical_wave --platform vertical_full --dry-run
+```
+
+### Presets
+
+```bash
+clipped --preset instagram
+clipped video "track.mp3" --preset instagram
+```
+
+## Video Templates
+
+```bash
 clipped templates
 ```
 
-## 🧰 New CLI Commands
+| Name | Label | Size | Best For |
+| --- | --- | --- | --- |
+| `reel` | Dynamic Reel (Logo -> Spinner -> Artist) | 1080x1920 | Instagram Reels, TikTok, YouTube Shorts, long vertical previews with `vertical_full` |
+| `vertical` | Vertical Spinner | 1080x1920 | Classic vertical album-art spinner and square final artwork reveal |
+| `vertical_wave` | Vertical Wave | 1080x1920 | Vertical spinner with circular audio-reactive waveform styling |
+| `spinner` | Spinner | 1080x1080 | Square rotating record posts and archive clips |
+| `waveformbar` | Waveform Bar | 1080x1080 | Square cover panel with live waveform strip |
+| `static` | Static Artwork | 1080x1080 | Simple centered album art videos |
+| `minimal` | Minimal | 1080x1080 | Dark typographic square layouts |
+| `fade` | Fade Sequence | 1080x1080 | Logo, artist image, and cover crossfades |
+| `cinematic` | Cinematic | 1920x816 | Wide YouTube/archive style renders |
 
-The toolkit now includes additional commands for developers and power users:
+## Platform Profiles
 
-- `clipped doctor` — verify environment dependencies, config, templates, and platforms
-- `clipped config` — manage `~/.config/clipped/config.toml`
-- `clipped test templates` — smoke-test installed templates against a sample audio file
-- `clipped batch` — batch process audio or video for directories of files
-- `clipped watch` — watch a directory and process new audio files as they arrive
-- `clipped docs generate` — regenerate CLI docs from the current config and templates
-
----
-
-| Name | Label | Size | Ideal For |
-|------|-------|------|-----------|
-| `spinner` | Spinner (Rotating Record) | 1080×1080 | Instagram Feed, Archive, Twitter/X |
-| `fade` | Fade (Crossfade Sequence) | 1080×1080 | Full-track previews, Story posts, YouTube |
-| `static` | Static (Centered Artwork) | 1080×1080 | Archive uploads, SoundCloud, Bandcamp |
-| `vertical` | Vertical Spinner (9:16 Reel) | 1080×1920 | Instagram Reels, TikTok, YouTube Shorts |
-| `minimal` | Minimal (Dark Typographic) | 1080×1080 | Twitter/X, Archive, Bandcamp |
-| `cinematic` | Cinematic (21:9 Ken Burns) | 1920×816 | YouTube, Video essays, Archive |
-
----
-
-## 📤 Platform Profiles
-
-```
+```bash
 clipped platforms
 ```
 
 | Name | Label | Size | Max Duration | Format |
-|------|-------|------|--------------|--------|
-| `default` | Default (1:1 Square) | 1080×1080 | — | MP4 |
-| `instagram` | Instagram Reel (9:16) | 1080×1920 | 60s | MP4 |
-| `tiktok` | TikTok (9:16) | 1080×1920 | 60s | MP4 |
-| `youtube_shorts` | YouTube Shorts (9:16) | 1080×1920 | 60s | MP4 |
-| `twitter` | Twitter / X (16:9) | 1280×720 | 140s | MP4 |
-| `discord` | Discord (MP3, <8 MB) | audio only | — | MP3 |
-| `youtube` | YouTube / Archive (16:9) | 1920×816 | — | MP4 |
-| `bandcamp` | Bandcamp / SoundCloud (1:1) | 1080×1080 | — | MP4 |
+| --- | --- | --- | --- | --- |
+| `default` | Default Square | 1080x1080 | none | MP4 |
+| `instagram` | Instagram Reel | 1080x1920 | 60s | MP4 |
+| `tiktok` | TikTok | 1080x1920 | 60s | MP4 |
+| `youtube_shorts` | YouTube Shorts | 1080x1920 | 60s | MP4 |
+| `vertical_full` | Vertical Full Length | 1080x1920 | none | MP4 |
+| `twitter` | Twitter/X | 1280x720 | 140s | MP4 |
+| `discord` | Discord Audio | audio only | none | MP3 |
+| `youtube` | YouTube/Archive | 1920x1080 | none | MP4 |
+| `bandcamp` | Bandcamp/SoundCloud | 1080x1080 | none | MP4 |
 
----
+## Keyboard Maestro
 
-## ⚙️ Named Presets
-
-Presets in `~/.config/clipped/config.toml` override `[general]` keys:
-
-```toml
-[preset.instagram]
-default_template = "vertical"
-default_platform = "instagram"
-
-[preset.discord]
-default_platform = "discord"
-```
-
-**Usage:**
+Import the main macro bundle:
 
 ```bash
-clipped --preset instagram          # TUI with instagram defaults
-clipped video track.mp3 --preset instagram   # non-interactive
+open macros/clipped.kmmacros
 ```
 
-Shipped presets: `instagram`, `tiktok`, `archive`, `cinematic`, `discord`.
-
----
-
-## 🎹 Keyboard Maestro Hotkeys
+Import the focused Swinsian dynamic reel macro:
 
 ```bash
-open macros/clipped.kmmacros    # double-click to import all 5 macros
+open macros/swinsian-clipped-dynamic-reel.kmmacros
 ```
 
-| Hotkey | Action |
-|--------|--------|
-| `⌘⇧[` | Mark start in Swinsian |
-| `⌘⇧]` | Mark end + clip immediately |
-| `⌘⇧V` | Spinner video from last clip |
-| `⌘⇧I` | Instagram Reel from last clip |
-| `⌘⇧U` | Clip YouTube URL from clipboard |
+| Macro | Trigger | Purpose |
+| --- | --- | --- |
+| `Clipped: Interactive Clip & Generate Video` | Palette/manual | Prompt for source, range, template, and platform, then render in Terminal. |
+| `Clipped: Mark Start` | `Command-Shift-[` | Mark the current Swinsian playback position. |
+| `Clipped: Mark End + Clip` | `Command-Shift-]` | Mark the end position and create the clip. |
+| `Clipped: Generate Spinner Video (Last Clip)` | `Command-Shift-V` | Render the latest clip/source with the spinner template. |
+| `Clipped: Generate Instagram Reel (Last Clip)` | `Command-Shift-I` | Render the latest clip/source as a dynamic Instagram reel. |
+| `Clipped: Clip YouTube URL from Clipboard` | `Command-Shift-U` | Start a YouTube clipping workflow from the clipboard URL. |
+| `Utility: Clipped Dynamic Reel` | user-assigned | In the Swinsian group, prompts for start/end and renders the selected track with `reel` + `vertical_full`. |
 
-See [`macros/SETUP.md`](macros/SETUP.md) for prerequisites and customisation.
+See [macros/SETUP.md](macros/SETUP.md) for setup notes and customization.
 
----
+## Configuration
 
-## 🛠 Key Workflows
-
-### Live clipping (fastest path)
-1. Press `⌘⇧[` at the moment you want the clip to start
-2. Press `⌘⇧]` when done — clip is processed and copied to clipboard
-
-### Full pipeline
-```bash
-clipped                     # TUI: choose action, template, platform
-```
-
-### Non-interactive
-```bash
-clipped audio track.mp3 62 75              # clip 62s–75s
-clipped video clip.mp3 --template vertical --platform instagram
-clipped video clip.mp3 --preset instagram  # same, via preset
-clipped video clip.mp3 --dry-run           # preview FFmpeg command
-```
-
----
-
-## 📁 Structure
-
-```
-~/Music/clipped/
-├── bin/
-│   └── clipped                 # Global entry point shim
-├── clipped_src/
-│   ├── __init__.py             # Package version
-│   ├── main.py                 # TUI / Typer CLI entrypoint
-│   ├── audio.py                # Audio engine (clipping, hotkeys)
-│   ├── video.py                # Video engine (coordinates templates + platforms)
-│   ├── platforms.py            # Platform export profiles
-│   ├── progress.py             # FFmpeg progress bar
-│   ├── config.py               # XDG config + presets
-│   ├── utils.py                # Asset discovery, metadata parsing
-│   └── templates/
-│       ├── __init__.py
-│       ├── base.py             # VideoTemplate ABC
-│       ├── spinner.py
-│       ├── fade.py
-│       ├── static.py
-│       ├── vertical.py         # 9:16 for Reels / TikTok
-│       ├── minimal.py          # Dark typographic
-│       ├── cinematic.py        # 21:9 Ken Burns
-│       └── registry.py         # Template registry
-├── macros/
-│   ├── clipped.kmmacros        # Keyboard Maestro macro bundle
-│   └── SETUP.md
-├── requirements.txt
-├── CHANGELOG.md
-└── README.md
-```
-
----
-
-## ⚙️ Configuration
-
-`~/.config/clipped/config.toml` — generated on first run.
+`~/.config/clipped/config.toml` is created on first run.
 
 ```toml
 [general]
@@ -200,19 +190,87 @@ video_dir         = "~/Music/clipped/_video"
 copy_to_clipboard = true
 auto_fade         = true
 fade_duration     = 0.5
-spinner_speed     = 0.5          # revolutions / second
-default_template  = "spinner"
-default_platform  = "default"
+spinner_speed     = 0.5
+default_template  = "reel"
+default_platform  = "instagram"
 ```
 
+Named presets can override the general defaults:
+
+```toml
+[preset.instagram]
+default_template = "reel"
+default_platform = "instagram"
+
+[preset.vertical_full]
+default_template = "reel"
+default_platform = "vertical_full"
+```
+
+## Project Structure
+
+```text
+~/Scripts/Riley/clipped/
+├── assets/
+│   ├── icon.png
+│   └── examples/
+├── bin/
+│   └── clipped
+├── clipped_src/
+│   ├── audio.py
+│   ├── config.py
+│   ├── main.py
+│   ├── platforms.py
+│   ├── video.py
+│   └── templates/
+│       ├── cinematic.py
+│       ├── fade.py
+│       ├── minimal.py
+│       ├── reel.py
+│       ├── spinner.py
+│       ├── static.py
+│       ├── vertical.py
+│       ├── vertical_wave.py
+│       └── waveformbar.py
+├── macros/
+│   ├── clipped.kmmacros
+│   ├── swinsian-clipped-dynamic-reel.kmmacros
+│   └── SETUP.md
+├── config.example.toml
+├── install.sh
+└── README.md
+```
+
+## Developer Commands
+
+| Command | Purpose |
+| --- | --- |
+| `clipped doctor` | Verify FFmpeg, config, templates, platform profiles, and paths. |
+| `clipped config` | View or update `~/.config/clipped/config.toml`. |
+| `clipped test templates` | Smoke-test installed templates against a sample audio file. |
+| `clipped batch` | Process directories of audio or video inputs. |
+| `clipped watch` | Watch a folder and process new audio files. |
+| `clipped docs generate` | Regenerate CLI docs from the current command surface. |
+
+## Adding a Template
+
+1. Create `clipped_src/templates/mytemplate.py`.
+2. Subclass `VideoTemplate`.
+3. Set `info = TemplateInfo(...)`.
+4. Implement `get_inputs()` and `get_filter_graph()`.
+5. Add the template to `REGISTRY` in `clipped_src/templates/registry.py`.
+6. Run `clipped templates` and a short smoke render.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| `clipped` is not found | Re-run `./install.sh` and confirm `~/Scripts/Riley/clipped/bin` is on `PATH`. |
+| Video has no cover/logo | Render from the original source track, not only a flattened MP3 clip, so folder artwork and logo context are available. |
+| Reel is trimmed to 60 seconds | Use `--platform vertical_full` for vertical reels without the Instagram/TikTok duration cap. |
+| Keyboard Maestro macro fails instantly | Open the macro action and confirm `CLIPPED_BIN` points to `~/Scripts/Riley/clipped/bin/clipped`. |
+| FFmpeg hangs or fails | Run `clipped doctor`, then retry with `--dry-run` to inspect the generated FFmpeg command. |
+
 ---
 
-## Adding a New Template
-
-1. Create `clipped_src/templates/mytemplate.py` — subclass `VideoTemplate`, set `info = TemplateInfo(...)`, implement `get_inputs()` and `get_filter_graph()`.
-2. Add it to `REGISTRY` in `clipped_src/templates/registry.py`.
-3. Done — it appears in the TUI, `clipped templates`, and `--template` flag immediately.
-
----
-
-*Last updated: 2026-05-12 · v2.0.0*
+Last updated: 2026-05-26

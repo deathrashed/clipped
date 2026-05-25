@@ -2,10 +2,12 @@
 Dynamic Reel template — Vertical (9:16) with a sequential story:
 1. Logo fade in/out
 2. Large Spinning Record (high position) - stays until Artist stage
-3. Artist Photo (Professional Subtle Border, 75% start)
+3. Full square album art reveal (75% start)
 4. Professional Typography starting during Spinner stage
 """
 from __future__ import annotations
+from pathlib import Path
+
 from .base import VideoTemplate, TemplateInfo
 from ..utils import MediaAssets
 
@@ -15,8 +17,6 @@ _H           = 1920
 _SPINNER_SZ  = 850
 _LOGO_SZ     = 900
 _PHOTO_SZ    = 950
-_BORDER_PX   = 5
-_CORNER_R    = 8
 _Y_HIGH      = 350
 _T_LOGO_END  = 5.0
 _T_SPIN_START = 5.0
@@ -24,8 +24,11 @@ _T_ART_START  = 0.75   # fraction of duration
 _T_SPIN_OVERLAP = 0.5  # overlap between spinner and artist
 _T_TEXT_START = 7.0
 _T_END_GAP    = 2.0
+_T_TEXT_FADE_BEFORE_ART = 1.5
+_T_TEXT_FADE_DUR = 1.4
 _Y_TITLE      = 1380
 _Y_ARTIST     = 1495
+_FONT_FILE    = "/System/Library/Fonts/Supplemental/Arial.ttf"
 
 
 class ReelTemplate(VideoTemplate):
@@ -49,6 +52,7 @@ class ReelTemplate(VideoTemplate):
         speed = self.config.get("spinner_speed", 2)
         t_art_start = duration * _T_ART_START
         t_spin_end = t_art_start + _T_SPIN_OVERLAP
+        t_art_fade_start = max(0.0, duration - _T_END_GAP - 1)
 
         steps: list[str] = []
 
@@ -89,17 +93,14 @@ class ReelTemplate(VideoTemplate):
             )
             current_v = "[v2]"
 
-        # ── Stage 3: Artist Photo ────────────────────────────────────────────
+        # ── Stage 3: Full square album art reveal ────────────────────────────
         if assets.cover:
             steps.append(
-                f"[1:v]scale={_PHOTO_SZ-2*_BORDER_PX}:{_PHOTO_SZ-2*_BORDER_PX}:force_original_aspect_ratio=decrease,"
-                f"pad={_PHOTO_SZ-2*_BORDER_PX}:{_PHOTO_SZ-2*_BORDER_PX}:(ow-iw)/2:(oh-ih)/2:color=black@0,"
-                f"pad={_PHOTO_SZ}:{_PHOTO_SZ}:{_BORDER_PX}:{_BORDER_PX}:white,"
+                f"[1:v]scale={_PHOTO_SZ}:{_PHOTO_SZ}:force_original_aspect_ratio=decrease,"
+                f"pad={_PHOTO_SZ}:{_PHOTO_SZ}:(ow-iw)/2:(oh-ih)/2:color=black@0,"
                 f"format=rgba,"
-                f"geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
-                f"a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2,2)),255,0)',"
                 f"fade=t=in:st={t_art_start}:d=1:alpha=1,"
-                f"fade=t=out:st={max(0.0, duration - _T_END_GAP - 1)}:d=1:alpha=1[artist_ov]"
+                f"fade=t=out:st={t_art_fade_start}:d=1:alpha=1[artist_ov]"
             )
             steps.append(
                 f"{current_v}[artist_ov]overlay=(W-w)/2:{_Y_HIGH}:"
@@ -108,9 +109,21 @@ class ReelTemplate(VideoTemplate):
             current_v = "[v3]"
 
         graph = ";".join(steps)
-        return graph + ";" + self._drawtext_overlay(assets, link_in=current_v)
+        return graph + ";" + self._drawtext_overlay(
+            assets,
+            duration=duration,
+            art_fade_start=t_art_fade_start,
+            link_in=current_v,
+        )
 
-    def _drawtext_overlay(self, assets: MediaAssets, link_in: str = "[outv]", link_out: str = "[v]") -> str:
+    def _drawtext_overlay(
+        self,
+        assets: MediaAssets,
+        duration: float,
+        art_fade_start: float,
+        link_in: str = "[outv]",
+        link_out: str = "[v]",
+    ) -> str:
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
@@ -121,10 +134,8 @@ class ReelTemplate(VideoTemplate):
         artist_src = self._drawtext_source(artist_text, prefix="artist")
 
         title_lines  = self._line_count(title_text)
-        artist_lines = self._line_count(artist_text)
-
-        title_fs  = 52
-        artist_fs = 36
+        title_fs  = 68
+        artist_fs = 48
         gap       = 15
         lh_factor = 1.15
 
@@ -134,13 +145,20 @@ class ReelTemplate(VideoTemplate):
         y_title  = _Y_TITLE - int((h_title - (title_fs * lh_factor)))
         y_artist = _Y_ARTIST
 
-        common = ":text_align=center:expansion=none"
+        t_title_start = _T_TEXT_START
+        t_artist_start = _T_TEXT_START + 1.0
+        t_text_end = max(t_artist_start + _T_TEXT_FADE_DUR, art_fade_start - _T_TEXT_FADE_BEFORE_ART)
+        alpha_title = self.get_fade_alpha(t_title_start, t_text_end, _T_TEXT_FADE_DUR)
+        alpha_artist = self.get_fade_alpha(t_artist_start, t_text_end, _T_TEXT_FADE_DUR)
+
+        font = f":fontfile='{self._escape_path(_FONT_FILE)}'" if Path(_FONT_FILE).exists() else ""
+        common = f"{font}:text_align=center:expansion=none"
 
         return (
             f"{link_in}"
             f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}{common}"
-            f":x=(w-text_w)/2:y={y_title}:enable='gt(t,{_T_TEXT_START})':alpha='if(lt(t,{_T_TEXT_START+1}),t-{_T_TEXT_START},1)',"
+            f":x=(w-text_w)/2:y={y_title}:enable='between(t,{t_title_start},{t_text_end})':alpha='{alpha_title}',"
             f"drawtext={artist_src}:fontcolor=0xBBBBBB:fontsize={artist_fs}{common}"
-            f":x=(w-text_w)/2:y={y_artist}:enable='gt(t,{_T_TEXT_START+1})':alpha='if(lt(t,{_T_TEXT_START+2}),t-{_T_TEXT_START+1},1)'"
+            f":x=(w-text_w)/2:y={y_artist}:enable='between(t,{t_artist_start},{t_text_end})':alpha='{alpha_artist}'"
             f"{link_out}"
         )

@@ -2,231 +2,818 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <array>
+	<dict>
+		<key>Activate</key>
+		<string>Normal</string>
+		<key>CreationDate</key>
+		<real>769478400.0</real>
+		<key>ModificationDate</key>
+		<real>769478400.0</real>
+		<key>Name</key>
+		<string>Clipped</string>
+		<key>UID</key>
+		<string>A1B2C3D4-0000-4000-0000-CLIPPEDGROUP0</string>
+		<key>Enabled</key>
+		<true/>
+		<key>Macros</key>
+		<array>
+			<dict>
+				<key>Activate</key>
+				<string>Normal</string>
+				<key>CreationDate</key>
+				<real>769478400.0</real>
+				<key>ModificationDate</key>
+				<real>769478400.0</real>
+				<key>Name</key>
+				<string>Clipped: Interactive Clip &amp; Generate Video</string>
+				<key>UID</key>
+				<string>A1B2C3D4-0001-4000-0000-CLIPPED00001</string>
+				<key>Enabled</key>
+				<true/>
+				<key>Triggers</key>
+				<array/>
+				<key>Actions</key>
+				<array>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2001</integer>
+						<key>Destination</key>
+						<string>Variable</string>
+						<key>DestinationVariable</key>
+						<string>Clipped_SourceType</string>
+						<key>MacroActionType</key>
+						<string>PromptWithList</string>
+						<key>NotifyOnFailure</key>
+						<false/>
+						<key>NotifyOnTimeOut</key>
+						<false/>
+						<key>PromptUID</key>
+						<string>A20A05E1-E6B9-41C1-A3C8-008D37384418</string>
+						<key>Source</key>
+						<string>Text</string>
+						<key>Text</key>
+						<string>swinsian | Current Track in Swinsian | keeps album folder cover/logo context
+finder | Selected File in Finder | uses the selected audio file directly
+clipboard | YouTube URL from Clipboard | downloads/clips from copied URL
+dialog | Choose File | opens a macOS file picker</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TimeOutPeriod</key>
+						<real>300.0</real>
+						<key>WindowTitle</key>
+						<string>Clipped - 1. Choose Source</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2002</integer>
+						<key>Conditions</key>
+						<dict>
+							<key>ConditionList</key>
+							<array>
+								<dict>
+									<key>ConditionType</key>
+									<string>Variable</string>
+									<key>Variable</key>
+									<string>Clipped_SourceType</string>
+									<key>VariableConditionType</key>
+									<string>Contains</string>
+									<key>VariableValue</key>
+									<string>swinsian |</string>
+								</dict>
+							</array>
+							<key>ConditionListMatch</key>
+							<string>All</string>
+						</dict>
+						<key>ElseActions</key>
+						<array/>
+						<key>MacroActionType</key>
+						<string>IfThenElse</string>
+						<key>ThenActions</key>
+						<array>
+							<dict>
+								<key>ActionUID</key>
+								<integer>2003</integer>
+								<key>DisplayKind</key>
+								<string>None</string>
+								<key>HonourFailureSettings</key>
+								<true/>
+								<key>IncludeStdErr</key>
+								<true/>
+								<key>MacroActionType</key>
+								<string>ExecuteAppleScript</string>
+								<key>Path</key>
+								<string></string>
+								<key>Text</key>
+								<string>tell application "Swinsian"
+	set curTrack to POSIX path of (get location of current track)
+end tell
+tell application "Keyboard Maestro Engine"
+	setvariable "Clipped_Source" to curTrack
+end tell</string>
+								<key>TimeOutAbortsMacro</key>
+								<true/>
+								<key>TrimResults</key>
+								<true/>
+								<key>TrimResultsNew</key>
+								<true/>
+								<key>UseText</key>
+								<true/>
+							</dict>
+						</array>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2004</integer>
+						<key>Conditions</key>
+						<dict>
+							<key>ConditionList</key>
+							<array>
+								<dict>
+									<key>ConditionType</key>
+									<string>Variable</string>
+									<key>Variable</key>
+									<string>Clipped_SourceType</string>
+									<key>VariableConditionType</key>
+									<string>Contains</string>
+									<key>VariableValue</key>
+									<string>finder |</string>
+								</dict>
+							</array>
+							<key>ConditionListMatch</key>
+							<string>All</string>
+						</dict>
+						<key>ElseActions</key>
+						<array/>
+						<key>MacroActionType</key>
+						<string>IfThenElse</string>
+						<key>ThenActions</key>
+						<array>
+							<dict>
+								<key>ActionUID</key>
+								<integer>2005</integer>
+								<key>DisplayKind</key>
+								<string>None</string>
+								<key>HonourFailureSettings</key>
+								<true/>
+								<key>IncludeStdErr</key>
+								<true/>
+								<key>MacroActionType</key>
+								<string>ExecuteAppleScript</string>
+								<key>Path</key>
+								<string></string>
+								<key>Text</key>
+								<string>tell application "Finder"
+	set selectedItems to selection
+	if selectedItems is {} then
+		error "No file selected in Finder."
+	else
+		set firstItem to item 1 of selectedItems as alias
+		set posixPath to POSIX path of firstItem
+	end if
+end tell
+tell application "Keyboard Maestro Engine"
+	setvariable "Clipped_Source" to posixPath
+end tell</string>
+								<key>TimeOutAbortsMacro</key>
+								<true/>
+								<key>TrimResults</key>
+								<true/>
+								<key>TrimResultsNew</key>
+								<true/>
+								<key>UseText</key>
+								<true/>
+							</dict>
+						</array>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2006</integer>
+						<key>Conditions</key>
+						<dict>
+							<key>ConditionList</key>
+							<array>
+								<dict>
+									<key>ConditionType</key>
+									<string>Variable</string>
+									<key>Variable</key>
+									<string>Clipped_SourceType</string>
+									<key>VariableConditionType</key>
+									<string>Contains</string>
+									<key>VariableValue</key>
+									<string>clipboard |</string>
+								</dict>
+							</array>
+							<key>ConditionListMatch</key>
+							<string>All</string>
+						</dict>
+						<key>ElseActions</key>
+						<array/>
+						<key>MacroActionType</key>
+						<string>IfThenElse</string>
+						<key>ThenActions</key>
+						<array>
+							<dict>
+								<key>ActionUID</key>
+								<integer>2007</integer>
+								<key>MacroActionType</key>
+								<string>SetVariableToText</string>
+								<key>Text</key>
+								<string>%SystemClipboard%</string>
+								<key>Variable</key>
+								<string>Clipped_Source</string>
+							</dict>
+						</array>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2008</integer>
+						<key>Conditions</key>
+						<dict>
+							<key>ConditionList</key>
+							<array>
+								<dict>
+									<key>ConditionType</key>
+									<string>Variable</string>
+									<key>Variable</key>
+									<string>Clipped_SourceType</string>
+									<key>VariableConditionType</key>
+									<string>Contains</string>
+									<key>VariableValue</key>
+									<string>dialog |</string>
+								</dict>
+							</array>
+							<key>ConditionListMatch</key>
+							<string>All</string>
+						</dict>
+						<key>ElseActions</key>
+						<array/>
+						<key>MacroActionType</key>
+						<string>IfThenElse</string>
+						<key>ThenActions</key>
+						<array>
+							<dict>
+								<key>ActionUID</key>
+								<integer>2009</integer>
+								<key>DisplayKind</key>
+								<string>None</string>
+								<key>HonourFailureSettings</key>
+								<true/>
+								<key>IncludeStdErr</key>
+								<true/>
+								<key>MacroActionType</key>
+								<string>ExecuteAppleScript</string>
+								<key>Path</key>
+								<string></string>
+								<key>Text</key>
+								<string>tell application (path to frontmost application as text)
+	set chosenFile to POSIX path of (choose file with prompt "Select audio file:")
+end tell
+tell application "Keyboard Maestro Engine"
+	setvariable "Clipped_Source" to chosenFile
+end tell</string>
+								<key>TimeOutAbortsMacro</key>
+								<true/>
+								<key>TrimResults</key>
+								<true/>
+								<key>TrimResultsNew</key>
+								<true/>
+								<key>UseText</key>
+								<true/>
+							</dict>
+						</array>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2010</integer>
+						<key>Buttons</key>
+						<array>
+							<dict>
+								<key>Button</key>
+								<string>OK</string>
+							</dict>
+							<dict>
+								<key>Button</key>
+								<string>Cancel</string>
+								<key>Cancel</key>
+								<true/>
+							</dict>
+						</array>
+						<key>MacroActionType</key>
+						<string>PromptForUserInput</string>
+						<key>Prompt</key>
+						<string>Source: %Variable%Clipped_Source%
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       MACRO 1: Mark Start (⌘⇧[)
-       Marks the current Swinsian playback position as clip start.
-  ═══════════════════════════════════════════════════════════════════ -->
-  <dict>
-    <key>Activate</key><string>Normal</string>
-    <key>CreationDate</key><real>769478400</real>
-    <key>ModificationDate</key><real>769478400</real>
-    <key>Name</key><string>Clipped: Mark Start</string>
-    <key>UID</key><string>A1B2C3D4-0001-4000-0000-CLIPPED00001</string>
-    <key>Enabled</key><true/>
+Enter the audio range for both the standalone clip and the video render.
+Examples: 0, 30, 2:45, 3:45. Fade applies to the video audio.</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>Title</key>
+						<string>Clipped - 2. Clip Range &amp; Audio Fade</string>
+						<key>Variables</key>
+						<array>
+							<dict>
+								<key>Default</key>
+								<string>0</string>
+								<key>Variable</key>
+								<string>Clipped_Start</string>
+							</dict>
+							<dict>
+								<key>Default</key>
+								<string>30</string>
+								<key>Variable</key>
+								<string>Clipped_End</string>
+							</dict>
+							<dict>
+								<key>Default</key>
+								<string>0.5</string>
+								<key>Variable</key>
+								<string>Clipped_Fade</string>
+							</dict>
+						</array>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2013</integer>
+						<key>Destination</key>
+						<string>Variable</string>
+						<key>DestinationVariable</key>
+						<string>Clipped_Template</string>
+						<key>MacroActionType</key>
+						<string>PromptWithList</string>
+						<key>NotifyOnFailure</key>
+						<false/>
+						<key>NotifyOnTimeOut</key>
+						<false/>
+						<key>PromptUID</key>
+						<string>B20A05E1-E6B9-41C1-A3C8-008D37384418</string>
+						<key>Source</key>
+						<string>Text</string>
+						<key>Text</key>
+						<string>reel | Dynamic Reel | logo intro, circular spinner, square final album art
+vertical | Vertical Spinner | circular spinner then square album reveal
+vertical_wave | Vertical Wave | 9:16 spinner with reactive waveform styling
+spinner | Spinner | classic circular rotating record, 1:1
+waveformbar | Waveform Bar | square cover panel plus live waveform strip
+static | Static Artwork | clean centered album art, 1:1
+minimal | Minimal | dark editorial square layout with metadata
+fade | Fade Sequence | logo, artist image, and cover crossfade
+cinematic | Cinematic | 21:9 Ken Burns style archive video</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TimeOutPeriod</key>
+						<real>300.0</real>
+						<key>WindowTitle</key>
+						<string>Clipped - 3. Choose Video Template</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2014</integer>
+						<key>Destination</key>
+						<string>Variable</string>
+						<key>DestinationVariable</key>
+						<string>Clipped_Platform</string>
+						<key>MacroActionType</key>
+						<string>PromptWithList</string>
+						<key>NotifyOnFailure</key>
+						<false/>
+						<key>NotifyOnTimeOut</key>
+						<false/>
+						<key>PromptUID</key>
+						<string>C20A05E1-E6B9-41C1-A3C8-008D37384418</string>
+						<key>Source</key>
+						<string>Text</string>
+						<key>Text</key>
+						<string>instagram | Instagram Reel | 1080x1920 MP4, trims over 60s
+youtube_shorts | YouTube Shorts | 1080x1920 MP4, trims over 60s
+tiktok | TikTok | 1080x1920 MP4, trims over 60s
+default | Default Square | 1080x1080 MP4
+youtube | YouTube Archive | 1920x1080 MP4
+twitter | Twitter/X | 1280x720 MP4
+bandcamp | Bandcamp/SoundCloud | 1080x1080 MP4
+discord | Discord Audio | MP3 only, video template ignored</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TimeOutPeriod</key>
+						<real>300.0</real>
+						<key>WindowTitle</key>
+						<string>Clipped - 4. Choose Export Platform</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2015</integer>
+						<key>DisplayKind</key>
+						<string>None</string>
+						<key>HonourFailureSettings</key>
+						<true/>
+						<key>IncludeStdErr</key>
+						<true/>
+						<key>MacroActionType</key>
+						<string>ExecuteShellScript</string>
+						<key>Path</key>
+						<string></string>
+						<key>Source</key>
+						<string>Nothing</string>
+						<key>Text</key>
+						<string>#!/bin/zsh
+set -euo pipefail
 
-    <key>Triggers</key>
-    <array>
-      <dict>
-        <key>MacroTriggerType</key><string>HotKey</string>
-        <key>KeyCode</key><integer>33</integer><!-- [ -->
-        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
-        <key>FireType</key><string>Pressed</string>
-      </dict>
-    </array>
+CLIPPED_BIN="$HOME/Scripts/Riley/clipped/bin/clipped"
+RUNNER_DIR="$(mktemp -d -t clipped-km-run)"
+RUNNER="$RUNNER_DIR/run.zsh"
+LOG="$RUNNER_DIR/run.log"
 
-    <key>Actions</key>
-    <array>
-      <dict>
-        <key>MacroActionType</key><string>ExecuteShellScript</string>
-        <key>Script</key>
-        <string>#!/bin/zsh
-source "$HOME/.zshrc" 2>/dev/null || true
-/Users/rd/Music/clipped/bin/clipped audio --mark-start
-</string>
-        <key>TimeOutAbortsMacro</key><true/>
-        <key>TimeOut</key><integer>10</integer>
-        <key>TrimResults</key><true/>
-        <key>UseEnvironmentVariable</key><false/>
-      </dict>
-      <dict>
-        <key>MacroActionType</key><string>Notification</string>
-        <key>Title</key><string>Clipped</string>
-        <key>SubTitle</key><string>Start Marked</string>
-        <key>Text</key><string>Press ⌘⇧] to clip when done.</string>
-      </dict>
-    </array>
-  </dict>
+SOURCE="$KMVAR_Clipped_Source"
+START="$KMVAR_Clipped_Start"
+END="$KMVAR_Clipped_End"
+FADE="${KMVAR_Clipped_Fade:-0.5}"
+TEMPLATE="${KMVAR_Clipped_Template%% |*}"
+PLATFORM="${KMVAR_Clipped_Platform%% |*}"
+SOURCE_TYPE="${KMVAR_Clipped_SourceType%% |*}"
 
-  <!-- ═══════════════════════════════════════════════════════════════════
-       MACRO 2: Mark End + Clip (⌘⇧])
-       Marks current position as clip end, clips immediately.
-  ═══════════════════════════════════════════════════════════════════ -->
-  <dict>
-    <key>Activate</key><string>Normal</string>
-    <key>CreationDate</key><real>769478400</real>
-    <key>ModificationDate</key><real>769478400</real>
-    <key>Name</key><string>Clipped: Mark End + Clip</string>
-    <key>UID</key><string>B2C3D4E5-0002-4000-0000-CLIPPED00002</string>
-    <key>Enabled</key><true/>
-
-    <key>Triggers</key>
-    <array>
-      <dict>
-        <key>MacroTriggerType</key><string>HotKey</string>
-        <key>KeyCode</key><integer>30</integer><!-- ] -->
-        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
-        <key>FireType</key><string>Pressed</string>
-      </dict>
-    </array>
-
-    <key>Actions</key>
-    <array>
-      <dict>
-        <key>MacroActionType</key><string>ExecuteShellScript</string>
-        <key>Script</key>
-        <string>#!/bin/zsh
-source "$HOME/.zshrc" 2>/dev/null || true
-/Users/rd/Music/clipped/bin/clipped audio --mark-end
-</string>
-        <key>TimeOutAbortsMacro</key><true/>
-        <key>TimeOut</key><integer>60</integer>
-        <key>TrimResults</key><true/>
-        <key>UseEnvironmentVariable</key><false/>
-      </dict>
-    </array>
-  </dict>
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       MACRO 3: Generate Spinner Video from Last Clip (⌘⇧V)
-       Generates a spinner video from the most recently clipped file.
-  ═══════════════════════════════════════════════════════════════════ -->
-  <dict>
-    <key>Activate</key><string>Normal</string>
-    <key>CreationDate</key><real>769478400</real>
-    <key>ModificationDate</key><real>769478400</real>
-    <key>Name</key><string>Clipped: Generate Spinner Video (Last Clip)</string>
-    <key>UID</key><string>C3D4E5F6-0003-4000-0000-CLIPPED00003</string>
-    <key>Enabled</key><true/>
-
-    <key>Triggers</key>
-    <array>
-      <dict>
-        <key>MacroTriggerType</key><string>HotKey</string>
-        <key>KeyCode</key><integer>9</integer><!-- V -->
-        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
-        <key>FireType</key><string>Pressed</string>
-      </dict>
-    </array>
-
-    <key>Actions</key>
-    <array>
-      <dict>
-        <key>MacroActionType</key><string>ExecuteShellScript</string>
-        <key>Script</key>
-        <string>#!/bin/zsh
-source "$HOME/.zshrc" 2>/dev/null || true
-LAST_CLIP="$(cat "$HOME/.config/clipped/history.txt" 2>/dev/null)"
-if [ -z "$LAST_CLIP" ]; then
-  osascript -e 'display notification "No recent clip found." with title "Clipped"'
+if [[ -z "$SOURCE" ]]; then
+  osascript -e 'display notification "No audio source was resolved." with title "Clipped"'
   exit 1
 fi
-# Use the output audio dir for the clip if it's there
+if [[ "$SOURCE_TYPE" == "clipboard" &amp;&amp; "$SOURCE" != http* ]]; then
+  osascript -e 'display notification "Clipboard source is not a URL." with title "Clipped"'
+  exit 1
+fi
+if [[ ! -x "$CLIPPED_BIN" ]]; then
+  osascript -e 'display notification "clipped CLI wrapper is missing or not executable." with title "Clipped"'
+  exit 1
+fi
+
+q_clipped=${(qqq)CLIPPED_BIN}
+q_source=${(qqq)SOURCE}
+q_start=${(qqq)START}
+q_end=${(qqq)END}
+q_fade=${(qqq)FADE}
+q_template=${(qqq)TEMPLATE}
+q_platform=${(qqq)PLATFORM}
+q_log=${(qqq)LOG}
+
+cat &gt; "$RUNNER" &lt;&lt;EOF
+#!/bin/zsh
+set -euo pipefail
+CLIPPED_BIN=$q_clipped
+SOURCE=$q_source
+START=$q_start
+END=$q_end
+FADE=$q_fade
+TEMPLATE=$q_template
+PLATFORM=$q_platform
+LOG=$q_log
+
+echo "Clipped interactive export"
+echo "Source   : \$SOURCE"
+echo "Range    : \$START -&gt; \$END"
+echo "Template : \$TEMPLATE"
+echo "Platform : \$PLATFORM"
+echo "Fade     : \$FADE seconds"
+echo "Log      : \$LOG"
+echo
+
+echo "[1/2] Creating standalone audio clip..."
+"\$CLIPPED_BIN" audio "\$SOURCE" "\$START" "\$END" 2&gt;&amp;1 | tee -a "\$LOG"
+echo
+
+echo "[2/2] Rendering video from the original source so cover/logo assets are preserved..."
+"\$CLIPPED_BIN" video "\$SOURCE" --template "\$TEMPLATE" --platform "\$PLATFORM" --start "\$START" --end "\$END" --fade-in "\$FADE" --fade-out "\$FADE" 2&gt;&amp;1 | tee -a "\$LOG"
+echo
+
+echo "Done. The final exported path was copied to the clipboard by clipped."
+osascript -e 'display notification "Interactive export complete." with title "Clipped"' &gt;/dev/null 2&gt;&amp;1 || true
+EOF
+chmod +x "$RUNNER"
+
+osascript -e "tell application \"Terminal\" to do script \"zsh ${(q)RUNNER}\""
+</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TrimResults</key>
+						<true/>
+						<key>TrimResultsNew</key>
+						<true/>
+						<key>UseText</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2016</integer>
+						<key>MacroActionType</key>
+						<string>Notification</string>
+						<key>SubTitle</key>
+						<string>Interactive export started</string>
+						<key>Text</key>
+						<string>Rendering in Terminal so progress and errors stay visible.</string>
+						<key>Title</key>
+						<string>Clipped</string>
+					</dict>
+				</array>
+			</dict>
+			<dict>
+				<key>Activate</key>
+				<string>Normal</string>
+				<key>CreationDate</key>
+				<real>769478400.0</real>
+				<key>ModificationDate</key>
+				<real>769478400.0</real>
+				<key>Name</key>
+				<string>Clipped: Mark Start</string>
+				<key>UID</key>
+				<string>A1B2C3D4-0002-4000-0000-CLIPPED00002</string>
+				<key>Enabled</key>
+				<true/>
+				<key>Triggers</key>
+				<array>
+					<dict>
+						<key>MacroTriggerType</key>
+						<string>HotKey</string>
+						<key>KeyCode</key>
+						<integer>33</integer>
+						<key>Modifiers</key>
+						<integer>4352</integer>
+						<key>FireType</key>
+						<string>Pressed</string>
+					</dict>
+				</array>
+				<key>Actions</key>
+				<array>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2020</integer>
+						<key>MacroActionType</key>
+						<string>ExecuteShellScript</string>
+						<key>Script</key>
+						<string>#!/bin/zsh
+CLIPPED_BIN="$HOME/Scripts/Riley/clipped/bin/clipped"
+"$CLIPPED_BIN" audio --mark-start
+</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TimeOut</key>
+						<integer>10</integer>
+						<key>TrimResults</key>
+						<true/>
+						<key>UseEnvironmentVariable</key>
+						<false/>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2021</integer>
+						<key>MacroActionType</key>
+						<string>Notification</string>
+						<key>Title</key>
+						<string>Clipped</string>
+						<key>SubTitle</key>
+						<string>Start Marked</string>
+						<key>Text</key>
+						<string>Press ⌘⇧] to clip when done.</string>
+					</dict>
+				</array>
+			</dict>
+			<dict>
+				<key>Activate</key>
+				<string>Normal</string>
+				<key>CreationDate</key>
+				<real>769478400.0</real>
+				<key>ModificationDate</key>
+				<real>769478400.0</real>
+				<key>Name</key>
+				<string>Clipped: Mark End + Clip</string>
+				<key>UID</key>
+				<string>A1B2C3D4-0003-4000-0000-CLIPPED00003</string>
+				<key>Enabled</key>
+				<true/>
+				<key>Triggers</key>
+				<array>
+					<dict>
+						<key>MacroTriggerType</key>
+						<string>HotKey</string>
+						<key>KeyCode</key>
+						<integer>30</integer>
+						<key>Modifiers</key>
+						<integer>4352</integer>
+						<key>FireType</key>
+						<string>Pressed</string>
+					</dict>
+				</array>
+				<key>Actions</key>
+				<array>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2030</integer>
+						<key>MacroActionType</key>
+						<string>ExecuteShellScript</string>
+						<key>Script</key>
+						<string>#!/bin/zsh
+CLIPPED_BIN="$HOME/Scripts/Riley/clipped/bin/clipped"
+"$CLIPPED_BIN" audio --mark-end
+</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TimeOut</key>
+						<integer>60</integer>
+						<key>TrimResults</key>
+						<true/>
+						<key>UseEnvironmentVariable</key>
+						<false/>
+					</dict>
+				</array>
+			</dict>
+			<dict>
+				<key>Activate</key>
+				<string>Normal</string>
+				<key>CreationDate</key>
+				<real>769478400.0</real>
+				<key>ModificationDate</key>
+				<real>769478400.0</real>
+				<key>Name</key>
+				<string>Clipped: Generate Spinner Video (Last Clip)</string>
+				<key>UID</key>
+				<string>A1B2C3D4-0004-4000-0000-CLIPPED00004</string>
+				<key>Enabled</key>
+				<true/>
+				<key>Triggers</key>
+				<array>
+					<dict>
+						<key>MacroTriggerType</key>
+						<string>HotKey</string>
+						<key>KeyCode</key>
+						<integer>9</integer>
+						<key>Modifiers</key>
+						<integer>4352</integer>
+						<key>FireType</key>
+						<string>Pressed</string>
+					</dict>
+				</array>
+				<key>Actions</key>
+				<array>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2040</integer>
+						<key>MacroActionType</key>
+						<string>ExecuteShellScript</string>
+						<key>Script</key>
+						<string>#!/bin/zsh
+CLIPPED_BIN="$HOME/Scripts/Riley/clipped/bin/clipped"
+HISTORY_FILE="$HOME/.config/clipped/history.txt"
 AUDIO_DIR="$HOME/Music/clipped/_audio"
-LATEST_AUDIO="$(ls -t "$AUDIO_DIR"/*.mp3 2>/dev/null | head -1)"
-if [ -n "$LATEST_AUDIO" ]; then
-  /Users/rd/Music/clipped/bin/clipped video "$LATEST_AUDIO" --template spinner --platform default
+SOURCE=""
+if [[ -f "$HISTORY_FILE" ]]; then
+  HIST="$(cat "$HISTORY_FILE")"
+  if [[ -f "$HIST" ]]; then
+    SOURCE="$HIST"
+  fi
+fi
+if [[ -z "$SOURCE" ]]; then
+  SOURCE="$(ls -t "$AUDIO_DIR"/*.mp3 2&gt;/dev/null | head -1)"
+fi
+if [[ -n "$SOURCE" ]]; then
+  "$CLIPPED_BIN" video "$SOURCE" --template spinner --platform default
 else
-  osascript -e 'display notification "No clipped audio file found." with title "Clipped"'
+  osascript -e 'display notification "No recent local source or clipped audio file found." with title "Clipped"'
 fi
 </string>
-        <key>TimeOutAbortsMacro</key><true/>
-        <key>TimeOut</key><integer>120</integer>
-        <key>TrimResults</key><true/>
-        <key>UseEnvironmentVariable</key><false/>
-      </dict>
-    </array>
-  </dict>
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       MACRO 4: Clip from YouTube URL in Clipboard (⌘⇧U)
-       Pastes clipboard YouTube URL into an interactive clip session.
-  ═══════════════════════════════════════════════════════════════════ -->
-  <dict>
-    <key>Activate</key><string>Normal</string>
-    <key>CreationDate</key><real>769478400</real>
-    <key>ModificationDate</key><real>769478400</real>
-    <key>Name</key><string>Clipped: Clip YouTube URL from Clipboard</string>
-    <key>UID</key><string>D4E5F6A7-0004-4000-0000-CLIPPED00004</string>
-    <key>Enabled</key><true/>
-
-    <key>Triggers</key>
-    <array>
-      <dict>
-        <key>MacroTriggerType</key><string>HotKey</string>
-        <key>KeyCode</key><integer>32</integer><!-- U -->
-        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
-        <key>FireType</key><string>Pressed</string>
-      </dict>
-    </array>
-
-    <key>Actions</key>
-    <array>
-      <dict>
-        <key>MacroActionType</key><string>ExecuteShellScript</string>
-        <key>Script</key>
-        <string>#!/bin/zsh
-source "$HOME/.zshrc" 2>/dev/null || true
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TimeOut</key>
+						<integer>600</integer>
+						<key>TrimResults</key>
+						<true/>
+						<key>UseEnvironmentVariable</key>
+						<false/>
+					</dict>
+				</array>
+			</dict>
+			<dict>
+				<key>Activate</key>
+				<string>Normal</string>
+				<key>CreationDate</key>
+				<real>769478400.0</real>
+				<key>ModificationDate</key>
+				<real>769478400.0</real>
+				<key>Name</key>
+				<string>Clipped: Generate Instagram Reel (Last Clip)</string>
+				<key>UID</key>
+				<string>A1B2C3D4-0005-4000-0000-CLIPPED00005</string>
+				<key>Enabled</key>
+				<true/>
+				<key>Triggers</key>
+				<array>
+					<dict>
+						<key>MacroTriggerType</key>
+						<string>HotKey</string>
+						<key>KeyCode</key>
+						<integer>34</integer>
+						<key>Modifiers</key>
+						<integer>4352</integer>
+						<key>FireType</key>
+						<string>Pressed</string>
+					</dict>
+				</array>
+				<key>Actions</key>
+				<array>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2050</integer>
+						<key>MacroActionType</key>
+						<string>ExecuteShellScript</string>
+						<key>Script</key>
+						<string>#!/bin/zsh
+CLIPPED_BIN="$HOME/Scripts/Riley/clipped/bin/clipped"
+HISTORY_FILE="$HOME/.config/clipped/history.txt"
+AUDIO_DIR="$HOME/Music/clipped/_audio"
+SOURCE=""
+if [[ -f "$HISTORY_FILE" ]]; then
+  HIST="$(cat "$HISTORY_FILE")"
+  if [[ -f "$HIST" ]]; then
+    SOURCE="$HIST"
+  fi
+fi
+if [[ -z "$SOURCE" ]]; then
+  SOURCE="$(ls -t "$AUDIO_DIR"/*.mp3 2&gt;/dev/null | head -1)"
+fi
+if [[ -n "$SOURCE" ]]; then
+  "$CLIPPED_BIN" video "$SOURCE" --template reel --platform instagram
+else
+  osascript -e 'display notification "No recent local source or clipped audio file found." with title "Clipped"'
+fi
+</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TimeOut</key>
+						<integer>600</integer>
+						<key>TrimResults</key>
+						<true/>
+						<key>UseEnvironmentVariable</key>
+						<false/>
+					</dict>
+				</array>
+			</dict>
+			<dict>
+				<key>Activate</key>
+				<string>Normal</string>
+				<key>CreationDate</key>
+				<real>769478400.0</real>
+				<key>ModificationDate</key>
+				<real>769478400.0</real>
+				<key>Name</key>
+				<string>Clipped: Clip YouTube URL from Clipboard</string>
+				<key>UID</key>
+				<string>A1B2C3D4-0006-4000-0000-CLIPPED00006</string>
+				<key>Enabled</key>
+				<true/>
+				<key>Triggers</key>
+				<array>
+					<dict>
+						<key>MacroTriggerType</key>
+						<string>HotKey</string>
+						<key>KeyCode</key>
+						<integer>32</integer>
+						<key>Modifiers</key>
+						<integer>4352</integer>
+						<key>FireType</key>
+						<string>Pressed</string>
+					</dict>
+				</array>
+				<key>Actions</key>
+				<array>
+					<dict>
+						<key>ActionUID</key>
+						<integer>2060</integer>
+						<key>MacroActionType</key>
+						<string>ExecuteShellScript</string>
+						<key>Script</key>
+						<string>#!/bin/zsh
+CLIPPED_BIN="$HOME/Scripts/Riley/clipped/bin/clipped"
 URL=$(pbpaste)
 if [[ "$URL" != http* ]]; then
   osascript -e 'display notification "Clipboard does not contain a URL." with title "Clipped"'
   exit 1
 fi
-# Open a new Terminal window and run the interactive clip session
-osascript -e "tell application \"Terminal\" to do script \"/Users/rd/Music/clipped/bin/clipped audio '$URL'\""
+osascript -e "tell application \"Terminal\" to do script \"$CLIPPED_BIN audio '$URL'\""
 </string>
-        <key>TimeOutAbortsMacro</key><true/>
-        <key>TimeOut</key><integer>10</integer>
-        <key>TrimResults</key><true/>
-        <key>UseEnvironmentVariable</key><false/>
-      </dict>
-    </array>
-  </dict>
-
-  <!-- ═══════════════════════════════════════════════════════════════════
-       MACRO 5: Generate Instagram Reel (⌘⇧I)
-       Generate a 9:16 vertical spinner for the most recent clip.
-  ═══════════════════════════════════════════════════════════════════ -->
-  <dict>
-    <key>Activate</key><string>Normal</string>
-    <key>CreationDate</key><real>769478400</real>
-    <key>ModificationDate</key><real>769478400</real>
-    <key>Name</key><string>Clipped: Generate Instagram Reel (Last Clip)</string>
-    <key>UID</key><string>E5F6A7B8-0005-4000-0000-CLIPPED00005</string>
-    <key>Enabled</key><true/>
-
-    <key>Triggers</key>
-    <array>
-      <dict>
-        <key>MacroTriggerType</key><string>HotKey</string>
-        <key>KeyCode</key><integer>34</integer><!-- I -->
-        <key>Modifiers</key><integer>4352</integer><!-- ⌘⇧ -->
-        <key>FireType</key><string>Pressed</string>
-      </dict>
-    </array>
-
-    <key>Actions</key>
-    <array>
-      <dict>
-        <key>MacroActionType</key><string>ExecuteShellScript</string>
-        <key>Script</key>
-        <string>#!/bin/zsh
-source "$HOME/.zshrc" 2>/dev/null || true
-AUDIO_DIR="$HOME/Music/clipped/_audio"
-LATEST_AUDIO="$(ls -t "$AUDIO_DIR"/*.mp3 2>/dev/null | head -1)"
-if [ -n "$LATEST_AUDIO" ]; then
-  /Users/rd/Music/clipped/bin/clipped video "$LATEST_AUDIO" --template vertical --platform instagram
-else
-  osascript -e 'display notification "No clipped audio file found." with title "Clipped"'
-fi
-</string>
-        <key>TimeOutAbortsMacro</key><true/>
-        <key>TimeOut</key><integer>120</integer>
-        <key>TrimResults</key><true/>
-        <key>UseEnvironmentVariable</key><false/>
-      </dict>
-    </array>
-  </dict>
-
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TimeOut</key>
+						<integer>10</integer>
+						<key>TrimResults</key>
+						<true/>
+						<key>UseEnvironmentVariable</key>
+						<false/>
+					</dict>
+				</array>
+			</dict>
+		</array>
+	</dict>
 </array>
 </plist>
