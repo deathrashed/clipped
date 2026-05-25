@@ -62,6 +62,15 @@ PLATFORMS: dict[str, PlatformProfile] = {
         output_format="mp4",
         ideal_templates=["vertical"],
     ),
+    "vertical_full": PlatformProfile(
+        name="vertical_full",
+        label="Vertical Full Length (9:16)",
+        width=1080, height=1920,
+        max_duration=None, max_size_mb=None,
+        output_format="mp4",
+        ideal_templates=["reel", "vertical", "vertical_wave"],
+        notes="No duration cap. Useful for local exports and long-form vertical reels.",
+    ),
     "twitter": PlatformProfile(
         name="twitter",
         label="Twitter / X (16:9)",

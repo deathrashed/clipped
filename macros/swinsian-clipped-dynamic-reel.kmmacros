@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>Activate</key>
+		<string>Normal</string>
+		<key>CreationDate</key>
+		<real>801441079.901778</real>
+		<key>ModificationDate</key>
+		<real>801441079.901778</real>
+		<key>Name</key>
+		<string>Swinsian - Clipped Import</string>
+		<key>UID</key>
+		<string>B375BA03-1B80-4D0D-A364-19BED3C6A66F</string>
+		<key>Enabled</key>
+		<true/>
+		<key>Macros</key>
+		<array>
+			<dict>
+				<key>Activate</key>
+				<string>Normal</string>
+				<key>CreationDate</key>
+				<real>801441079.901778</real>
+				<key>ModificationDate</key>
+				<real>801441079.901778</real>
+				<key>Name</key>
+				<string>Utility: Clipped Dynamic Reel (No Limit)</string>
+				<key>UID</key>
+				<string>D051FBB8-C0E0-4A41-9BE8-2D411457086D</string>
+				<key>Enabled</key>
+				<true/>
+				<key>Triggers</key>
+				<array/>
+				<key>Actions</key>
+				<array>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751279</integer>
+						<key>MacroActionType</key>
+						<string>SetVariableToText</string>
+						<key>Variable</key>
+						<string>SwinsianClipped_Config_ClippedBin</string>
+						<key>Text</key>
+						<string>/Users/rd/Scripts/Riley/clipped/bin/clipped</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751280</integer>
+						<key>MacroActionType</key>
+						<string>SetVariableToText</string>
+						<key>Variable</key>
+						<string>SwinsianClipped_Config_Template</string>
+						<key>Text</key>
+						<string>reel</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751281</integer>
+						<key>MacroActionType</key>
+						<string>SetVariableToText</string>
+						<key>Variable</key>
+						<string>SwinsianClipped_Config_Platform</string>
+						<key>Text</key>
+						<string>vertical_full</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751282</integer>
+						<key>MacroActionType</key>
+						<string>SetVariableToText</string>
+						<key>Variable</key>
+						<string>SwinsianClipped_Config_Fade</string>
+						<key>Text</key>
+						<string>0.5</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751283</integer>
+						<key>MacroActionType</key>
+						<string>SetVariableToText</string>
+						<key>Variable</key>
+						<string>SwinsianClipped_Config_OutputDir</string>
+						<key>Text</key>
+						<string>~/Music/clipped/_video</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751284</integer>
+						<key>MacroActionType</key>
+						<string>SetVariableToText</string>
+						<key>Variable</key>
+						<string>SwinsianClipped_Config_OutputName</string>
+						<key>Text</key>
+						<string></string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751285</integer>
+						<key>MacroActionType</key>
+						<string>SetVariableToText</string>
+						<key>Variable</key>
+						<string>SwinsianClipped_Config_OpenOutput</string>
+						<key>Text</key>
+						<string>false</string>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751286</integer>
+						<key>DisplayKind</key>
+						<string>None</string>
+						<key>HonourFailureSettings</key>
+						<true/>
+						<key>IncludeStdErr</key>
+						<true/>
+						<key>MacroActionType</key>
+						<string>ExecuteAppleScript</string>
+						<key>Path</key>
+						<string></string>
+						<key>Text</key>
+						<string>tell application "Swinsian"
+	set sel to selection of front window
+	if sel is {} then error "Select one track in Swinsian first."
+	set selectedTrack to item 1 of sel
+	set trackPath to path of selectedTrack
+	try
+		set trackTitle to name of selectedTrack
+	on error
+		set trackTitle to ""
+	end try
+	try
+		set artistName to artist of selectedTrack
+	on error
+		set artistName to ""
+	end try
+	try
+		set albumName to album of selectedTrack
+	on error
+		set albumName to ""
+	end try
+end tell
+
+set trackSummary to artistName
+if trackTitle is not "" then
+	if trackSummary is not "" then
+		set trackSummary to trackSummary &amp; " - " &amp; trackTitle
+	else
+		set trackSummary to trackTitle
+	end if
+end if
+if albumName is not "" then set trackSummary to trackSummary &amp; " (" &amp; albumName &amp; ")"
+if trackSummary is "" then set trackSummary to trackPath
+
+tell application "Keyboard Maestro Engine"
+	setvariable "SwinsianClipped_Source" to (trackPath as text)
+	setvariable "SwinsianClipped_Track" to trackSummary
+end tell</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TrimResults</key>
+						<true/>
+						<key>TrimResultsNew</key>
+						<true/>
+						<key>UseText</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751287</integer>
+						<key>Buttons</key>
+						<array>
+							<dict>
+								<key>Button</key>
+								<string>OK</string>
+							</dict>
+							<dict>
+								<key>Button</key>
+								<string>Cancel</string>
+								<key>Cancel</key>
+								<true/>
+							</dict>
+						</array>
+						<key>MacroActionType</key>
+						<string>PromptForUserInput</string>
+						<key>Prompt</key>
+						<string>Selected: %Variable%SwinsianClipped_Track%
+
+Enter the start and end time for the Dynamic Reel. There is no 60-second export limit.
+Examples: 0, 30, 2:45, 3:45.</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>Title</key>
+						<string>Swinsian - Dynamic Reel Range</string>
+						<key>Variables</key>
+						<array>
+							<dict>
+								<key>Default</key>
+								<string>0</string>
+								<key>Variable</key>
+								<string>SwinsianClipped_Start</string>
+							</dict>
+							<dict>
+								<key>Default</key>
+								<string>1:00</string>
+								<key>Variable</key>
+								<string>SwinsianClipped_End</string>
+							</dict>
+						</array>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751288</integer>
+						<key>DisplayKind</key>
+						<string>None</string>
+						<key>HonourFailureSettings</key>
+						<true/>
+						<key>IncludeStdErr</key>
+						<true/>
+						<key>MacroActionType</key>
+						<string>ExecuteShellScript</string>
+						<key>Path</key>
+						<string></string>
+						<key>Source</key>
+						<string>Nothing</string>
+						<key>Text</key>
+						<string>#!/bin/zsh
+set -euo pipefail
+
+CLIPPED_BIN="${KMVAR_SwinsianClipped_Config_ClippedBin:-/Users/rd/Scripts/Riley/clipped/bin/clipped}"
+TEMPLATE="${KMVAR_SwinsianClipped_Config_Template:-reel}"
+PLATFORM="${KMVAR_SwinsianClipped_Config_Platform:-vertical_full}"
+FADE="${KMVAR_SwinsianClipped_Config_Fade:-0.5}"
+OUTPUT_DIR="${KMVAR_SwinsianClipped_Config_OutputDir:-}"
+OUTPUT_NAME="${KMVAR_SwinsianClipped_Config_OutputName:-}"
+OPEN_OUTPUT="${KMVAR_SwinsianClipped_Config_OpenOutput:-false}"
+
+SOURCE="$KMVAR_SwinsianClipped_Source"
+START="$KMVAR_SwinsianClipped_Start"
+END="$KMVAR_SwinsianClipped_End"
+TRACK="${KMVAR_SwinsianClipped_Track:-Selected Swinsian track}"
+RUNNER_DIR="$(mktemp -d -t swinsian-clipped-reel)"
+RUNNER="$RUNNER_DIR/run.zsh"
+LOG="$RUNNER_DIR/run.log"
+
+if [[ -z "$SOURCE" || ! -f "$SOURCE" ]]; then
+  osascript -e 'display notification "Selected Swinsian track path could not be resolved." with title "Clipped"'
+  exit 1
+fi
+if [[ -z "$START" || -z "$END" ]]; then
+  osascript -e 'display notification "Start and end times are required." with title "Clipped"'
+  exit 1
+fi
+if [[ ! -x "$CLIPPED_BIN" ]]; then
+  osascript -e 'display notification "clipped CLI wrapper is missing or not executable." with title "Clipped"'
+  exit 1
+fi
+
+OUTPUT_PATH=""
+if [[ -n "$OUTPUT_NAME" ]]; then
+  [[ -z "$OUTPUT_DIR" ]] &amp;&amp; OUTPUT_DIR="$HOME/Music/clipped/_video"
+  OUTPUT_DIR="${OUTPUT_DIR/#\~/$HOME}"
+  mkdir -p "$OUTPUT_DIR"
+  [[ "$OUTPUT_NAME" != *.* ]] &amp;&amp; OUTPUT_NAME="${OUTPUT_NAME}.mp4"
+  OUTPUT_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
+fi
+
+q_clipped=${(qqq)CLIPPED_BIN}
+q_source=${(qqq)SOURCE}
+q_start=${(qqq)START}
+q_end=${(qqq)END}
+q_track=${(qqq)TRACK}
+q_template=${(qqq)TEMPLATE}
+q_platform=${(qqq)PLATFORM}
+q_fade=${(qqq)FADE}
+q_output=${(qqq)OUTPUT_PATH}
+q_open=${(qqq)OPEN_OUTPUT}
+q_log=${(qqq)LOG}
+
+cat &gt; "$RUNNER" &lt;&lt;EOF
+#!/bin/zsh
+set -euo pipefail
+CLIPPED_BIN=$q_clipped
+SOURCE=$q_source
+START=$q_start
+END=$q_end
+TRACK=$q_track
+TEMPLATE=$q_template
+PLATFORM=$q_platform
+FADE=$q_fade
+OUTPUT_PATH=$q_output
+OPEN_OUTPUT=$q_open
+LOG=$q_log
+
+echo "Swinsian -&gt; Clipped Dynamic Reel"
+echo "Track    : \$TRACK"
+echo "Source   : \$SOURCE"
+echo "Range    : \$START -&gt; \$END"
+echo "Template : \$TEMPLATE"
+echo "Platform : \$PLATFORM"
+echo "Fade     : \$FADE"
+if [[ -n "\$OUTPUT_PATH" ]]; then echo "Output   : \$OUTPUT_PATH"; fi
+echo "Log      : \$LOG"
+echo
+
+cmd=("\$CLIPPED_BIN" video "\$SOURCE" --template "\$TEMPLATE" --platform "\$PLATFORM" --start "\$START" --end "\$END" --fade-in "\$FADE" --fade-out "\$FADE")
+if [[ -n "\$OUTPUT_PATH" ]]; then
+  cmd+=(--output "\$OUTPUT_PATH")
+fi
+"\${cmd[@]}" 2&gt;&amp;1 | tee -a "\$LOG"
+
+if [[ "\$OPEN_OUTPUT" == "true" &amp;&amp; -n "\$OUTPUT_PATH" &amp;&amp; -f "\$OUTPUT_PATH" ]]; then
+  open -R "\$OUTPUT_PATH"
+fi
+
+echo
+echo "Done. clipped copied the exported video to the clipboard."
+osascript -e 'display notification "Dynamic reel export complete." with title "Clipped"' &gt;/dev/null 2&gt;&amp;1 || true
+EOF
+chmod +x "$RUNNER"
+osascript -e "tell application \"Terminal\" to do script \"zsh ${(q)RUNNER}\""
+</string>
+						<key>TimeOutAbortsMacro</key>
+						<true/>
+						<key>TrimResults</key>
+						<true/>
+						<key>TrimResultsNew</key>
+						<true/>
+						<key>UseText</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>ActionUID</key>
+						<integer>1779751289</integer>
+						<key>MacroActionType</key>
+						<string>Notification</string>
+						<key>Title</key>
+						<string>Clipped</string>
+						<key>SubTitle</key>
+						<string>Dynamic reel started</string>
+						<key>Text</key>
+						<string>Rendering in Terminal with no 60-second cap.</string>
+					</dict>
+				</array>
+			</dict>
+		</array>
+	</dict>
+</array>
+</plist>

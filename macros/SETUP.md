@@ -19,9 +19,9 @@ Double-click `clipped.kmmacros` to import all macros at once.
 ## Prerequisites
 
 1. [Keyboard Maestro](https://www.keyboardmaestro.com/) must be installed and running.
-2. The `clipped` shim at `~/Music/clipped/bin/clipped` must be executable:
+2. The `clipped` shim at `~/Scripts/Riley/clipped/bin/clipped` must be executable:
    ```bash
-   chmod +x ~/Music/clipped/bin/clipped
+   chmod +x ~/Scripts/Riley/clipped/bin/clipped
    ```
 3. Swinsian must be running for `⌘⇧[` and `⌘⇧]` to work.
 

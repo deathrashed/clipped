@@ -23,12 +23,22 @@ class VerticalWaveTemplate(VideoTemplate):
 
     def get_filter_graph(self, assets: MediaAssets, duration: float) -> str:
         speed = self.config.get("spinner_speed", 0.5)
+        color = self.config.get("waveform_color", "0x00E5FF")
         
         # Wave size slightly larger than the art to peek out from behind
-        wave_sz = 820
+        wave_sz = 860
         art_sz  = 720
+        inner_r = art_sz // 2 - 25
+        outer_r = wave_sz // 2
         
         steps: list[str] = []
+        steps.append(
+            f"[0:a]showwaves=s={wave_sz}x{wave_sz}:mode=line:colors={color}@0.75:rate=30,"
+            f"format=rgba,colorkey=black:0.12:0.08,"
+            f"geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
+            f"a='if(gte(pow(X-W/2,2)+pow(Y-H/2,2),pow({inner_r},2))*"
+            f"lte(pow(X-W/2,2)+pow(Y-H/2,2),pow({outer_r},2)),alpha(X,Y),0)'[wave]"
+        )
 
         if assets.cover:
             # ── 1. Background ─────────────────────────────────────────────────
@@ -51,10 +61,12 @@ class VerticalWaveTemplate(VideoTemplate):
 
             # ── 3. Composition ────────────────────────────────────────────────
             y_off = 960 - 250
-            steps.append(f"[bg][spinner]overlay=(W-w)/2:{y_off}[outv]")
+            wave_y = y_off - ((wave_sz - art_sz) // 2)
+            steps.append(f"[bg][wave]overlay=(W-w)/2:{wave_y}[bg_wave]")
+            steps.append(f"[bg_wave][spinner]overlay=(W-w)/2:{y_off}[outv]")
         else:
             steps.append(f"color=s=1080x1920:c=#0a0a0a[bg]")
-            steps.append(f"[bg]null[outv]")
+            steps.append(f"[bg][wave]overlay=(W-w)/2:640[outv]")
 
         graph = ";".join(steps)
         return graph + ";" + self._drawtext_overlay(assets, duration, link_in="[outv]")
@@ -82,7 +94,7 @@ class VerticalWaveTemplate(VideoTemplate):
         lh_factor = 1.15
 
         h_title = self._line_count(title) * title_fs * lh_factor
-        y_title = int(1400 - (h_title - (title_fs * lh_factor)))
+        y_title = int(1480 - (h_title - (title_fs * lh_factor)))
         y_artist = int(y_title + h_title + gap)
 
         common = ":text_align=center:expansion=none"

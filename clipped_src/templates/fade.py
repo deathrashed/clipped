@@ -59,7 +59,10 @@ class FadeTemplate(VideoTemplate):
             for d in durations[:-1]:
                 starts.append(starts[-1] + d)
         else:
-            img_dur = max(5, duration / num)
+            # Keep auto transitions inside short clips. The old 5s minimum made
+            # a 3s smoke render schedule later images at 5s/10s, which can make
+            # FFmpeg sit on an effectively unreachable graph.
+            img_dur = duration / num if duration < num * 5 else max(5, duration / num)
             starts = [i * img_dur for i in range(num)]
 
         if num == 1:
