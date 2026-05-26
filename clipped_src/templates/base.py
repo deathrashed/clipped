@@ -204,6 +204,17 @@ class VideoTemplate(ABC):
         """
         fade_in = f"if(lt(t,{st}),0,if(lt(t,{st+dur}),(t-{st})/{dur},1))"
         if et > st + dur:
+            plateau_start = st + dur
+            plateau_end = et - dur
+            if plateau_end <= plateau_start:
+                mid = st + ((et - st) / 2)
+                in_dur = max(0.001, mid - st)
+                out_dur = max(0.001, et - mid)
+                return (
+                    f"if(lt(t,{st}),0,"
+                    f"if(lt(t,{mid}),(t-{st})/{in_dur},"
+                    f"if(lt(t,{et}),1-(t-{mid})/{out_dur},0)))"
+                )
             # Add fade-out: if(lt(t, et-dur), 1, if(lt(t, et), 1-(t-(et-dur))/dur, 0))
             # Combined with fade-in:
             return (

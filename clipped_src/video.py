@@ -7,10 +7,7 @@ PlatformProfile (size, duration limit) → runs FFmpeg with a progress bar.
 from __future__ import annotations
 
 import subprocess
-import sys
 from pathlib import Path
-
-from rich.console import Console
 
 from .config import get_config, validate_output_dirs
 from .platforms import PlatformProfile, get_profile
@@ -247,8 +244,3 @@ def _export_audio_only(
     )
 
     return output_path
-
-
-def _get_ui():
-    from .main import UI
-    return UI

@@ -6,7 +6,7 @@ from typing import Iterable
 import typer
 from rich.console import Console
 
-from .config import load_config
+from .config import DEFAULT_CONFIG, load_config
 from .platforms import list_platforms
 from .templates import list_templates
 
@@ -26,16 +26,27 @@ def _md_table(headers: list[str], rows: Iterable[list[str]]) -> str:
 @docs_app.command("generate")
 def generate(
     output: Path = typer.Option(Path("docs/CLI.md"), help="Output markdown path."),
+    local_config: bool = typer.Option(
+        False,
+        "--local-config",
+        help="Use ~/.config/clipped/config.toml instead of repository defaults.",
+    ),
 ) -> None:
     """Generate a CLI documentation markdown file."""
-    config = load_config()
+    config = load_config() if local_config else DEFAULT_CONFIG
     presets = config.get("preset", {})
     template_rows = [
         [t.info.name, t.info.label, f"{t.info.aspect[0]}×{t.info.aspect[1]}", ", ".join(t.info.ideal_for)]
         for t in list_templates()
     ]
     platform_rows = [
-        [p.name, p.label, f"{p.width or '-'}×{p.height or '-'}", p.output_format]
+        [
+            p.name,
+            p.label,
+            f"{p.width or '-'}×{p.height or '-'}",
+            f"{p.max_duration:.0f}s" if p.max_duration else "none",
+            p.output_format,
+        ]
         for p in list_platforms()
     ]
     preset_rows = [[name, ", ".join(f"{k}={v}" for k, v in data.items())] for name, data in presets.items()]
@@ -48,7 +59,7 @@ def generate(
 
 ## Platforms
 
-{_md_table(['Name', 'Label', 'Size', 'Format'], platform_rows)}
+{_md_table(['Name', 'Label', 'Size', 'Max Duration', 'Format'], platform_rows)}
 
 ## Presets
 
@@ -60,7 +71,8 @@ def generate(
 clipped --help
 clipped audio track.mp3 30 45
 clipped video myaudio.mp3 --template spinner --platform default
-clipped video vertical myaudio.mp3 --preset instagram
+clipped video myaudio.mp3 --template reel --platform instagram --start 2:45 --end 3:45
+clipped video myaudio.mp3 --template reel --platform vertical_full
 clipped config show
 clipped doctor
 clipped test templates sample.mp3 --dry-run

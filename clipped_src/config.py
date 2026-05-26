@@ -32,6 +32,7 @@ DEFAULT_CONFIG: dict = {
         "spinner_speed":       0.5,   # revolutions / second
         "waveform_mode":        "line",  # line | cline | p2p | point
         "waveform_color":       "0x00E5FF",  # vivid cyan
+        "default_template":     "spinner",
         "default_platform":    "default",
         
         # Vertical Template Settings
@@ -41,7 +42,40 @@ DEFAULT_CONFIG: dict = {
         "vertical_transition_duration":  2.0,
         "vertical_text_fade_duration":   1.0,
         "vertical_text_reveal_overlap":  1.0,
-    }
+    },
+    "preset": {
+        "instagram": {
+            "default_template": "reel",
+            "default_platform": "instagram",
+        },
+        "tiktok": {
+            "default_template": "reel",
+            "default_platform": "tiktok",
+        },
+        "youtube_shorts": {
+            "default_template": "reel",
+            "default_platform": "youtube_shorts",
+        },
+        "vertical_full": {
+            "default_template": "reel",
+            "default_platform": "vertical_full",
+        },
+        "archive": {
+            "default_template": "static",
+            "default_platform": "default",
+        },
+        "cinematic": {
+            "default_template": "cinematic",
+            "default_platform": "youtube",
+        },
+        "discord": {
+            "default_platform": "discord",
+        },
+        "waveformbar": {
+            "default_template": "waveformbar",
+            "default_platform": "default",
+        },
+    },
 }
 
 _DEFAULT_TOML = textwrap.dedent("""\
@@ -64,12 +98,20 @@ _DEFAULT_TOML = textwrap.dedent("""\
     # Each key overrides the matching [general] key.
 
     [preset.instagram]
-    default_template = "vertical"
+    default_template = "reel"
     default_platform = "instagram"
 
     [preset.tiktok]
-    default_template = "vertical"
+    default_template = "reel"
     default_platform = "tiktok"
+
+    [preset.youtube_shorts]
+    default_template = "reel"
+    default_platform = "youtube_shorts"
+
+    [preset.vertical_full]
+    default_template = "reel"
+    default_platform = "vertical_full"
 
     [preset.archive]
     default_template = "static"
@@ -121,7 +163,7 @@ def load_config() -> dict:
 
     # Load presets - tomllib gives us user["preset"]["instagram"] = {...}
     if "preset" in user and isinstance(user["preset"], dict):
-        config["preset"] = user["preset"]
+        config["preset"].update(user["preset"])
     
     # Support top-level preset.NAME for backward compatibility if any
     for key, val in user.items():

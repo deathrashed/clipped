@@ -11,11 +11,11 @@ Commands:
 from __future__ import annotations
 
 import subprocess
-import sys
 from pathlib import Path
 from typing import Optional
 
 import typer
+from rich.panel import Panel
 from rich.console import Console
 from rich.table import Table
 from rich import box
@@ -25,7 +25,7 @@ from .audio import process_clip, mark_start, mark_end
 from .config import HISTORY_FILE, get_config, get_preset
 from .config_cmd import config_app
 from .doctor import run_diagnostics
-from .platforms import list_platforms, get_profile, suggested_template, PLATFORMS
+from .platforms import list_platforms, suggested_template, PLATFORMS
 from .qa import test_app
 from .templates import list_templates, REGISTRY
 from .batch import batch_app, watch_directory
@@ -42,9 +42,15 @@ class UI:
     @staticmethod
     def header():
         """Retro TUI branding."""
-        console.print(f"\n[bold cyan]┌──────────────────────────────┐[/bold cyan]")
-        console.print(f"[bold cyan]│[/bold cyan] [bold white]📀 CLIPPED[/bold white] [dim]v{__version__}[/dim]             [bold cyan]│[/bold cyan]")
-        console.print(f"[bold cyan]└──────────────────────────────┘[/bold cyan]\n")
+        console.print()
+        console.print(Panel(
+            "[bold white]CLIPPED[/bold white] "
+            f"[dim]v{__version__}[/dim]\n"
+            "[cyan]Audio clips, album-art reels, and Swinsian automation[/cyan]",
+            border_style="cyan",
+            box=box.ROUNDED,
+            padding=(1, 3),
+        ))
 
     @staticmethod
     def sys(msg: str):
@@ -148,6 +154,183 @@ def watch_cmd(
 
 # ── Interactive TUI ───────────────────────────────────────────────────────────
 
+def _format_duration(seconds: float | None) -> str:
+    if not seconds:
+        return "unknown"
+    mins, secs = divmod(int(seconds), 60)
+    hours, mins = divmod(mins, 60)
+    if hours:
+        return f"{hours}:{mins:02d}:{secs:02d}"
+    return f"{mins}:{secs:02d}"
+
+
+def _short_path(path: str, max_len: int = 58) -> str:
+    if not path:
+        return ""
+    display = path.replace(str(Path.home()), "~")
+    if len(display) <= max_len:
+        return display
+    return f"...{display[-(max_len - 3):]}"
+
+
+def _last_source() -> str:
+    if not HISTORY_FILE.exists():
+        return ""
+    return HISTORY_FILE.read_text().strip()
+
+
+def _source_title(src: str) -> str:
+    if not src:
+        return "No source"
+    if src.startswith("http"):
+        return _short_path(src, max_len=70)
+    return Path(src).name
+
+
+def _is_url(src: str) -> bool:
+    return src.startswith(("http://", "https://"))
+
+
+def _validate_source(src: str, allow_url: bool = False) -> bool:
+    if _is_url(src):
+        if allow_url:
+            return True
+        UI.err("This workflow expects a local audio file, not a URL.")
+        return False
+    path = Path(src).expanduser()
+    if path.exists() and path.is_file():
+        return True
+    UI.err(f"Audio file not found: {src}")
+    return False
+
+
+def _parse_optional_float(value: str | None, label: str) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        UI.err(f"{label} must be a number of seconds.")
+        return None
+
+
+def _print_tui_context(cfg: dict, last_action: dict | None) -> None:
+    table = Table.grid(expand=True)
+    table.add_column(ratio=1)
+    table.add_column(ratio=1)
+
+    last = _last_source()
+    defaults = (
+        f"[bold]Default render[/bold]\n"
+        f"Template: [cyan]{cfg.get('default_template', 'spinner')}[/cyan]\n"
+        f"Platform: [magenta]{cfg.get('default_platform', 'default')}[/magenta]\n"
+        f"Fade: [green]{cfg.get('fade_duration', 0.5)}s[/green]"
+    )
+    recent = (
+        "[bold]Session[/bold]\n"
+        f"Last source: [white]{_source_title(last) if last else 'none'}[/white]\n"
+        f"Previous action: [white]{last_action['label'] if last_action else 'none'}[/white]\n"
+        f"Video dir: [dim]{_short_path(str(Path(cfg.get('video_dir', '')).expanduser()))}[/dim]"
+    )
+
+    table.add_row(
+        Panel(defaults, title="Preset", border_style="cyan", box=box.ROUNDED),
+        Panel(recent, title="Context", border_style="magenta", box=box.ROUNDED),
+    )
+    console.print(table)
+    console.print()
+
+
+def _choose_source(prompt: str, allow_url: bool = False, allow_history: bool = True) -> str:
+    import questionary
+
+    choices = []
+    last = _last_source()
+    if allow_history and last and (allow_url or not last.startswith("http")):
+        choices.append(questionary.Choice(
+            title=f"Last source  —  {_source_title(last)}",
+            value=("history", last),
+        ))
+        choices.append(questionary.Separator())
+
+    choices.extend([
+        questionary.Choice(title="Current track in Swinsian", value=("swinsian", None)),
+        questionary.Choice(title="Choose audio file", value=("file", None)),
+        questionary.Choice(title="Enter file path manually", value=("manual", None)),
+    ])
+    if allow_url:
+        choices.append(questionary.Choice(title="YouTube URL", value=("url", None)))
+
+    selected = questionary.select(prompt, choices=choices).ask()
+    if not selected:
+        return ""
+
+    method, value = selected
+    if method == "history":
+        src = value or ""
+        return src if _validate_source(src, allow_url=allow_url) else ""
+    if method == "file":
+        script = (
+            'tell application (path to frontmost application as text) '
+            'to POSIX path of (choose file with prompt "Select audio file:" of type {"public.audio"})'
+        )
+        res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
+        src = res.stdout.strip()
+        return src if src and _validate_source(src, allow_url=allow_url) else ""
+    if method == "swinsian":
+        from .audio import _swinsian_current_track
+        src = _swinsian_current_track()
+        if not src:
+            UI.err("Swinsian is not playing a track.")
+            return ""
+        return src if _validate_source(src, allow_url=allow_url) else ""
+    if method == "manual":
+        src = questionary.path("Audio file path:").ask() or ""
+        src = str(Path(src).expanduser()) if src.startswith("~") else src
+        return src if src and _validate_source(src, allow_url=allow_url) else ""
+    if method == "url":
+        src = questionary.text("YouTube URL:").ask() or ""
+        return src if src and _validate_source(src, allow_url=allow_url) else ""
+    return ""
+
+
+def _print_source_summary(src: str):
+    if src.startswith("http"):
+        console.print(Panel(
+            f"[bold]YouTube URL[/bold]\n[white]{src}[/white]",
+            title="Source",
+            border_style="cyan",
+            box=box.ROUNDED,
+        ))
+        return None
+
+    from .utils import resolve_assets
+    assets = resolve_assets(src)
+    table = Table.grid(padding=(0, 2))
+    table.add_column(style="cyan", no_wrap=True)
+    table.add_column(style="white")
+    table.add_row("Track", assets.track_title or Path(src).stem)
+    table.add_row("Artist", assets.artist_name or "unknown")
+    table.add_row("Album", assets.album_name or "unknown")
+    table.add_row("Duration", _format_duration(assets.duration))
+    table.add_row("Cover", "yes" if assets.cover else "missing")
+    table.add_row("Logo", "yes" if assets.logo else "missing")
+    console.print(Panel(table, title="Source", border_style="cyan", box=box.ROUNDED))
+    return assets
+
+
+def _confirm_plan(title: str, rows: list[tuple[str, str]]) -> bool:
+    import questionary
+
+    table = Table.grid(padding=(0, 2))
+    table.add_column(style="cyan", no_wrap=True)
+    table.add_column(style="white")
+    for key, value in rows:
+        table.add_row(key, value)
+    console.print(Panel(table, title=title, border_style="green", box=box.ROUNDED))
+    return bool(questionary.confirm("Run this workflow?", default=True).ask())
+
+
 def _run_interactive_menu(preset_config: dict | None = None) -> None:
     import questionary
 
@@ -156,103 +339,70 @@ def _run_interactive_menu(preset_config: dict | None = None) -> None:
 
     while True:
         UI.header()
+        _print_tui_context(cfg, last_action)
 
         choices = []
         if last_action:
-            choices.append(f"🔄 Rerun: {last_action['label']}")
+            choices.append(questionary.Choice(
+                title=f"Rerun previous workflow  —  {last_action['label']}",
+                value="rerun",
+            ))
             choices.append(questionary.Separator())
 
         choices += [
-            "🎬 Generate Video",
-            "✂️  Clip Audio (File or URL)",
-            "ℹ️  List Templates",
-            "📤 List Platforms",
-            "🚪 Exit",
+            questionary.Choice(
+                title="Generate video reel  —  choose source, template, platform, time range",
+                value="video",
+            ),
+            questionary.Choice(
+                title="Clip audio  —  file, Swinsian, last source, or YouTube URL",
+                value="audio",
+            ),
+            questionary.Separator(),
+            questionary.Choice(title="Browse templates", value="templates"),
+            questionary.Choice(title="Browse platform profiles", value="platforms"),
+            questionary.Choice(title="Exit", value="exit"),
         ]
 
         choice = questionary.select(
-            "What would you like to do?",
+            "Choose a workflow:",
             choices=choices,
         ).ask()
 
-        if not choice or "Exit" in choice:
+        if not choice or choice == "exit":
             break
 
-        if "Rerun" in choice and last_action:
+        if choice == "rerun" and last_action:
             last_action["func"](*last_action["args"], **last_action["kwargs"])
             continue
 
-        if choice.startswith("✂️"):
+        if choice == "audio":
             action = _interactive_audio(cfg)
             if action:
                 last_action = action
-        elif choice.startswith("🎬"):
+        elif choice == "video":
             action = _interactive_video(cfg)
             if action:
                 last_action = action
-        elif choice.startswith("ℹ️"):
+        elif choice == "templates":
             _print_templates()
-        elif choice.startswith("📤"):
+        elif choice == "platforms":
             platforms_cmd()
 
 
 def _interactive_audio(cfg: dict) -> None:
     import questionary
 
-    # Source
-    use_history = False
-    if HISTORY_FILE.exists():
-        last = HISTORY_FILE.read_text().strip()
-        if last:
-            use_history = questionary.confirm(
-                f"Use last source? [{Path(last).name if not last.startswith('http') else last[:60]}]"
-            ).ask()
-
-    if use_history:
-        src = last
-    else:
-        method = questionary.select(
-            "Source:",
-            choices=[
-                "📁 Pick file (Finder)",
-                "🎵 Current song in Swinsian",
-                "⌨️  Enter path manually",
-                "🔗 Enter YouTube URL"
-            ],
-        ).ask()
-
-        if not method:
-            return
-
-        if method.startswith("📁"):
-            script = 'tell application (path to frontmost application as text) to POSIX path of (choose file with prompt "Select audio:")'
-            res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
-            src = res.stdout.strip()
-        elif method.startswith("🎵"):
-            script = 'tell application "Swinsian" to POSIX path of (get location of current track)'
-            res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
-            src = res.stdout.strip()
-        elif method.startswith("⌨️"):
-            src = questionary.text("File path:").ask() or ""
-            if src.startswith("~"):
-                src = str(Path(src).expanduser())
-        elif method.startswith("🔗"):
-            src = questionary.text("YouTube URL:").ask() or ""
-        else:
-            return
+    src = _choose_source("Audio source:", allow_url=True)
 
     if not src:
         UI.err("No source provided.")
         return
 
-    # Metadata summary
-    from .utils import resolve_assets
-    if not src.startswith("http"):
-        assets = resolve_assets(src)
-        UI.metadata(assets.summary())
+    _print_source_summary(src)
 
-    start = questionary.text("Start time (M:SS or seconds):", default="0").ask() or "0"
-    end   = questionary.text("End time   (M:SS or seconds):").ask() or ""
+    start = questionary.text("Start time:", default="0").ask() or "0"
+    end   = questionary.text("End time:", instruction="M:SS, H:MM:SS, or seconds").ask() or ""
 
     if not end:
         UI.err("End time is required.")
@@ -268,15 +418,28 @@ def _interactive_audio(cfg: dict) -> None:
         default=str(cfg.get("fade_duration", 0.5))
     ).ask()
 
-    is_url = src.startswith("http")
+    is_url = _is_url(src)
+    fade_in_value = _parse_optional_float(fade_in, "Fade in duration")
+    fade_out_value = _parse_optional_float(fade_out, "Fade out duration")
+    if (fade_in and fade_in_value is None) or (fade_out and fade_out_value is None):
+        return
+
     params = {
         "src": src,
         "start": parse_time(start),
         "end": parse_time(end),
         "is_url": is_url,
-        "fade_in": float(fade_in) if fade_in else None,
-        "fade_out": float(fade_out) if fade_out else None,
+        "fade_in": fade_in_value,
+        "fade_out": fade_out_value,
     }
+
+    if not _confirm_plan("Audio Clip", [
+        ("Source", _source_title(src)),
+        ("Range", f"{start} -> {end}"),
+        ("Fade", f"in {fade_in or 'auto'}s / out {fade_out or 'auto'}s"),
+        ("Output", _short_path(str(Path(cfg.get("audio_dir", "")).expanduser()))),
+    ]):
+        return
 
     process_clip(**params)
 
@@ -291,51 +454,21 @@ def _interactive_audio(cfg: dict) -> None:
 def _interactive_video(cfg: dict) -> None:
     import questionary
 
-    method = questionary.select(
-        "Source:",
-        choices=[
-            "📁 Pick file (Finder)",
-            "🎵 Current song in Swinsian",
-            "⌨️  Enter path manually",
-        ],
-    ).ask()
-
-    if not method:
-        return
-
-    if method.startswith("📁"):
-        script = 'tell application (path to frontmost application as text) to POSIX path of (choose file with prompt "Select audio file:" of type {"public.audio"})'
-        res    = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
-        src    = res.stdout.strip()
-    elif method.startswith("🎵"):
-        from .audio import _swinsian_current_track
-        src = _swinsian_current_track()
-        if not src:
-            UI.err("Swinsian is not playing a track.")
-            return
-    elif method.startswith("⌨️"):
-        src = questionary.text("File path:").ask() or ""
-        if src.startswith("~"):
-            src = str(Path(src).expanduser())
-    else:
-        return
+    src = _choose_source("Video source:", allow_url=False)
 
     if not src:
         UI.err("No file selected.")
         return
 
-    # Metadata summary
-    from .utils import resolve_assets
-    assets = resolve_assets(src)
-    UI.metadata(assets.summary())
+    assets = _print_source_summary(src)
 
     # Template picker
-    template_name = _pick_template()
+    template_name = _pick_template(default=cfg.get("default_template"))
     if not template_name:
         return
 
     # Platform picker
-    platform_name = _pick_platform()
+    platform_name = _pick_platform(default=cfg.get("default_platform"))
     if not platform_name:
         return
 
@@ -345,8 +478,23 @@ def _interactive_video(cfg: dict) -> None:
     # Custom waveform options
     waveform_cfg = _build_waveform_config() if template_name == "waveformbar" else {}
 
-    start = questionary.text("Start time (optional):", default="0").ask() or "0"
-    end   = questionary.text("End time (optional, leave blank for full file):").ask() or ""
+    start = questionary.text("Start time:", default="0", instruction="optional").ask() or "0"
+    end   = questionary.text("End time:", instruction="blank means full file").ask() or ""
+    fade_in = questionary.text(
+        "Audio fade in:",
+        default=str(cfg.get("fade_duration", 0.5)),
+        instruction="seconds; blank = config default",
+    ).ask()
+    fade_out = questionary.text(
+        "Audio fade out:",
+        default=str(cfg.get("fade_duration", 0.5)),
+        instruction="seconds; blank = config default",
+    ).ask()
+
+    fade_in_value = _parse_optional_float(fade_in, "Audio fade in")
+    fade_out_value = _parse_optional_float(fade_out, "Audio fade out")
+    if (fade_in and fade_in_value is None) or (fade_out and fade_out_value is None):
+        return
 
     params = {
         "src": src,
@@ -356,7 +504,21 @@ def _interactive_video(cfg: dict) -> None:
         "end": parse_time(end) if end else None,
         "sequence": sequence,
         "extra_config": waveform_cfg or None,
+        "fade_in": fade_in_value,
+        "fade_out": fade_out_value,
     }
+
+    range_label = f"{start} -> {end}" if end else f"{start} -> full file"
+    if not _confirm_plan("Video Render", [
+        ("Source", _source_title(src)),
+        ("Track", (assets.track_title if assets else Path(src).stem) or Path(src).stem),
+        ("Template", template_name),
+        ("Platform", platform_name),
+        ("Range", range_label),
+        ("Fade", f"in {fade_in or 'auto'}s / out {fade_out or 'auto'}s"),
+        ("Output", _short_path(str(Path(cfg.get("video_dir", "")).expanduser()))),
+    ]):
+        return
 
     process_video(**params)
 
@@ -379,6 +541,8 @@ def audio_cmd(
     mark_e:  bool = typer.Option(False, "--mark-end",    help="Mark end in Swinsian and clip"),
     history: bool = typer.Option(False, "--history",     help="Use last source"),
     dry_run: bool = typer.Option(False, "--dry-run",     help="Print command, don't run"),
+    fade_in: Optional[float] = typer.Option(None, "--fade-in", help="Fade-in duration in seconds"),
+    fade_out: Optional[float] = typer.Option(None, "--fade-out", help="Fade-out duration in seconds"),
     output:  Optional[str] = typer.Option(None, "--output", "-o", help="Output file path"),
 ):
     """Clip an audio file or YouTube URL."""
@@ -413,11 +577,15 @@ def audio_cmd(
         UI.err("Start and end times are required.")
         raise typer.Exit(1)
 
-    is_url = src.startswith("http")
+    is_url = _is_url(src)
+    if not _validate_source(src, allow_url=True):
+        raise typer.Exit(1)
+
     out_path = Path(output) if output else None
     process_clip(
         src, parse_time(start), parse_time(end),
         is_url=is_url, dry_run=dry_run,
+        fade_in=fade_in, fade_out=fade_out,
         output_path=out_path,
     )
 
@@ -439,7 +607,7 @@ def video_cmd(
         "--template", "-t",
         help=f"Template: {', '.join(REGISTRY.keys())}"
     ),
-    platform:      str           = typer.Option("default",    help=f"Platform: {', '.join(PLATFORMS.keys())}"),
+    platform:      Optional[str] = typer.Option(None,          help=f"Platform: {', '.join(PLATFORMS.keys())}"),
     start:         Optional[str] = typer.Option(None,          help="Start time"),
     end:           Optional[str] = typer.Option(None,          help="End time"),
     preset:        Optional[str] = typer.Option(None,          help="Named preset from config.toml"),
@@ -460,9 +628,12 @@ def video_cmd(
       clipped video vertical myaudio.mp3  (shorthand)
       clipped video --template reel myaudio.mp3
     """
+    base_cfg = get_config()
+
     # Logic to handle 'clipped video template src' vs 'clipped video src'
     final_src = src
-    final_template = template
+    final_template = template or base_cfg.get("default_template", "spinner")
+    final_platform = platform or base_cfg.get("default_platform", "default")
 
     # If target matches a template name, and src is provided, it's shorthand
     if target in REGISTRY and src:
@@ -471,8 +642,6 @@ def video_cmd(
     elif not src:
         # Standard usage: target is the src file
         final_src = target
-        if not final_template:
-            final_template = "spinner" # Default
     else:
         # ambiguous? assume target is src and ignore src unless it's a known conflict
         final_src = target
@@ -481,7 +650,7 @@ def video_cmd(
         try:
             cfg = get_preset(preset)
             final_template = cfg.get("default_template", final_template)
-            platform = cfg.get("default_platform", platform)
+            final_platform = cfg.get("default_platform", final_platform)
         except ValueError as e:
             UI.err(str(e)); raise typer.Exit(1)
 
@@ -490,11 +659,13 @@ def video_cmd(
     if waveform_color: extra["waveform_color"] = waveform_color
 
     out_path = Path(output) if output else None
+    if not final_src or not _validate_source(final_src, allow_url=False):
+        raise typer.Exit(1)
 
     process_video(
         final_src,
         template_name=final_template,
-        platform_name=platform,
+        platform_name=final_platform,
         start=parse_time(start) if start else 0,
         end=parse_time(end)   if end   else None,
         dry_run=dry_run,
@@ -580,20 +751,48 @@ def _build_waveform_config() -> dict:
     return cfg
 
 
-def _pick_template() -> str | None:
+def _pick_template(default: str | None = None) -> str | None:
     import questionary
     templates = list_templates()
-    choices = [f"{t.info.label} [dim]({t.info.name})[/dim]" for t in templates]
-    res = questionary.select("Select template:", choices=choices).ask()
-    return templates[choices.index(res)].info.name if res else None
+    choices = []
+    default_choice = None
+    for t in templates:
+        w, h = t.info.aspect
+        title = (
+            f"{t.info.label}  ({t.info.name})  —  "
+            f"{w}x{h}; {', '.join(t.info.ideal_for) or 'general'}"
+        )
+        choice = questionary.Choice(title=title, value=t.info.name)
+        choices.append(choice)
+        if t.info.name == default:
+            default_choice = choice
+    return questionary.select(
+        "Template:",
+        choices=choices,
+        default=default_choice,
+        instruction="choose the visual style",
+    ).ask()
 
 
-def _pick_platform() -> str | None:
+def _pick_platform(default: str | None = None) -> str | None:
     import questionary
     platforms = list_platforms()
-    choices = [f"{p.label} [dim]({p.name})[/dim]" for p in platforms]
-    res = questionary.select("Select platform:", choices=choices).ask()
-    return platforms[choices.index(res)].name if res else None
+    choices = []
+    default_choice = None
+    for p in platforms:
+        size = f"{p.width}x{p.height}" if p.width and p.height else p.output_format.upper()
+        duration = f"{int(p.max_duration)}s max" if p.max_duration else "no cap"
+        title = f"{p.label}  ({p.name})  —  {size}; {duration}"
+        choice = questionary.Choice(title=title, value=p.name)
+        choices.append(choice)
+        if p.name == default:
+            default_choice = choice
+    return questionary.select(
+        "Platform:",
+        choices=choices,
+        default=default_choice,
+        instruction="sets size, duration cap, and output format",
+    ).ask()
 
 
 def _print_templates():
@@ -620,18 +819,18 @@ def _print_templates():
 def platforms_cmd():
     """List all available platform export profiles."""
     table = Table(title="📤 Platform Profiles", box=box.ROUNDED, highlight=True)
-    table.add_column("Name",        style="cyan",    width=16)
-    table.add_column("Label",       style="white",   width=26)
-    table.add_column("Size",        style="green",   width=12)
-    table.add_column("Max Duration",style="magenta", width=14)
-    table.add_column("Format",      style="yellow",  width=8)
-    table.add_column("Ideal Template", style="dim")
+    table.add_column("Name", style="cyan", no_wrap=True)
+    table.add_column("Label", style="white")
+    table.add_column("Profile", style="green")
+    table.add_column("Best Template", style="dim")
 
     for p in list_platforms():
         size = f"{p.width}×{p.height}" if p.width else "—"
         dur  = f"{p.max_duration:.0f}s" if p.max_duration else "—"
         table.add_row(
-            p.name, p.label, size, dur, p.output_format,
+            p.name,
+            p.label,
+            f"{size} / {dur} / {p.output_format}",
             suggested_template(p.name),
         )
     console.print(table)

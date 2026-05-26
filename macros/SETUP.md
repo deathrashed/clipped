@@ -1,6 +1,7 @@
 # Keyboard Maestro Macros for Clipped
 
-Double-click `clipped.kmmacros` to import all macros at once.
+Double-click `clipped.kmmacros` to import the main macro group.
+Double-click `clipped-swinsian.kmmacros` to import the focused Swinsian selected-track dynamic reel macro.
 
 ---
 
@@ -10,9 +11,10 @@ Double-click `clipped.kmmacros` to import all macros at once.
 |--------|------|--------|
 | `⌘⇧[` | **Mark Start** | Marks current Swinsian position as clip start. Shows a notification. |
 | `⌘⇧]` | **Mark End + Clip** | Marks current position and immediately clips audio. |
-| `⌘⇧V` | **Spinner Video (Last Clip)** | Generates a 1:1 spinner video from the most recent `_audio/` file. |
-| `⌘⇧I` | **Instagram Reel (Last Clip)** | Generates a 9:16 vertical spinner reel from the most recent `_audio/` file. |
+| `⌘⇧V` | **Spinner Video (Last Clip)** | Generates a 1:1 spinner video from the most recent source or clipped audio. |
+| `⌘⇧I` | **Instagram Reel (Last Clip)** | Generates a dynamic reel from the most recent source or clipped audio. |
 | `⌘⇧U` | **Clip YouTube URL** | Reads a YouTube URL from the clipboard and opens a Terminal clip session. |
+| User-assigned | **Utility: Clipped Dynamic Reel** | In the Swinsian group, prompts for start/end and renders the selected track with `reel` + `vertical_full`. |
 
 ---
 
@@ -23,20 +25,20 @@ Double-click `clipped.kmmacros` to import all macros at once.
    ```bash
    chmod +x ~/Scripts/Riley/clipped/bin/clipped
    ```
-3. Swinsian must be running for `⌘⇧[` and `⌘⇧]` to work.
+3. Swinsian must be running for Swinsian-driven macros to work.
 
 ---
 
 ## Customising Hotkeys
 
-After importing, open Keyboard Maestro Editor → find the "Clipped" macros → click the trigger to change the hotkey.
+After importing, open Keyboard Maestro Editor, find the "Clipped" macros, then click the trigger to change the hotkey.
 
 ---
 
 ## Adding More Macros
 
-Copy one of the existing `<dict>` blocks in `clipped.kmmacros`, change:
-- `<key>Name</key>` — display name
-- `<key>UID</key>` — must be a unique string
-- `<key>KeyCode</key>` — see [KM key codes](https://wiki.keyboardmaestro.com/action/Execute_a_Shell_Script)
-- `<key>Script</key>` — the shell script to run
+Prefer exporting a known-good macro from Keyboard Maestro and editing that plist, then validate it:
+
+```bash
+plutil -lint macros/*.kmmacros
+```

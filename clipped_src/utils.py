@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import subprocess
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -90,7 +90,6 @@ def read_metadata(audio_path: Path) -> TrackMetadata:
 def _try_mutagen(path: Path) -> TrackMetadata | None:
     try:
         from mutagen import File as MutagenFile
-        from mutagen.id3 import ID3NoHeaderError
     except ImportError:
         return None
 

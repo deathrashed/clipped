@@ -42,7 +42,7 @@
 						<key>Variable</key>
 						<string>SwinsianClipped_Config_ClippedBin</string>
 						<key>Text</key>
-						<string>/Users/rd/Scripts/Riley/clipped/bin/clipped</string>
+						<string>~/Scripts/Riley/clipped/bin/clipped</string>
 					</dict>
 					<dict>
 						<key>ActionUID</key>
@@ -226,7 +226,12 @@ Examples: 0, 30, 2:45, 3:45.</string>
 						<string>#!/bin/zsh
 set -euo pipefail
 
-CLIPPED_BIN="${KMVAR_SwinsianClipped_Config_ClippedBin:-/Users/rd/Scripts/Riley/clipped/bin/clipped}"
+CLIPPED_BIN="${KMVAR_SwinsianClipped_Config_ClippedBin:-$HOME/Scripts/Riley/clipped/bin/clipped}"
+if [[ "$CLIPPED_BIN" == "~/"* ]]; then
+  CLIPPED_BIN="$HOME/${CLIPPED_BIN#~/}"
+elif [[ "$CLIPPED_BIN" == '$HOME/'* ]]; then
+  CLIPPED_BIN="$HOME/${CLIPPED_BIN#\$HOME/}"
+fi
 TEMPLATE="${KMVAR_SwinsianClipped_Config_Template:-reel}"
 PLATFORM="${KMVAR_SwinsianClipped_Config_Platform:-vertical_full}"
 FADE="${KMVAR_SwinsianClipped_Config_Fade:-0.5}"

@@ -50,16 +50,25 @@ class ReelTemplate(VideoTemplate):
 
     def get_filter_graph(self, assets: MediaAssets, duration: float) -> str:
         speed = self.config.get("spinner_speed", 2)
-        t_art_start = duration * _T_ART_START
+        cover_idx = 1 if assets.cover else None
+        logo_idx = 1 + (1 if assets.cover else 0) if assets.logo else None
+        logo_fade_dur = min(1.0, max(0.25, duration * 0.08))
+        t_logo_end = min(_T_LOGO_END, max(logo_fade_dur * 2, duration * 0.25))
+        t_logo_fade_out = max(logo_fade_dur, t_logo_end - logo_fade_dur)
+
+        t_spin_start = min(_T_SPIN_START, max(t_logo_end, duration * 0.25))
+        t_art_start = max(t_spin_start + 0.75, duration * _T_ART_START)
+        t_art_start = min(t_art_start, max(t_spin_start + 0.75, duration - 1.5))
         t_spin_end = t_art_start + _T_SPIN_OVERLAP
-        t_art_fade_start = max(0.0, duration - _T_END_GAP - 1)
+        t_spin_fade_out = max(t_spin_start, t_spin_end - 1)
+        t_art_fade_start = max(t_art_start + 0.5, duration - _T_END_GAP - 1)
 
         steps: list[str] = []
 
         # ── Background: blurred and darkened ──────────────────────────────────
         if assets.cover:
             steps.append(
-                f"[1:v]scale={_W}:{_H}:force_original_aspect_ratio=increase,"
+                f"[{cover_idx}:v]scale={_W}:{_H}:force_original_aspect_ratio=increase,"
                 f"crop={_W}:{_H},gblur=sigma=40,eq=brightness=-0.3:saturation=0.6[bg]"
             )
         else:
@@ -70,8 +79,9 @@ class ReelTemplate(VideoTemplate):
         # ── Stage 1: Logo Fade In/Out ────────────────────────────────────────
         if assets.logo:
             steps.append(
-                f"[2:v]scale={_LOGO_SZ}:{_LOGO_SZ}:force_original_aspect_ratio=decrease,"
-                f"format=rgba,fade=t=in:st=0.5:d=1:alpha=1,fade=t=out:st={_T_LOGO_END - 1.5}:d=1:alpha=1[logo_ov]"
+                f"[{logo_idx}:v]scale={_LOGO_SZ}:{_LOGO_SZ}:force_original_aspect_ratio=decrease,"
+                f"format=rgba,fade=t=in:st=0.5:d={logo_fade_dur}:alpha=1,"
+                f"fade=t=out:st={t_logo_fade_out}:d={logo_fade_dur}:alpha=1[logo_ov]"
             )
             steps.append(f"{current_v}[logo_ov]overlay=(W-w)/2:(H-h)/2[v1]")
             current_v = "[v1]"
@@ -79,24 +89,24 @@ class ReelTemplate(VideoTemplate):
         # ── Stage 2: Spinning Record ─────────────────────────────────────────
         if assets.cover:
             steps.append(
-                f"[1:v]scale={_SPINNER_SZ}:{_SPINNER_SZ}:force_original_aspect_ratio=decrease,"
+                f"[{cover_idx}:v]scale={_SPINNER_SZ}:{_SPINNER_SZ}:force_original_aspect_ratio=decrease,"
                 f"pad={_SPINNER_SZ}:{_SPINNER_SZ}:(ow-iw)/2:(oh-ih)/2:color=black@0,format=rgba,"
                 f"geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
                 f"a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2,2)),255,0)',"
                 f"rotate=t*{speed}:c=none,"
-                f"fade=t=in:st={_T_SPIN_START}:d=1:alpha=1,"
-                f"fade=t=out:st={t_spin_end - 1}:d=1:alpha=1[spinner_ov]"
+                f"fade=t=in:st={t_spin_start}:d=1:alpha=1,"
+                f"fade=t=out:st={t_spin_fade_out}:d=1:alpha=1[spinner_ov]"
             )
             steps.append(
                 f"{current_v}[spinner_ov]overlay=(W-w)/2:{_Y_HIGH}:"
-                f"enable='between(t,{_T_SPIN_START},{t_spin_end})'[v2]"
+                f"enable='between(t,{t_spin_start},{t_spin_end})'[v2]"
             )
             current_v = "[v2]"
 
         # ── Stage 3: Full square album art reveal ────────────────────────────
         if assets.cover:
             steps.append(
-                f"[1:v]scale={_PHOTO_SZ}:{_PHOTO_SZ}:force_original_aspect_ratio=decrease,"
+                f"[{cover_idx}:v]scale={_PHOTO_SZ}:{_PHOTO_SZ}:force_original_aspect_ratio=decrease,"
                 f"pad={_PHOTO_SZ}:{_PHOTO_SZ}:(ow-iw)/2:(oh-ih)/2:color=black@0,"
                 f"format=rgba,"
                 f"fade=t=in:st={t_art_start}:d=1:alpha=1,"
@@ -145,11 +155,22 @@ class ReelTemplate(VideoTemplate):
         y_title  = _Y_TITLE - int((h_title - (title_fs * lh_factor)))
         y_artist = _Y_ARTIST
 
-        t_title_start = _T_TEXT_START
-        t_artist_start = _T_TEXT_START + 1.0
-        t_text_end = max(t_artist_start + _T_TEXT_FADE_DUR, art_fade_start - _T_TEXT_FADE_BEFORE_ART)
-        alpha_title = self.get_fade_alpha(t_title_start, t_text_end, _T_TEXT_FADE_DUR)
-        alpha_artist = self.get_fade_alpha(t_artist_start, t_text_end, _T_TEXT_FADE_DUR)
+        t_title_start = min(_T_TEXT_START, max(0.5, duration * 0.35))
+        t_artist_start = min(t_title_start + 1.0, max(t_title_start, duration - _T_TEXT_FADE_DUR))
+        t_text_end = min(
+            duration,
+            max(t_artist_start + _T_TEXT_FADE_DUR, art_fade_start - _T_TEXT_FADE_BEFORE_ART),
+        )
+        title_fade_dur = min(
+            _T_TEXT_FADE_DUR,
+            max(0.25, (t_text_end - t_title_start) / 2),
+        )
+        artist_fade_dur = min(
+            _T_TEXT_FADE_DUR,
+            max(0.25, (t_text_end - t_artist_start) / 2),
+        )
+        alpha_title = self.get_fade_alpha(t_title_start, t_text_end, title_fade_dur)
+        alpha_artist = self.get_fade_alpha(t_artist_start, t_text_end, artist_fade_dur)
 
         font = f":fontfile='{self._escape_path(_FONT_FILE)}'" if Path(_FONT_FILE).exists() else ""
         common = f"{font}:text_align=center:expansion=none"

@@ -263,7 +263,7 @@ def process_clip(
     """
     if dry_run:
         UI = _get_ui()
-        console.print(f"\n[bold cyan]── Dry Run ──[/bold cyan]")
+        Console().print(f"\n[bold cyan]── Dry Run ──[/bold cyan]")
         UI.sys(f"Source   : {src}")
         UI.sys(f"Start    : {start}s")
         UI.sys(f"End      : {end}s")

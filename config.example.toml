@@ -35,12 +35,20 @@ default_platform = "default"
 # Each key overrides the matching [general] key.
 
 [preset.instagram]
-default_template = "vertical"
+default_template = "reel"
 default_platform = "instagram"
 
 [preset.tiktok]
-default_template = "vertical"
+default_template = "reel"
 default_platform = "tiktok"
+
+[preset.youtube_shorts]
+default_template = "reel"
+default_platform = "youtube_shorts"
+
+[preset.vertical_full]
+default_template = "reel"
+default_platform = "vertical_full"
 
 [preset.archive]
 default_template = "static"

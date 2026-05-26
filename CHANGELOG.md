@@ -5,6 +5,16 @@ Format: [Semantic Versioning](https://semver.org/).
 
 ---
 
+## Unreleased
+
+### Changed
+- Refreshed repository taxonomy: agent docs restored at the root, config/docs moved back to canonical locations, test helpers moved under `tests/`, and generation helpers moved under `scripts/`.
+- Updated default preset definitions so `instagram`, `tiktok`, `youtube_shorts`, and `vertical_full` use the dynamic `reel` template.
+
+### Fixed
+- Added `default_template` to the in-memory default config so existing config files get the same defaults as newly generated config files.
+- Removed small unused imports and duplicate helper definitions from the Python source.
+
 ## [2.1.0] — 2026-05-13
 
 ### Removed

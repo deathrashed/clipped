@@ -11,13 +11,19 @@ ENV/
 # Project Specific
 .history
 .gemini/
+.omg/
+.specstory/
+.vscode/
 .history.txt
 settings.local.json
 .claude/
+macros.zip
+Icon
 
 # Temp files
 temp_*/
 *.tmp
+*.log
 
 # macOS
 .DS_Store

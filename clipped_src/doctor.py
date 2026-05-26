@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import shutil
-import subprocess
 from pathlib import Path
-from typing import Iterable
 
 from rich.console import Console
 
 from .config import get_config, load_config, validate_output_dirs
 from .platforms import list_platforms
-from .templates import list_templates, REGISTRY
+from .templates import REGISTRY
 
 console = Console()
 

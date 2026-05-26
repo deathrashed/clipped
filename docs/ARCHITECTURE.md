@@ -245,3 +245,24 @@ Add CLI tooling for:
 **Negative:**
 - More CLI surface area to maintain
 - Slightly higher help/UX complexity
+
+## ADR-0010: Source Package Layout
+
+### Status
+Proposed
+
+### Context
+The active Python package currently lives in `clipped_src/`. That name is explicit, but it is less standard than modern Python's `src/<package>/` layout.
+
+### Decision
+Keep `clipped_src/` stable for the current cleanup pass. If the package is renamed later, prefer `src/clipped/` and update `bin/clipped`, `install.sh`, docs, tests, and all `python -m clipped_src.main` references in one migration.
+
+Do not rename the package itself to `src`; `src` should be a container directory, not the importable application package.
+
+### Consequences
+**Positive:**
+- Avoids breaking the CLI wrapper and Keyboard Maestro workflows during taxonomy cleanup.
+- Leaves a clear migration path to a conventional Python layout.
+
+**Negative:**
+- The package name remains slightly nonstandard until a dedicated packaging pass.
