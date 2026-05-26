@@ -43,7 +43,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["vertical"],
+        ideal_templates=["reel", "vertical", "vertical_wave"],
         notes="Clips longer than 60s will be trimmed.",
     ),
     "tiktok": PlatformProfile(
@@ -52,7 +52,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["vertical"],
+        ideal_templates=["reel", "vertical", "vertical_wave"],
     ),
     "youtube_shorts": PlatformProfile(
         name="youtube_shorts",
@@ -60,7 +60,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["vertical"],
+        ideal_templates=["reel", "vertical", "vertical_wave"],
     ),
     "vertical_full": PlatformProfile(
         name="vertical_full",

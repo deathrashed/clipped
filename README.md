@@ -164,7 +164,7 @@ open macros/clipped.kmmacros
 Import the focused Swinsian dynamic reel macro:
 
 ```bash
-open macros/swinsian-clipped-dynamic-reel.kmmacros
+open macros/clipped-swinsian.kmmacros
 ```
 
 | Macro | Trigger | Purpose |
@@ -191,8 +191,8 @@ copy_to_clipboard = true
 auto_fade         = true
 fade_duration     = 0.5
 spinner_speed     = 0.5
-default_template  = "reel"
-default_platform  = "instagram"
+default_template  = "spinner"
+default_platform  = "default"
 ```
 
 Named presets can override the general defaults:
@@ -234,7 +234,7 @@ default_platform = "vertical_full"
 │       └── waveformbar.py
 ├── macros/
 │   ├── clipped.kmmacros
-│   ├── swinsian-clipped-dynamic-reel.kmmacros
+│   ├── clipped-swinsian.kmmacros
 │   └── SETUP.md
 ├── config.example.toml
 ├── install.sh

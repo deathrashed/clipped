@@ -1,19 +1,45 @@
 # Clipped CLI Reference
 
-## Overview
-This document describes the available Clipped commands and example workflows.
+## Templates
 
-## Command groups
+| Name | Label | Size | Ideal For |
+| --- | --- | --- | --- |
+| cinematic | Cinematic (21:9 Ken Burns) | 1920×816 | YouTube, Video essays, Archive |
+| fade | Fade (Crossfade Sequence) | 1080×1080 | Full-track previews, Story posts, YouTube |
+| minimal | Minimal (Dark Typographic) | 1080×1080 | Twitter/X, Archive, Bandcamp |
+| reel | Dynamic Reel (Logo -> Spinner -> Artist) | 1080×1920 | Instagram Reels, TikTok, YouTube Shorts |
+| spinner | Spinner (Rotating Record) | 1080×1080 | Instagram Feed, Archive, Twitter/X |
+| static | Static (Centered Artwork) | 1080×1080 | Archive uploads, SoundCloud, Bandcamp |
+| vertical | Vertical Spinner (9:16 Reel) | 1080×1920 | Instagram Reels, TikTok, YouTube Shorts |
+| vertical_wave | Vertical Wave (9:16 Reel + Circular Wave) | 1080×1920 | Instagram Reels, TikTok, YouTube Shorts |
+| waveformbar | Waveform Bar (Live Audio Visual) | 1080×1080 | Instagram Feed, Twitter/X, SoundCloud, YouTube |
 
-- `clipped audio` — clip audio from a file or YouTube URL
-- `clipped video` — generate video from audio using templates and platforms
-- `clipped templates` — list available video templates
-- `clipped platforms` — list supported platform profiles
-- `clipped config` — manage Clipped configuration
-- `clipped doctor` — run diagnostics and verify the environment
-- `clipped test` — run QA smoke tests for templates
-- `clipped batch` — process multiple audio files in a directory
-- `clipped docs` — generate CLI documentation from live config
+## Platforms
+
+| Name | Label | Size | Max Duration | Format |
+| --- | --- | --- | --- | --- |
+| default | Default (1:1 Square) | 1080×1080 | none | mp4 |
+| instagram | Instagram Reel (9:16) | 1080×1920 | 60s | mp4 |
+| tiktok | TikTok (9:16) | 1080×1920 | 60s | mp4 |
+| youtube_shorts | YouTube Shorts (9:16) | 1080×1920 | 60s | mp4 |
+| vertical_full | Vertical Full Length (9:16) | 1080×1920 | none | mp4 |
+| twitter | Twitter / X (16:9) | 1280×720 | 140s | mp4 |
+| discord | Discord (MP3, <8 MB) | -×- | none | mp3 |
+| youtube | YouTube / Archive (16:9) | 1920×1080 | none | mp4 |
+| bandcamp | Bandcamp / SoundCloud (1:1) | 1080×1080 | none | mp4 |
+
+## Presets
+
+| Preset | Overrides |
+| --- | --- |
+| instagram | default_template=reel, default_platform=instagram |
+| tiktok | default_template=reel, default_platform=tiktok |
+| youtube_shorts | default_template=reel, default_platform=youtube_shorts |
+| vertical_full | default_template=reel, default_platform=vertical_full |
+| archive | default_template=static, default_platform=default |
+| cinematic | default_template=cinematic, default_platform=youtube |
+| discord | default_platform=discord |
+| waveformbar | default_template=waveformbar, default_platform=default |
 
 ## Examples
 
@@ -21,28 +47,11 @@ This document describes the available Clipped commands and example workflows.
 clipped --help
 clipped audio track.mp3 30 45
 clipped video myaudio.mp3 --template spinner --platform default
-clipped video vertical myaudio.mp3 --preset instagram
+clipped video myaudio.mp3 --template reel --platform instagram --start 2:45 --end 3:45
+clipped video myaudio.mp3 --template reel --platform vertical_full
 clipped config show
-clipped config edit
 clipped doctor
 clipped test templates sample.mp3 --dry-run
 clipped batch video --input-dir ./audio --template spinner --platform default --dry-run
 clipped watch --input-dir ./audio --type video --dry-run
-clipped docs generate --output docs/CLI.md
 ```
-
-## Templates and platforms
-Use `clipped templates` and `clipped platforms` to see the current available options.
-
-## Configuration
-The config file is stored at `~/.config/clipped/config.toml`.
-
-### Config commands
-- `clipped config show` — display current settings
-- `clipped config edit` — open the config file in your editor
-- `clipped config init` — create a default config file if missing
-- `clipped config reset` — reset config to defaults
-
-## Notes
-- `--dry-run` is supported for batch, test, and docs generation commands.
-- Watch mode polls a directory and processes new audio files as they appear.

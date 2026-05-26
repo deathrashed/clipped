@@ -13,9 +13,9 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from typing import Optional
 
 from rich.console import Console
+from rich.markup import escape
 from rich.progress import (
     BarColumn,
     Progress,
@@ -51,7 +51,8 @@ def run_ffmpeg_with_progress(
     """
     if dry_run:
         console.print("\n[bold cyan]── Dry Run: FFmpeg Command ──[/bold cyan]")
-        console.print(" ".join(f'"{a}"' if " " in a else a for a in cmd))
+        command = " ".join(f'"{a}"' if " " in a else a for a in cmd)
+        console.print(escape(command))
         console.print("[bold cyan]────────────────────────────[/bold cyan]\n")
         return
 

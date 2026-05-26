@@ -6,7 +6,6 @@ from typing import Optional
 import typer
 from rich.console import Console
 
-from .platforms import get_profile
 from .templates import REGISTRY
 from .video import process_video
 
