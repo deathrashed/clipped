@@ -33,14 +33,14 @@ The Elements Registry is a unified, categorized system of visual building blocks
 | oscilloscope | visualizers | core | Audio waveform oscilloscope |
 | pulsar | visualizers | core | Audio-reactive pulse rings |
 | circle | visualizers | core | Audio-reactive circle pattern |
+| pixelation | effects/texture | experimental | CSS pixelation / mosaic block effect using backdrop-filter blur and block grid overlay |
+| ferro-fluid | visualizers | experimental | Audio-reactive SVG blob field with organic morphing |
+| strobe | effects/glow | disabled | Frame-interval flash effect — disabled by policy |
 
 ### Stubbed (not implemented, `implemented: false`)
 
 | ID | Category | Tier | Notes |
 |----|----------|------|-------|
-| ferro-fluid | visualizers | experimental | Component exists but is a placeholder wrapper |
-| pixelation | effects/texture | experimental | Component returns null in ElementStack |
-| strobe | effects/glow | disabled | `() => null` stub, disabled by policy |
 | tone-mapping | effects/color | core | Component returns null |
 | text-3d | shapes3d | premium | Returns null |
 | box-3d | shapes3d | premium | Returns null |
@@ -60,8 +60,8 @@ The Elements Registry is a unified, categorized system of visual building blocks
 
 | Status | Count |
 |--------|-------|
-| Implemented | 25 |
-| Stubbed (not implemented) | 18 |
+| Implemented | 28 |
+| Stubbed (not implemented) | 15 |
 | **Total registered** | **43** |
 
 ## Architecture
