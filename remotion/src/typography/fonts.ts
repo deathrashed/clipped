@@ -20,7 +20,6 @@ const localFonts = [
 // Load local fonts programmatically in the browser environment
 if (typeof window !== "undefined" && typeof window.FontFace !== "undefined") {
   localFonts.forEach((fontSpec) => {
-    const handle = delayRender(`Loading font ${fontSpec.name} weight ${fontSpec.weight}`);
     const font = new FontFace(
       fontSpec.name,
       `url(${staticFile(fontSpec.src)})`,
@@ -28,13 +27,12 @@ if (typeof window !== "undefined" && typeof window.FontFace !== "undefined") {
     );
     font.load()
       .then((loadedFace) => {
-        document.fonts.add(loadedFace);
-        continueRender(handle);
+        try {
+          document.fonts.add(loadedFace);
+        } catch (e) {}
       })
       .catch((err) => {
-        // Fail gracefully to system fallbacks
         console.warn(`Failed to load font ${fontSpec.name} (${fontSpec.src}) gracefully falling back.`, err);
-        continueRender(handle);
       });
   });
 }
