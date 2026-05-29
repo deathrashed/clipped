@@ -7,6 +7,7 @@ import { FallbackArtwork } from "../artwork/FallbackArtwork";
 import { MetadataBlock } from "../components/Metadata";
 import { BeatFlash, PostFxStack, ReactiveHalo, ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight } from "../effects";
 import { SpectrumBars, WaveRibbon } from "../visualizers";
+import { ElementStack } from "../elements";
 import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
 import { Captions } from "../components/lyrics/Captions";
@@ -150,6 +151,15 @@ export const GallerySquare = (props: ClippedRenderProps) => {
         }}
       />
       
+      {/* ── Element Stack (effects, lights, depth, backgrounds, modifiers) ── */}
+      <ElementStack
+        elements={[
+          ...(scenePreset.background || []),
+          ...(scenePreset.effects || []),
+          ...(scenePreset.lights || []),
+        ]}
+      />
+
       {/* ── Cinematic PostFX Overlays ── */}
       <ColorGrade preset={scenePreset.colorGrade} />
       <AtmosphereLayer mode={scenePreset.atmosphere} intensity={1} />

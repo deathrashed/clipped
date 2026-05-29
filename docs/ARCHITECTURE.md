@@ -287,3 +287,35 @@ Add a top-level `remotion/` React/TypeScript app as Clipped's primary video rend
 **Negative:**
 - Adds Node/npm and pinned Remotion package dependencies.
 - Render diagnostics must cover both Python/FFmpeg and Remotion/Node.
+
+## ADR-0012: Categorized Elements Registry
+
+### Status
+Accepted
+
+### Context
+Templates mix effects, visualizers, backgrounds, and lights in ad-hoc patterns. Adding a new effect required edits to every template, and there was no shared catalog of what visual building blocks exist or are safe to use.
+
+### Decision
+Create `remotion/src/elements/` with a registry of 40+ categorized element definitions (text, visualizers, effects/glow, effects/color, effects/texture, effects/lens, depth, shapes3d, backgrounds, lights, scene3d). A single `<ElementStack>` component accepts `ElementInstance[]` arrays and renders only safe, implemented, opt-in-compliant elements. Scene presets include the element arrays, wired into all 6 templates.
+
+Each element definition includes: id, label, category, group, tier (core/premium/experimental/disabled), implementation status, defaultProps, full inspector schema (Transform, Appearance, element-specific controls), and safety metadata. Default props are merged at render time via `applyElementDefaults()` in `ElementStack.tsx`.
+
+### Modifier System
+Every element supports an optional `effects: EffectModifierInstance[]` array. Modifiers (glow, blur, shadow, stroke, adjust, dither, pixelate, wobble) are per-element wrappers rendered by `<ModifierWrapper>`. Global postFX (color grading, vignette, etc.) remain scene-level. Modifier definitions live in `modifiers/modifier-types.ts` with full inspector schemas and tier policies.
+
+### Inspector Schema
+Controls are defined as `InspectorSection[]` arrays on each `ElementDefinition`. Shared sections (`transformSection`, `appearanceSection`) are exported from `inspector.ts`. Each control declares its type (slider, color, number, select, toggle), min/max/step ranges, keyframeability, and whether it's optional.
+
+### Consequences
+**Positive:**
+- One declarative render path for all templates.
+- New effects only need a registry entry + component case; template wiring is automatic.
+- Clear tier/opt-in system prevents accidental strobe/bloom/3D without explicit flags.
+- Dev warnings for unknown elements.
+
+**Negative:**
+- Template-specific element positioning still requires manual layout.
+- 3D elements are stub-only; full Three.js integration deferred.
+- `ElementStack`'s switch-based dispatch needs refactoring if element count grows past ~50.
+- See `docs/ELEMENTS-REGISTRY.md` for full element catalog.

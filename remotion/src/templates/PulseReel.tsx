@@ -22,6 +22,7 @@ import { cleanText, compactMeta } from "../lib/text";
 import { resolveScenePreset } from "../presets/scene-presets";
 import { ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight, BeatFlash } from "../effects";
 import { RadialBars, SpectrumBars, WaveRibbon } from "../visualizers";
+import { ElementStack } from "../elements";
 import { FallbackArtwork } from "../artwork/FallbackArtwork";
 import { LumaFade } from "../transitions/LumaFade";
 import { BlurDissolve } from "../transitions/BlurDissolve";
@@ -236,6 +237,15 @@ export const PulseReel = (props: ClippedRenderProps) => {
           peakOpacity={0.7}
         />
       ) : null}
+
+      {/* ── Element Stack (effects, lights, depth, backgrounds) ── */}
+      <ElementStack
+        elements={[
+          ...(scenePreset.background || []),
+          ...(scenePreset.effects || []),
+          ...(scenePreset.lights || []),
+        ]}
+      />
 
       {/* ── Cinematic PostFX Overlays ── */}
       <ColorGrade preset={scenePreset.colorGrade} />

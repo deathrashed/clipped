@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "templateId": "gallery_square",
+  "compositionId": "gallery-square",
+  "platformName": "default",
+  "width": 1080,
+  "height": 1080,
+  "fps": 30,
+  "durationSeconds": 8,
+  "durationFrames": 240,
+  "assets": {
+    "audioSrc": "jobs/1780008199-b9e1bf844f/audio.wav",
+    "coverSrc": "jobs/1780008199-b9e1bf844f/cover.jpg",
+    "logoSrc": "jobs/1780008199-b9e1bf844f/logo.png",
+    "artistImageSrc": "jobs/1780008199-b9e1bf844f/artist.jpg",
+    "backgroundSrc": null,
+    "lyrics": null,
+    "lyricsJson": null,
+    "extraImageSrcs": [
+      "jobs/1780008199-b9e1bf844f/extra-0.jpg",
+      "jobs/1780008199-b9e1bf844f/extra-1.jpg"
+    ],
+    "mediaSrcs": []
+  },
+  "metadata": {
+    "artist": "Disincarnate",
+    "title": "Entranced",
+    "album": "Dreams of the Carrion Kind",
+    "trackNumber": 7,
+    "year": "1993",
+    "genre": "Death Metal",
+    "sourceFilename": "07. Entranced.mp3"
+  },
+  "audio": {
+    "fadeIn": 0.5,
+    "fadeOut": 0.5,
+    "volume": 1,
+    "originalStart": 63.0,
+    "preparedDuration": 8
+  },
+  "options": {
+    "style": "classic",
+    "motion": "medium",
+    "waveform": "none",
+    "palette": "auto",
+    "scene_pack": "art_focus",
+    "effects": "texture",
+    "captions": "off",
+    "mediaMode": "background",
+    "cleanLogo": true,
+    "logoBg": "auto",
+    "logoFuzz": 15,
+    "seed": ""
+  },
+  "encoding": {
+    "codec": "libx264",
+    "crf": 23,
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "pixelFormat": "yuv420p"
+  }
+}
