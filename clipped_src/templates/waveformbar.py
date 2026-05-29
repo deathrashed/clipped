@@ -35,6 +35,7 @@ class WaveformBarTemplate(VideoTemplate):
         description="Album art with an animated live waveform bar at the bottom.",
         aspect=(_W, _H),
         ideal_for=["Instagram Feed", "Twitter/X", "SoundCloud", "YouTube"],
+        safe_duration_hint=30.0,
     )
 
     def get_inputs(self, assets: MediaAssets) -> list[str]:

@@ -183,18 +183,59 @@ class MediaAssets:
       - rich track metadata via mutagen → ffprobe fallback
     """
 
-    def __init__(self, audio_path: Path):
+    def __init__(
+        self,
+        audio_path: Path,
+        cover_override: str | None = None,
+        logo_override: str | None = None,
+        artist_override: str | None = None,
+        background_override: str | None = None,
+        extra_images: list[str] | None = None,
+        media: list[str] | None = None,
+        lyrics_override: str | None = None,
+    ):
         self.audio_path = audio_path.resolve()
         self.album_dir  = self.audio_path.parent
         self.artist_dir = self.album_dir.parent
 
-        # Image assets
-        self.cover  = self._find(["cover", "front", "folder", "album", "art"], self.album_dir)
-        self.logo   = self._find(["logo"],                              self.artist_dir)
-        self.artist = self._find(["artist", "band", "photo"],           self.artist_dir)
+        # Rich metadata read first to allow iTunes / artist fetching
+        self._meta = read_metadata(self.audio_path)
+
+        # Process overrides (downloads/local paths)
+        self.cover = self._resolve_path_or_url(cover_override) if cover_override else self._find(["cover", "front", "folder", "album", "art"], self.album_dir)
+        self.logo = self._resolve_path_or_url(logo_override) if logo_override else self._find(["logo"], self.artist_dir)
+        self.artist = self._resolve_path_or_url(artist_override) if artist_override else self._find(["artist", "band", "photo"], self.artist_dir)
+        self.background = self._resolve_path_or_url(background_override) if background_override else None
+        
+        self.extra_images = [p for p in (self._resolve_path_or_url(u) for u in (extra_images or [])) if p]
+        self.media = [p for p in (self._resolve_path_or_url(u) for u in (media or [])) if p]
+        self.lyrics = self._resolve_path_or_url(lyrics_override) if lyrics_override else None
+
+        # Auto-fetch logo/artist on-the-fly if missing and artist folder exists
+        if self.artist_dir and self.artist_dir.exists() and (not self.logo or not self.artist):
+            try:
+                from .artist_image_fetcher import ArtistImageFetcher
+                fetcher = ArtistImageFetcher(verbose=False)
+                fetcher.process_artist(
+                    artist_name=self.artist_name or self.artist_dir.name,
+                    out_dir=self.artist_dir,
+                    artist_folder=self.artist_dir,
+                )
+                if not self.logo:
+                    self.logo = self._find(["logo"], self.artist_dir)
+                if not self.artist:
+                    self.artist = self._find(["artist", "band", "photo"], self.artist_dir)
+            except Exception:
+                pass
+
+        if self.logo:
+            self.logo = self._clean_logo_background(self.logo)
 
         if not self.cover:
             self.cover = self._extract_embedded_cover()
+
+        if not self.cover:
+            self.cover = self._fetch_itunes_cover()
 
         # Fallbacks: if cover is missing in album dir, look in artist dir for anything
         if not self.cover:
@@ -202,15 +243,88 @@ class MediaAssets:
 
         # All available images for custom sequences (cover + artist images)
         self.all_images = self._find_all([self.album_dir, self.artist_dir])
+        if self.extra_images:
+            self.all_images.extend(self.extra_images)
 
-        # Rich metadata
-        self._meta = read_metadata(self.audio_path)
+        # Embedded lyrics JSON (pre-parsed for Remotion)
+        self._lyrics_json: str | None = None
+        if not self.lyrics:
+            self._lyrics_json = self._extract_embedded_lyrics()
+
+    def _clean_logo_background(self, logo_path: Path) -> Path:
+        rmbg_path = "/Users/rd/Scripts/Riley/rmbg/bin/rmbg"
+        rmbg = Path(rmbg_path).expanduser()
+        if not rmbg.exists() or not logo_path.exists():
+            return logo_path
+
+        # If it's already a transparent PNG, check mode (avoid re-running rmbg)
+        if logo_path.suffix.lower() == ".png":
+            try:
+                from PIL import Image
+                with Image.open(logo_path) as img:
+                    if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                        return logo_path
+            except Exception:
+                pass
+
+        # We'll save the cleaned logo in the same directory as logo_path, but as logo_cleaned.png
+        cleaned_path = logo_path.parent / "logo_cleaned.png"
+        if cleaned_path.exists() and cleaned_path.stat().st_size > 512:
+            return cleaned_path
+
+        cmd = [str(rmbg), "-i", str(logo_path), "-o", str(cleaned_path), "--fuzz", "15"]
+        try:
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            if res.returncode == 0 and cleaned_path.exists():
+                return cleaned_path
+        except Exception:
+            pass
+        return logo_path
+
+    def _fetch_itunes_cover(self) -> Path | None:
+        artist = self.artist_name
+        title = self.track_title
+        if not artist or not title:
+            term = self.audio_path.stem
+        else:
+            term = f"{artist} {title}"
+
+        import urllib.request
+        import urllib.parse
+        import json
+
+        try:
+            url_encoded = urllib.parse.quote_plus(term)
+            query_url = f"https://itunes.apple.com/search?term={url_encoded}&media=music&limit=1"
+            req = urllib.request.Request(
+                query_url,
+                headers={'User-Agent': 'Mozilla/5.0'}
+            )
+            with urllib.request.urlopen(req, timeout=5) as response:
+                data = json.loads(response.read().decode('utf-8'))
+
+            if data and data.get("resultCount", 0) > 0:
+                result = data["results"][0]
+                artwork_url = result.get("artworkUrl100")
+                if artwork_url:
+                    high_res_url = artwork_url.replace("100x100bb.jpg", "1000x1000bb.jpg")
+                    if "100x100" in high_res_url:
+                        high_res_url = high_res_url.replace("100x100", "1000x1000")
+                    return self._download_media(high_res_url)
+        except Exception:
+            pass
+        return None
 
     # ── Convenience properties ────────────────────────────────────────────────
 
     @property
     def artist_name(self) -> str:
         return self._meta.artist
+
+    @property
+    def lyrics_json(self) -> str | None:
+        """Pre-parsed JSON lyrics for Remotion. None if not available."""
+        return self._lyrics_json
 
     @property
     def album_name(self) -> str:
@@ -251,6 +365,51 @@ class MediaAssets:
         return "  ".join(parts) if parts else self.audio_path.name
 
     # ── Internal helpers ──────────────────────────────────────────────────────
+
+    def _resolve_path_or_url(self, path_or_url: str) -> Path | None:
+        if not path_or_url:
+            return None
+        if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
+            return self._download_media(path_or_url)
+        p = Path(path_or_url).expanduser().resolve()
+        return p if p.exists() else None
+
+    def _download_media(self, url: str) -> Path | None:
+        import hashlib
+        import urllib.request
+        from urllib.parse import urlparse
+        
+        cache_dir = Path("~/.cache/clipped/downloads").expanduser()
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        
+        parsed = urlparse(url)
+        if "youtube.com" in parsed.netloc or "youtu.be" in parsed.netloc:
+            url_hash = hashlib.md5(url.encode()).hexdigest()[:10]
+            out_path = cache_dir / f"yt_{url_hash}.mp4"
+            if out_path.exists():
+                return out_path
+            try:
+                subprocess.run(
+                    ["yt-dlp", "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4", "-o", str(out_path), url],
+                    check=True, capture_output=True
+                )
+                return out_path
+            except subprocess.CalledProcessError:
+                return None
+        
+        url_hash = hashlib.md5(url.encode()).hexdigest()[:10]
+        ext = Path(parsed.path).suffix or ".jpg"
+        out_path = cache_dir / f"dl_{url_hash}{ext}"
+        if out_path.exists():
+            return out_path
+            
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                out_path.write_bytes(response.read())
+            return out_path
+        except Exception:
+            return None
 
     def _find(self, names: list[str], directory: Path) -> Path | None:
         if not directory.exists() or not directory.is_dir():
@@ -328,11 +487,111 @@ class MediaAssets:
         except Exception:
             return None
 
+    def _extract_embedded_lyrics(self) -> str | None:
+        """
+        Extract synced or plain lyrics from audio metadata tags.
+        Returns a JSON string of SubtitleLine objects, or None if no lyrics found.
+
+        Checks (in order):
+          - ID3 USLT (unsynced) or SYLT (synced) tags in MP3
+          - Vorbis 'lyrics' comment (FLAC / OGG)
+          - MP4 '©lyr' atom (M4A / MP4)
+        """
+        try:
+            from mutagen import File as MutagenFile
+        except ImportError:
+            return None
+
+        raw_text: str | None = None
+        try:
+            f = MutagenFile(str(self.audio_path))
+            if f is None or not getattr(f, "tags", None):
+                return None
+
+            tags = f.tags
+
+            # -- ID3 SYLT (synced lyrics) --
+            if hasattr(tags, "getall"):
+                sylt_frames = tags.getall("SYLT")
+                if sylt_frames:
+                    frame = sylt_frames[0]
+                    lines = []
+                    data = getattr(frame, "text", [])
+                    for text, ms in data:
+                        start = ms / 1000.0
+                        end = start + 3.0  # guess 3s unless next line resets it
+                        lines.append({"start": start, "end": end, "text": text.strip()})
+                    # Patch end times from next start
+                    for i in range(len(lines) - 1):
+                        lines[i]["end"] = lines[i + 1]["start"]
+                    if lines:
+                        return json.dumps(lines)
+
+            # -- ID3 USLT (unsynced lyrics) --
+            if hasattr(tags, "getall"):
+                uslt_frames = tags.getall("USLT")
+                if uslt_frames:
+                    raw_text = getattr(uslt_frames[0], "text", "")
+
+            # -- Vorbis LYRICS comment --
+            if raw_text is None and hasattr(tags, "get"):
+                for key in ("lyrics", "LYRICS"):
+                    val = tags.get(key)
+                    if val:
+                        raw_text = str(val[0]) if isinstance(val, list) else str(val)
+                        break
+
+            # -- MP4 ©lyr atom --
+            if raw_text is None and hasattr(tags, "get"):
+                lyr = tags.get("\xa9lyr") or tags.get("©lyr")
+                if lyr:
+                    raw_text = str(lyr[0]) if isinstance(lyr, list) else str(lyr)
+
+        except Exception:
+            return None
+
+        if not raw_text or not raw_text.strip():
+            return None
+
+        # If it looks like LRC format, parse it
+        if "[" in raw_text and "]" in raw_text and ":" in raw_text:
+            return self._parse_lrc_to_json(raw_text)
+
+        # Plain-text lyrics: split by line, each line gets a ~3s window
+        plain_lines = [l.strip() for l in raw_text.splitlines() if l.strip()]
+        if not plain_lines:
+            return None
+        result = []
+        for i, text in enumerate(plain_lines):
+            result.append({"start": i * 3.0, "end": (i + 1) * 3.0, "text": text})
+        return json.dumps(result)
+
+    @staticmethod
+    def _parse_lrc_to_json(lrc_text: str) -> str | None:
+        """Parse LRC format to JSON SubtitleLine array."""
+        import re
+        lines = lrc_text.splitlines()
+        time_re = re.compile(r"\[(\d+):(\d+\.?\d*)\](.*)")
+        result = []
+        for line in lines:
+            m = time_re.match(line.strip())
+            if m:
+                secs = int(m.group(1)) * 60 + float(m.group(2))
+                text = m.group(3).strip()
+                if text:
+                    result.append({"start": secs, "end": secs, "text": text})
+        # patch end times
+        for i in range(len(result) - 1):
+            result[i]["end"] = result[i + 1]["start"]
+        if result:
+            result[-1]["end"] = result[-1]["start"] + 5.0
+        return json.dumps(result) if result else None
+
 
 # ── Convenience wrapper ───────────────────────────────────────────────────────
 
-def resolve_assets(filepath: str) -> MediaAssets:
-    return MediaAssets(Path(filepath))
+def resolve_assets(filepath: str, **kwargs) -> MediaAssets:
+    return MediaAssets(Path(filepath), **kwargs)
 
 
 # ── Output Path Generation ──────────────────────────────────────────────────

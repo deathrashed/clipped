@@ -1,0 +1,191 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "name": "pulse_reel",
+      "label": "Pulse Reel",
+      "description": "Feature-rich vertical reel with logo, record motion, audio-reactive accents, metadata, and cover reveal.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "pulse-reel",
+      "aspect": [1080, 1920],
+      "ideal_for": ["Instagram Reels", "TikTok", "YouTube Shorts", "vertical_full"],
+      "capabilities": ["audio_visualization", "transitions", "motion_blur", "captions", "logo", "artist_image", "palette", "shared_effects"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "radial",
+        "palette": "auto",
+        "scene_pack": "story",
+        "effects": "texture",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "vhs", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "radial", "ring", "ribbon", "flower", "particles"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "scene_pack": ["story", "art_focus", "logo_first", "lyrics", "media"],
+        "effects": ["clean", "texture", "grain", "film", "crt", "vhs", "metal_vhs", "neon"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "gallery_square",
+      "label": "Gallery Square",
+      "description": "Polished square artwork presentation with blurred cover background, framed art, tasteful motion, and optional sequence.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "gallery-square",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Feed", "Bandcamp", "SoundCloud", "Archive"],
+      "capabilities": ["transitions", "motion_blur", "captions", "palette", "artist_image", "gallery", "shared_effects"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "scene_pack": "art_focus",
+        "effects": "texture",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "ribbon"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "scene_pack": ["art_focus", "gallery", "minimal", "record_store", "media"],
+        "effects": ["clean", "texture", "grain", "film", "crt", "vhs", "neon"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "record_square",
+      "label": "Record Square",
+      "description": "Square rotating record composition with blurred artwork field, radial accents, and stronger metadata hierarchy.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "record-square",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Feed", "Archive", "Twitter/X", "Bandcamp"],
+      "capabilities": ["audio_visualization", "motion_blur", "palette", "record_spin", "shared_effects"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "ring",
+        "palette": "auto",
+        "scene_pack": "art_focus",
+        "effects": "texture",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "vhs", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "ring", "radial", "ribbon", "flower"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "scene_pack": ["art_focus", "record", "minimal", "vinyl", "media"],
+        "effects": ["clean", "texture", "grain", "film", "crt", "vhs", "metal_vhs", "neon"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "fluid_scene",
+      "label": "Fluid Scene",
+      "description": "Square metallic fluid/blob center scene with black star field background.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "fluid-scene",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Feed", "Archive"],
+      "capabilities": ["audio_visualization", "motion_blur", "palette", "shared_effects"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "scene_pack": "art_focus",
+        "effects": "clean",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "vhs", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "radial", "ring", "ribbon", "flower", "particles"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "scene_pack": ["art_focus", "media"],
+        "effects": ["clean", "texture", "grain", "film", "crt", "vhs", "metal_vhs", "neon"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "metal_vhs",
+      "label": "Glitch-Metal VHS",
+      "description": "Square/vertical glitch-metal VHS aesthetic with brutal uppercase typography, scanlines, and VHS tears.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "metal-vhs",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Reels", "TikTok", "Instagram Feed", "Archive"],
+      "capabilities": ["audio_visualization", "motion_blur", "palette", "captions", "shared_effects"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "bars",
+        "palette": "auto",
+        "scene_pack": "art_focus",
+        "effects": "metal_vhs",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "vhs", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "radial", "ring", "ribbon", "flower", "particles"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "scene_pack": ["art_focus", "media"],
+        "effects": ["clean", "texture", "grain", "film", "crt", "vhs", "metal_vhs", "neon"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "premium_card",
+      "label": "Premium Card",
+      "description": "Clean square framed album cover with background blur, band logo intro reveal, and fading metadata.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "premium-card",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Feed", "Archive", "Bandcamp"],
+      "capabilities": ["palette", "captions", "logo"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "scene_pack": "art_focus",
+        "effects": "clean",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "vhs", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "scene_pack": ["art_focus"],
+        "effects": ["clean", "texture", "grain"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    }
+  ]
+}

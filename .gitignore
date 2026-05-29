@@ -24,6 +24,18 @@ Icon
 temp_*/
 *.tmp
 *.log
+.cache/
+
+# Remotion
+remotion/node_modules/
+remotion/out/
+remotion/dist/
+remotion/public/jobs/
+remotion-research-inspiration/
+
+# Clipped Generated Output
+_audio/
+_video/
 
 # macOS
 .DS_Store

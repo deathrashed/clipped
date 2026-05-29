@@ -9,6 +9,7 @@ This file is the single source of truth for assistant guidance. Claude, Gemini, 
 - Python 3.12+
 - Typer, Rich, and Questionary for the CLI/TUI
 - FFmpeg and ffprobe for audio/video processing
+- Node, npm, Remotion, React, and TypeScript for primary video rendering
 - yt-dlp for YouTube ingestion
 - Mutagen for metadata and embedded artwork
 - Keyboard Maestro, AppleScript, and Swinsian for macOS automation
@@ -19,9 +20,11 @@ This file is the single source of truth for assistant guidance. Claude, Gemini, 
 - `clipped_src/main.py`: Typer CLI entry point and interactive TUI.
 - `clipped_src/audio.py`: local/YouTube clipping plus Swinsian mark-start/mark-end helpers.
 - `clipped_src/video.py`: video render coordinator.
+- `clipped_src/remotion_engine.py`: Python bridge that prepares Remotion render jobs and calls the local Remotion app.
 - `clipped_src/config.py`: config loading, migration, presets, and output path checks.
 - `clipped_src/platforms.py`: export profiles such as Instagram, TikTok, YouTube, Discord, and `vertical_full`.
 - `clipped_src/templates/`: FFmpeg template modules discovered by `templates/registry.py`.
+- `remotion/`: Remotion app, manifest, React templates, and reusable visual components.
 - `clipped_src/utils.py`: metadata, artwork/logo discovery, time parsing, and output-name sanitizing.
 - `bin/clipped`: local executable wrapper.
 - `macros/`: Keyboard Maestro import bundles.
@@ -32,10 +35,15 @@ This file is the single source of truth for assistant guidance. Claude, Gemini, 
 
 ## Template System
 
-Templates subclass `VideoTemplate`, set `TemplateInfo`, and are discovered dynamically through `clipped_src/templates/registry.py`.
+Templates are discovered through `clipped_src/templates/registry.py`.
+
+Remotion templates are declared in `remotion/templates.manifest.json` and rendered by the top-level `remotion/` app. FFmpeg templates subclass `VideoTemplate`, set `TemplateInfo`, and live in `clipped_src/templates/`.
 
 Active templates:
 
+- `pulse_reel`: Remotion vertical flagship reel with logo, record motion, metadata, waveform, and cover reveal.
+- `gallery_square`: Remotion square artwork presentation inspired by polished blurred-background album posts.
+- `record_square`: Remotion square spinning-record composition with radial audio accents.
 - `reel`: dynamic logo, spinner, metadata text, and final square-art reveal for vertical reels.
 - `vertical`: classic vertical spinner and square final artwork reveal.
 - `vertical_wave`: vertical spinner with circular waveform styling.
@@ -57,12 +65,16 @@ Do not add `_audio/`, `_video/`, `.venv/`, `__pycache__/`, `.DS_Store`, `.specst
 
 `assets/examples/` is the exception for committed README demo videos.
 
+Remotion job assets live under `remotion/public/jobs/` only while rendering and must stay ignored. Remotion generated output belongs in the configured video output directory unless the user explicitly passes `--output`.
+
 ## Repository Notes
 
 - `macros/clipped.kmmacros` is the main Keyboard Maestro bundle.
 - `macros/clipped-swinsian.kmmacros` is the focused Swinsian selected-track dynamic reel import.
 - Keyboard Maestro files are plist XML; validate them with `plutil -lint`.
 - FFmpeg filter graph changes need real short render checks, not only Python syntax checks.
+- Remotion composition IDs must be hyphenated (`gallery-square`), while Clipped template IDs stay underscored (`gallery_square`).
+- Remotion package versions should stay pinned and aligned across all `remotion` and `@remotion/*` packages.
 - If changing package layout, prefer the standard `src/clipped/` layout. Do not rename the package itself to `src`.
 
 ## Validation
@@ -75,6 +87,9 @@ plutil -lint macros/*.kmmacros
 ./bin/clipped doctor
 ./bin/clipped templates
 ./bin/clipped platforms
+cd remotion && npm run typecheck
+cd remotion && npm run compositions
+cd remotion && npm run still:smoke
 ```
 
 For render-sensitive template changes, run a short real render with a representative audio file and inspect at least one frame near each transition.

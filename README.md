@@ -43,9 +43,7 @@
 ```bash
 git clone https://github.com/deathrashed/clipped.git ~/Scripts/Riley/clipped
 cd ~/Scripts/Riley/clipped
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+cd remotion && npm install && cd ..
 ./install.sh
 clipped --version
 ```
@@ -54,7 +52,7 @@ The codebase lives at `~/Scripts/Riley/clipped`. Generated audio and video stay 
 
 ## Examples
 
-The dynamic reel template combines a logo intro, spinning album art, metadata text, and a final full-square album-art reveal.
+The Remotion templates are the primary video renderer. `pulse_reel` builds on the original dynamic reel idea with richer sequencing, audio-reactive accents, and stronger typography.
 
 <table>
   <tr>
@@ -66,14 +64,14 @@ The dynamic reel template combines a logo intro, spinning album art, metadata te
     <td width="50%" align="center">
       <video src="assets/examples/suicideboys-paris-reel.mp4" controls muted playsinline width="100%"></video>
       <br>
-      <strong>$uicideboy$ - Paris</strong>
+      <strong>SuicideboyS - Paris</strong>
     </td>
   </tr>
 </table>
 
 ```bash
-clipped video "track.mp3" --template reel --platform instagram --start 2:45 --end 3:45
-clipped video "track.mp3" --template reel --platform vertical_full --start 0 --end 4:20
+clipped video "track.mp3" --template pulse_reel --platform instagram --start 2:45 --end 3:45
+clipped video "track.mp3" --template gallery_square --platform default --start 0 --end 4:20
 ```
 
 ## What It Does
@@ -81,7 +79,7 @@ clipped video "track.mp3" --template reel --platform vertical_full --start 0 --e
 | Area | Details |
 | --- | --- |
 | Audio clipping | Clip local files or YouTube URLs by seconds or `M:SS` timestamps. |
-| Video rendering | Generate square, vertical, cinematic, waveform, spinner, and dynamic reel videos through FFmpeg. |
+| Video rendering | Generate Remotion-first reels and square templates, with FFmpeg kept for legacy templates and audio-only exports. |
 | Metadata | Reads track, artist, cover art, folder images, and logo assets where available. |
 | Platform exports | Apply size, duration, and format profiles for Instagram, TikTok, YouTube, Discord, Twitter/X, Bandcamp, and full-length vertical reels. |
 | Automation | Includes Keyboard Maestro macros for Swinsian, Finder, clipboard URLs, and prompt-driven reel creation. |
@@ -105,7 +103,8 @@ clipped audio "https://youtube.com/watch?v=..." 0:30 1:15
 ### Video Render
 
 ```bash
-clipped video "track.mp3" --template reel --platform instagram --start 2:45 --end 3:45
+clipped video "track.mp3" --template pulse_reel --platform instagram --start 2:45 --end 3:45
+clipped video "track.mp3" --template gallery_square --platform default --style cinematic --waveform bars
 clipped video "clip.mp3" --template spinner --platform default
 clipped video "track.mp3" --template vertical_wave --platform vertical_full --dry-run
 ```
@@ -125,6 +124,9 @@ clipped templates
 
 | Name | Label | Size | Best For |
 | --- | --- | --- | --- |
+| `pulse_reel` | Pulse Reel | 1080x1920 | Remotion vertical reels for Instagram, TikTok, Shorts, and `vertical_full` |
+| `gallery_square` | Gallery Square | 1080x1080 | Polished Remotion square artwork posts and archive clips |
+| `record_square` | Record Square | 1080x1080 | Remotion spinning-record posts with radial audio accents |
 | `reel` | Dynamic Reel (Logo -> Spinner -> Artist) | 1080x1920 | Instagram Reels, TikTok, YouTube Shorts, long vertical previews with `vertical_full` |
 | `vertical` | Vertical Spinner | 1080x1920 | Classic vertical album-art spinner and square final artwork reveal |
 | `vertical_wave` | Vertical Wave | 1080x1920 | Vertical spinner with circular audio-reactive waveform styling |
@@ -191,19 +193,22 @@ copy_to_clipboard = true
 auto_fade         = true
 fade_duration     = 0.5
 spinner_speed     = 0.5
-default_template  = "spinner"
+default_template  = "gallery_square"
 default_platform  = "default"
+remotion_style    = "classic"
+remotion_motion   = "medium"
+remotion_waveform = "radial"
 ```
 
 Named presets can override the general defaults:
 
 ```toml
 [preset.instagram]
-default_template = "reel"
+default_template = "pulse_reel"
 default_platform = "instagram"
 
 [preset.vertical_full]
-default_template = "reel"
+default_template = "pulse_reel"
 default_platform = "vertical_full"
 ```
 
@@ -221,6 +226,7 @@ default_platform = "vertical_full"
 │   ├── config.py
 │   ├── main.py
 │   ├── platforms.py
+│   ├── remotion_engine.py
 │   ├── video.py
 │   └── templates/
 │       ├── cinematic.py
@@ -237,6 +243,10 @@ default_platform = "vertical_full"
 │   ├── clipped-swinsian.kmmacros
 │   └── SETUP.md
 ├── config.example.toml
+├── remotion/
+│   ├── package.json
+│   ├── templates.manifest.json
+│   └── src/
 ├── install.sh
 └── README.md
 ```
@@ -248,18 +258,17 @@ default_platform = "vertical_full"
 | `clipped doctor` | Verify FFmpeg, config, templates, platform profiles, and paths. |
 | `clipped config` | View or update `~/.config/clipped/config.toml`. |
 | `clipped test templates` | Smoke-test installed templates against a sample audio file. |
+| `clipped remotion studio` | Open Remotion Studio for local template development. |
+| `clipped remotion doctor` | Run Remotion typecheck, composition listing, and still smoke render. |
 | `clipped batch` | Process directories of audio or video inputs. |
 | `clipped watch` | Watch a folder and process new audio files. |
 | `clipped docs generate` | Regenerate CLI docs from the current command surface. |
 
 ## Adding a Template
 
-1. Create `clipped_src/templates/mytemplate.py`.
-2. Subclass `VideoTemplate`.
-3. Set `info = TemplateInfo(...)`.
-4. Implement `get_inputs()` and `get_filter_graph()`.
-5. Add the template to `REGISTRY` in `clipped_src/templates/registry.py`.
-6. Run `clipped templates` and a short smoke render.
+For Remotion templates, add a manifest entry in `remotion/templates.manifest.json`, add the React composition in `remotion/src/templates/`, and compose from the shared Remotion components. Run `clipped templates`, `cd remotion && npm run typecheck`, and a short smoke render.
+
+For legacy FFmpeg templates, create `clipped_src/templates/mytemplate.py`, subclass `VideoTemplate`, implement `get_inputs()` and `get_filter_graph()`, then run `clipped templates` and a short smoke render.
 
 ## Troubleshooting
 
@@ -270,6 +279,7 @@ default_platform = "vertical_full"
 | Reel is trimmed to 60 seconds | Use `--platform vertical_full` for vertical reels without the Instagram/TikTok duration cap. |
 | Keyboard Maestro macro fails instantly | Open the macro action and confirm `CLIPPED_BIN` points to `~/Scripts/Riley/clipped/bin/clipped`. |
 | FFmpeg hangs or fails | Run `clipped doctor`, then retry with `--dry-run` to inspect the generated FFmpeg command. |
+| Remotion render fails before starting | Run `cd remotion && npm install`, then `clipped remotion doctor`. |
 
 ---
 

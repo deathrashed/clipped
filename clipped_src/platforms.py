@@ -35,7 +35,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1080,
         max_duration=None, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["spinner", "static", "minimal", "fade"],
+        ideal_templates=["gallery_square", "record_square", "spinner", "static", "minimal", "fade"],
     ),
     "instagram": PlatformProfile(
         name="instagram",
@@ -43,7 +43,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["reel", "vertical", "vertical_wave"],
+        ideal_templates=["pulse_reel", "reel", "vertical", "vertical_wave"],
         notes="Clips longer than 60s will be trimmed.",
     ),
     "tiktok": PlatformProfile(
@@ -52,7 +52,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["reel", "vertical", "vertical_wave"],
+        ideal_templates=["pulse_reel", "reel", "vertical", "vertical_wave"],
     ),
     "youtube_shorts": PlatformProfile(
         name="youtube_shorts",
@@ -60,7 +60,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["reel", "vertical", "vertical_wave"],
+        ideal_templates=["pulse_reel", "reel", "vertical", "vertical_wave"],
     ),
     "vertical_full": PlatformProfile(
         name="vertical_full",
@@ -68,7 +68,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=None, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["reel", "vertical", "vertical_wave"],
+        ideal_templates=["pulse_reel", "reel", "vertical", "vertical_wave"],
         notes="No duration cap. Useful for local exports and long-form vertical reels.",
     ),
     "twitter": PlatformProfile(
@@ -78,7 +78,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         max_duration=140, max_size_mb=512,
         output_format="mp4",
         crf=26,
-        ideal_templates=["spinner", "static", "minimal"],
+        ideal_templates=["record_square", "gallery_square", "spinner", "static", "minimal"],
     ),
     "discord": PlatformProfile(
         name="discord",
@@ -96,7 +96,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         max_duration=None, max_size_mb=None,
         output_format="mp4",
         crf=18,
-        ideal_templates=["cinematic", "fade"],
+        ideal_templates=["gallery_square", "cinematic", "fade"],
     ),
     "bandcamp": PlatformProfile(
         name="bandcamp",
@@ -104,7 +104,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1080,
         max_duration=None, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["static", "minimal"],
+        ideal_templates=["gallery_square", "record_square", "static", "minimal"],
     ),
 }
 

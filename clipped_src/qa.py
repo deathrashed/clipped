@@ -6,7 +6,7 @@ from typing import Optional
 import typer
 from rich.console import Console
 
-from .templates import REGISTRY
+from .templates import REGISTRY, default_platform_for_template
 from .video import process_video
 
 test_app = typer.Typer(help="Quality assurance and smoke test commands.")
@@ -14,11 +14,7 @@ console = Console()
 
 
 def _default_platform_for_template(template: str) -> str:
-    if template in {"vertical", "vertical_wave", "reel"}:
-        return "instagram"
-    if template == "cinematic":
-        return "youtube"
-    return "default"
+    return default_platform_for_template(template)
 
 
 @test_app.command("templates")

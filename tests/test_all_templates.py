@@ -19,7 +19,7 @@ def run_test(template: str, src: str) -> bool:
         platform = "youtube"
 
     cmd = [
-        ".venv/bin/python", "-m", "clipped_src.main", 
+        os.path.expanduser("~/Scripts/.config/python/run.sh"), "-m", "clipped_src.main", 
         "video", src,
         "--template", template, 
         "--start", "00:30", 

@@ -16,21 +16,25 @@ else
     echo "ℹ️ Config already exists at $CONFIG_DIR/config.toml"
 fi
 
-# 2. Setup virtual environment
-if [[ ! -d ".venv" ]]; then
-    echo "📦 Creating Python virtual environment..."
-    python3 -m venv .venv
+# 2. Setup shared python environment
+echo "📦 Installing/updating dependencies in shared runtime..."
+GLOBAL_REQ="$HOME/Scripts/.config/python/requirements.txt"
+if [[ -f "$GLOBAL_REQ" ]]; then
+    for req in typer rich questionary yt-dlp mutagen; do
+        if ! grep -q "^$req" "$GLOBAL_REQ"; then
+            echo "$req" >> "$GLOBAL_REQ"
+        fi
+    done
 fi
-
-echo "📦 Installing dependencies..."
-PIP_USER=false .venv/bin/pip install -q -r requirements.txt
+bash "$HOME/Scripts/.config/python/setup.sh"
 
 # 3. Setup wrapper
 cat > bin/clipped << 'EOF'
 #!/bin/zsh
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 export PYTHONPATH="$REPO_DIR"
-exec "$REPO_DIR/.venv/bin/python" -m clipped_src.main "$@"
+source "$HOME/Scripts/.config/python/env.sh"
+exec "$HOME/Scripts/.config/python/run.sh" -m clipped_src.main "$@"
 EOF
 
 chmod +x bin/clipped
@@ -39,7 +43,7 @@ echo "✅ Set up 'clipped' wrapper script."
 
 # 4. Generate completions
 echo "🚀 Setting up completions..."
-.venv/bin/python -m clipped_src.main --install-completion zsh 2>/dev/null || true
+"$HOME/Scripts/.config/python/run.sh" -m clipped_src.main --install-completion zsh 2>/dev/null || true
 
 # 5. Add to PATH
 REPO_BIN="$REPO_DIR/bin"

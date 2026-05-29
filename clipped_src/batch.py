@@ -53,6 +53,10 @@ def batch_video(
     recursive: bool = typer.Option(False, "--recursive", help="Search subdirectories."),
     template: str = typer.Option("spinner", "--template", "-t", help="Template to use for all files."),
     platform: str = typer.Option("default", help="Platform profile to use."),
+    style: str | None = typer.Option(None, "--style", help="Remotion style."),
+    motion: str | None = typer.Option(None, "--motion", help="Remotion motion level."),
+    waveform: str | None = typer.Option(None, "--waveform", help="Remotion waveform."),
+    palette: str | None = typer.Option(None, "--palette", help="Remotion palette."),
     start: str = typer.Option("0", help="Start time for all clips."),
     end: str = typer.Option(None, help="End time for all clips."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print commands without running."),
@@ -60,6 +64,16 @@ def batch_video(
     """Batch render video for audio files in a directory."""
     start_secs = parse_time(start)
     end_secs = parse_time(end) if end else None
+    extra_config = {
+        key: value
+        for key, value in {
+            "style": style,
+            "motion": motion,
+            "waveform": waveform,
+            "palette": palette,
+        }.items()
+        if value
+    } or None
     files = list(_iter_files(input_dir, pattern, recursive))
     if not files:
         console.print(f"[yellow]No files found for pattern {pattern} in {input_dir}[/yellow]")
@@ -74,6 +88,7 @@ def batch_video(
             start=start_secs,
             end=end_secs,
             dry_run=dry_run,
+            extra_config=extra_config,
         )
 
     console.print("\n[green]Batch video processing complete.[/green]")
@@ -87,6 +102,10 @@ def watch_directory(
     mode: str = typer.Option("video", "--type", help="Processing mode: audio or video."),
     template: str = typer.Option("spinner", help="Template to use for video mode."),
     platform: str = typer.Option("default", help="Platform profile to use for video mode."),
+    style: str | None = typer.Option(None, "--style", help="Remotion style."),
+    motion: str | None = typer.Option(None, "--motion", help="Remotion motion level."),
+    waveform: str | None = typer.Option(None, "--waveform", help="Remotion waveform."),
+    palette: str | None = typer.Option(None, "--palette", help="Remotion palette."),
     start: str = typer.Option("0", help="Start time for all clips."),
     end: str = typer.Option(None, help="End time for all clips."),
     interval: float = typer.Option(5.0, help="Polling interval in seconds."),
@@ -95,6 +114,16 @@ def watch_directory(
     """Watch a directory and process new audio files as they appear."""
     start_secs = parse_time(start)
     end_secs = parse_time(end) if end else None
+    extra_config = {
+        key: value
+        for key, value in {
+            "style": style,
+            "motion": motion,
+            "waveform": waveform,
+            "palette": palette,
+        }.items()
+        if value
+    } or None
     seen = set()
 
     console.print(f"[cyan]Watching {input_dir} for new audio files...[/cyan]")
@@ -119,6 +148,7 @@ def watch_directory(
                         start=start_secs,
                         end=end_secs,
                         dry_run=dry_run,
+                        extra_config=extra_config,
                     )
             time.sleep(interval)
     except KeyboardInterrupt:

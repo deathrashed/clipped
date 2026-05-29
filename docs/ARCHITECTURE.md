@@ -266,3 +266,24 @@ Do not rename the package itself to `src`; `src` should be a container directory
 
 **Negative:**
 - The package name remains slightly nonstandard until a dedicated packaging pass.
+
+## ADR-0011: Remotion-First Video Rendering
+
+### Status
+Accepted
+
+### Context
+The FFmpeg template system is reliable for utility renders, but richer motion graphics, typography, audio-reactive visuals, and reusable visual components are difficult to maintain as filter graphs.
+
+### Decision
+Add a top-level `remotion/` React/TypeScript app as Clipped's primary video renderer for new templates. Python remains the CLI/TUI, metadata resolver, platform/profile coordinator, and macOS automation layer. Remotion templates are declared in `remotion/templates.manifest.json`; `clipped_src/remotion_engine.py` prepares render props/assets and invokes the local Remotion CLI. Existing FFmpeg templates remain available as legacy templates and FFmpeg remains the audio-only/export utility path.
+
+### Consequences
+**Positive:**
+- New templates can share higher-level visual components.
+- Template options can be driven by a manifest and props JSON instead of Python filter graph code.
+- Remotion Studio gives a better design workflow for future templates.
+
+**Negative:**
+- Adds Node/npm and pinned Remotion package dependencies.
+- Render diagnostics must cover both Python/FFmpeg and Remotion/Node.
