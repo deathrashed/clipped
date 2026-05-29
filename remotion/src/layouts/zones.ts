@@ -4,7 +4,7 @@
 
 import type { AspectClass } from "./safe-zones";
 
-export type ZoneName = "centered" | "editorial-left" | "editorial-right" | "lower-third" | "poster";
+export type ZoneName = "centered" | "editorial-left" | "editorial-right" | "lower-third" | "poster" | "asymmetric-left" | "asymmetric-bottom";
 
 type ZoneFractions = {
   /** Artwork bounding box. */
@@ -44,6 +44,16 @@ const layouts: Record<ZoneName, LayoutDef> = {
     square:     { artwork: { cx: 0.50, cy: 0.50, size: 1.00 }, typography: { left: 0.08, top: 0.10, width: 0.84, align: "center" }, visualizer: { cx: 0.50, bottom: 0.07, width: 0.76 }, logo: { cx: 0.50, top: 0.05, width: 0.50 } },
     vertical:   { artwork: { cx: 0.50, cy: 0.50, size: 1.00 }, typography: { left: 0.08, top: 0.08, width: 0.84, align: "center" }, visualizer: { cx: 0.50, bottom: 0.18, width: 0.80 }, logo: { cx: 0.50, top: 0.05, width: 0.54 } },
     horizontal: { artwork: { cx: 0.50, cy: 0.50, size: 1.00 }, typography: { left: 0.08, top: 0.10, width: 0.84, align: "center" }, visualizer: { cx: 0.50, bottom: 0.05, width: 0.72 }, logo: { cx: 0.50, top: 0.05, width: 0.46 } },
+  },
+  "asymmetric-left": {
+    square:     { artwork: { cx: 0.35, cy: 0.42, size: 0.54 }, typography: { left: 0.58, top: 0.36, width: 0.36, align: "left" },   visualizer: { cx: 0.50, bottom: 0.07, width: 0.76 }, logo: { cx: 0.35, top: 0.07, width: 0.34 } },
+    vertical:   { artwork: { cx: 0.42, cy: 0.36, size: 0.60 }, typography: { left: 0.08, top: 0.68, width: 0.84, align: "left" },   visualizer: { cx: 0.50, bottom: 0.18, width: 0.80 }, logo: { cx: 0.28, top: 0.08, width: 0.40 } },
+    horizontal: { artwork: { cx: 0.32, cy: 0.44, size: 0.46 }, typography: { left: 0.56, top: 0.28, width: 0.38, align: "left" },   visualizer: { cx: 0.50, bottom: 0.06, width: 0.72 }, logo: { cx: 0.32, top: 0.06, width: 0.30 } },
+  },
+  "asymmetric-bottom": {
+    square:     { artwork: { cx: 0.50, cy: 0.36, size: 0.56 }, typography: { left: 0.08, top: 0.70, width: 0.50, align: "left" },   visualizer: { cx: 0.70, bottom: 0.08, width: 0.52 }, logo: { cx: 0.50, top: 0.07, width: 0.50 } },
+    vertical:   { artwork: { cx: 0.50, cy: 0.34, size: 0.62 }, typography: { left: 0.08, top: 0.66, width: 0.60, align: "left" },   visualizer: { cx: 0.50, bottom: 0.18, width: 0.80 }, logo: { cx: 0.50, top: 0.08, width: 0.54 } },
+    horizontal: { artwork: { cx: 0.50, cy: 0.40, size: 0.48 }, typography: { left: 0.06, top: 0.72, width: 0.48, align: "left" },   visualizer: { cx: 0.68, bottom: 0.06, width: 0.52 }, logo: { cx: 0.50, top: 0.06, width: 0.46 } },
   },
 };
 

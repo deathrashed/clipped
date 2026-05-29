@@ -64,7 +64,13 @@ export const ArtworkBackground = ({
           }}
         />
       ) : (
-        <div style={{ position: "absolute", inset: 0, backgroundColor: palette.bg }} />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: `radial-gradient(ellipse at 50% 45%, #161616 0%, ${palette.bg} 70%)`,
+          }}
+        />
       )}
       {/* Vignette gradient — dark edges, transparent center */}
       <div
