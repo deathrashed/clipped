@@ -9,7 +9,10 @@
     "still": "remotion still src/index.ts",
     "compositions": "remotion compositions src/index.ts",
     "typecheck": "tsc --noEmit",
+    "check:fonts": "node scripts/check-fonts.mjs",
     "still:smoke": "mkdir -p ../.cache/remotion-smoke && remotion still src/index.ts gallery-square ../.cache/remotion-smoke/gallery_square.png --frame=30 --props src/default-props.json",
+    "qa:stills": "mkdir -p ../.qa/production && for comp in gallery-square record-square pulse-reel fluid-scene metal-vhs premium-card; do remotion still src/index.ts $comp ../.qa/production/${comp//-/_}.png --frame=60 --props src/default-props.json; done",
+    "qa:fixtures": "sh ../scripts/render-fixtures.sh",
     "preview": "mkdir -p out && remotion render src/index.ts gallery-square out/gallery_square-preview.mp4 --props src/default-props.json --duration=120 --overwrite"
   },
   "dependencies": {

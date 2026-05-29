@@ -36,6 +36,7 @@ remotion-research-inspiration/
 # Clipped Generated Output
 _audio/
 _video/
+.qa/
 
 # macOS
 .DS_Store

@@ -1,3 +1,7 @@
+/**
+ * @deprecated Replaced by src/visualizers/SpectrumBars.tsx.
+ * Kept for reference. Import from src/visualizers/ for active use.
+ */
 import type { CSSProperties } from "react";
 import { useCurrentFrame } from "remotion";
 import type { AudioAnalysis } from "../audio/audio-utils";

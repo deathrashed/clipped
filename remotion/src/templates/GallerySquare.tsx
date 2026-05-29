@@ -3,6 +3,7 @@ import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
 import { ArtworkFrame } from "../artwork/ArtworkFrame";
+import { FallbackArtwork } from "../artwork/FallbackArtwork";
 import { MetadataBlock } from "../components/Metadata";
 import { BeatFlash, PostFxStack, ReactiveHalo, ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight } from "../effects";
 import { SpectrumBars, WaveRibbon } from "../visualizers";
@@ -21,7 +22,7 @@ export const GallerySquare = (props: ClippedRenderProps) => {
   const audio = useAudioReactive(props.assets.audioSrc, 128, props.options.seed);
   const scenePreset = resolveScenePreset(props.options.style);
   
-  const layout = useLayout("centered");
+  const layout = useLayout(props.options.scene_pack === "gallery" ? "editorial-left" : "centered");
   const coverSize = layout.artwork.size;
   const artY = layout.artwork.cy - layout.height / 2;
 
@@ -94,19 +95,7 @@ export const GallerySquare = (props: ClippedRenderProps) => {
                 }}
               />
             ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: palette.muted,
-                  fontSize: 42,
-                }}
-              >
-                No Artwork
-              </div>
+              <FallbackArtwork size={coverSize} palette={palette} seed={props.metadata.title} />
             )}
             {scenePreset.rimLight.enabled && (
               <RimLight

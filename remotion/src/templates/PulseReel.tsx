@@ -22,6 +22,7 @@ import { cleanText, compactMeta } from "../lib/text";
 import { resolveScenePreset } from "../presets/scene-presets";
 import { ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight, BeatFlash } from "../effects";
 import { RadialBars, SpectrumBars, WaveRibbon } from "../visualizers";
+import { FallbackArtwork } from "../artwork/FallbackArtwork";
 import { LumaFade } from "../transitions/LumaFade";
 import { BlurDissolve } from "../transitions/BlurDissolve";
 import { TextFadeUp } from "../transitions/TextFadeUp";
@@ -115,7 +116,7 @@ export const PulseReel = (props: ClippedRenderProps) => {
       ) : null}
 
       {/* ── Record spinning phase ── */}
-      <div style={{ opacity: recordFade }}>
+      <div style={{ opacity: recordFade, filter: "drop-shadow(0 8px 40px rgba(0,0,0,0.55))" }}>
         {["ring", "radial", "flower"].includes(String(props.options.waveform)) ? (
           <div
             style={{
@@ -154,7 +155,7 @@ export const PulseReel = (props: ClippedRenderProps) => {
               {props.assets.coverSrc ? (
                 <Img src={staticFile(props.assets.coverSrc)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: palette.panel, color: palette.muted, fontSize: 46 }}>No Artwork</div>
+                <FallbackArtwork size={coverSize} palette={palette} seed={props.metadata.title} />
               )}
             </ArtworkFrame>
           </BlurDissolve>
@@ -191,10 +192,11 @@ export const PulseReel = (props: ClippedRenderProps) => {
         riseDistance={24}
         style={{
           position: "absolute",
-          left: "50%",
+          left: 0,
+          right: 0,
           top: layout.typography.top,
-          width: "88%",
-          transform: "translateX(-50%)",
+          display: "flex",
+          justifyContent: "center",
           zIndex: 20,
         }}
       >
@@ -206,6 +208,7 @@ export const PulseReel = (props: ClippedRenderProps) => {
           revealFrame={recordStart + fps}
           typographyPreset={scenePreset.typographyPreset}
           style={{
+            maxWidth: layout.width * 0.84,
             color: palette.text,
             accent: palette.accent,
           }}

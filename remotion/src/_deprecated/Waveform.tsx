@@ -1,3 +1,7 @@
+/**
+ * @deprecated Replaced by modular visualizers in src/visualizers/.
+ * Kept for reference. Import from src/visualizers/ for active use.
+ */
 import { useMemo } from "react";
 import { staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { useAudioData, visualizeAudio } from "@remotion/media-utils";
