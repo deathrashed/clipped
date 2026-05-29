@@ -3,6 +3,7 @@ import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
 import { ArtworkFrame } from "../artwork/ArtworkFrame";
+import { FallbackArtwork } from "../artwork/FallbackArtwork";
 import { MetadataBlock } from "../components/Metadata";
 import { Captions } from "../components/lyrics/Captions";
 import { resolvePalette } from "../lib/palette";
@@ -11,6 +12,7 @@ import { cleanText, compactMeta } from "../lib/text";
 import { resolveScenePreset } from "../presets/scene-presets";
 import { ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight } from "../effects";
 import { BlurDissolve } from "../transitions/BlurDissolve";
+import { TextTrackIn } from "../transitions/TextTrackIn";
 
 export const PremiumCard = (props: ClippedRenderProps) => {
   const frame = useCurrentFrame();
@@ -104,7 +106,7 @@ export const PremiumCard = (props: ClippedRenderProps) => {
       ) : null}
 
       {/* ── 3. Album Cover Card (Reveals after logo, wrapped in BlurDissolve) ── */}
-      {coverSrc && frame >= coverRevealFrame ? (
+      {frame >= coverRevealFrame ? (
         <div
           style={{
             position: "absolute",
@@ -116,7 +118,11 @@ export const PremiumCard = (props: ClippedRenderProps) => {
         >
           <BlurDissolve progress={0.5 + coverReveal * 0.5} maxBlur={24} style={{ opacity: globalFadeOpacity }}>
             <ArtworkFrame size={coverSize} preset="matte">
-              <Img src={coverSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {coverSrc ? (
+                <Img src={coverSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <FallbackArtwork size={coverSize} palette={palette} seed={props.metadata.title} />
+              )}
               {scenePreset.rimLight.enabled && (
                 <RimLight
                   color={scenePreset.rimLight.color}
@@ -129,26 +135,34 @@ export const PremiumCard = (props: ClippedRenderProps) => {
         </div>
       ) : null}
 
-      {/* ── 4. Static Fading Title / Artist Metadata ── */}
+      {/* ── 4. Title / Artist Metadata with editorial track-in ── */}
       {showMetadata && frame >= textRevealFrame ? (
-        <MetadataBlock
-          title={cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"))}
-          artist={cleanText(props.metadata.artist, "Unknown Artist")}
-          meta={compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]) || undefined}
-          align={layout.typography.align}
-          revealFrame={textRevealFrame}
-          typographyPreset={scenePreset.typographyPreset}
+        <TextTrackIn
+          progress={textReveal}
+          startTracking={0.18}
+          targetTracking={-0.02}
           style={{
             position: "absolute",
             left: layout.typography.left,
             top: layout.typography.top,
             width: layout.typography.width,
-            opacity: textReveal * globalFadeOpacity,
+            opacity: globalFadeOpacity,
             zIndex: 20,
-            color: palette.text,
-            accent: palette.accent,
           }}
-        />
+        >
+          <MetadataBlock
+            title={cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"))}
+            artist={cleanText(props.metadata.artist, "Unknown Artist")}
+            meta={compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]) || undefined}
+            align={layout.typography.align}
+            revealFrame={textRevealFrame}
+            typographyPreset={scenePreset.typographyPreset}
+            style={{
+              color: palette.text,
+              accent: palette.accent,
+            }}
+          />
+        </TextTrackIn>
       ) : null}
 
       {/* ── 5. Synced Lyrics / Captions ── */}

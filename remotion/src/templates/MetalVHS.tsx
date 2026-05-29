@@ -10,6 +10,7 @@ import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
 import { ArtworkFrame } from "../artwork/ArtworkFrame";
+import { FallbackArtwork } from "../artwork/FallbackArtwork";
 import { MetadataBlock } from "../components/Metadata";
 import { Captions } from "../components/lyrics/Captions";
 import {
@@ -77,24 +78,39 @@ export const MetalVHS = (props: ClippedRenderProps) => {
             <Img src={coverSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </ArtworkFrame>
         </div>
-      ) : null}
+      ) : (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: `translate(-50%, calc(-50% + ${artY}px)) scale(${artScale})`,
+            opacity: artReveal,
+            zIndex: 10,
+          }}
+        >
+          <ArtworkFrame size={artSize} preset="chrome">
+            <FallbackArtwork size={artSize} palette={palette} seed={props.metadata.title} />
+          </ArtworkFrame>
+        </div>
+      )}
 
-      {/* ── Oscilloscope above art ── */}
+      {/* ── Oscilloscope below art ── */}
       <div
         style={{
           position: "absolute",
-          top: layout.logo.top,
           left: "50%",
+          bottom: layout.height - layout.visualizer.bottom + 56,
           transform: "translateX(-50%)",
-          opacity: 0.7,
+          opacity: 0.5,
         }}
       >
         <Oscilloscope
           audio={audio}
           palette={palette}
           width={layout.width * 0.82}
-          height={44}
-          strokeWidth={2}
+          height={36}
+          strokeWidth={1.5}
           glow={scenePreset.visualizer.glow}
         />
       </div>
@@ -106,10 +122,10 @@ export const MetalVHS = (props: ClippedRenderProps) => {
           left: "50%",
           bottom: layout.height - layout.visualizer.bottom,
           transform: "translateX(-50%)",
-          opacity: 0.8,
+          opacity: 0.65,
         }}
       >
-        <SpectrumBars audio={audio} palette={palette} count={36} width={layout.visualizer.width} height={64} />
+        <SpectrumBars audio={audio} palette={palette} count={36} width={layout.visualizer.width} height={48} />
       </div>
 
       {/* ── Compact metadata ── */}

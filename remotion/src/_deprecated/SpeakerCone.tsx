@@ -1,3 +1,7 @@
+/**
+ * @deprecated Replaced by src/visualizers/ modular components.
+ * Kept for reference. Do not use in new templates.
+ */
 import { useCurrentFrame } from "remotion";
 import type { AudioAnalysis } from "../audio/audio-utils";
 
