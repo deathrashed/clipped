@@ -11,12 +11,13 @@ import {
 import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
-import { ArtworkFrame } from "../materials";
+import { ArtworkFrame } from "../artwork/ArtworkFrame";
 import { MetadataBlock } from "../components/Metadata";
 import { VinylRecord } from "../components/vinyl/VinylRecord";
-import { RadialWaveform, WaveformBars } from "../components/Waveform";
 import { Captions } from "../components/lyrics/Captions";
 import { BeatFlash, Vignette, FilmGrain } from "../effects";
+import { RadialBars, SpectrumBars, WaveRibbon } from "../visualizers";
+import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
 import { effectPreset } from "../presets/effects";
 import { useLayout } from "../layouts";
@@ -31,6 +32,7 @@ export const PulseReel = (props: ClippedRenderProps) => {
   const layout = useLayout("centered");
   const coverSize = layout.artwork.size;
   const artY = layout.artwork.cy - layout.height / 2;
+  const audio = useAudioReactive(props.assets.audioSrc, 128, props.options.seed);
 
   // ── Logo phase (0 → logoEnd) ────────────────────────────────────────────────
   const logoSrc = props.assets.logoSrc ? staticFile(props.assets.logoSrc) : null;
@@ -111,7 +113,25 @@ export const PulseReel = (props: ClippedRenderProps) => {
 
       {/* ── Record spinning phase ── */}
       <div style={{ opacity: recordFade }}>
-        <RadialWaveform props={props} palette={palette} size={layout.width * 0.88} y={artY} count={88} />
+        {["ring", "radial", "flower"].includes(String(props.options.waveform)) ? (
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: `translate(-50%, calc(-50% + ${artY}px))`,
+            }}
+          >
+            <RadialBars
+              audio={audio}
+              palette={palette}
+              size={layout.width * 0.88}
+              innerRadius={coverSize * 0.55}
+              count={88}
+              mode={props.options.waveform === "flower" ? "flower" : "ring"}
+            />
+          </div>
+        ) : null}
         <VinylRecord props={props} palette={palette} size={coverSize} y={artY} revealFrame={recordStart} />
       </div>
 
@@ -135,15 +155,36 @@ export const PulseReel = (props: ClippedRenderProps) => {
       </div>
 
       {/* ── Waveform bars ── */}
-      <WaveformBars
-        props={props}
-        palette={palette}
-        count={54}
-        bottom={showCaptions ? 160 : safeBottom + 16}
-      />
+      {props.options.waveform === "bars" || props.options.waveform === "mirror" ? (
+        <div style={{ position: "absolute", left: "50%", bottom: showCaptions ? 160 : safeBottom + 16, transform: "translateX(-50%)" }}>
+          <SpectrumBars
+            audio={audio}
+            palette={palette}
+            count={54}
+            width={layout.visualizer.width}
+            height={96}
+            mirror={props.options.waveform === "mirror"}
+          />
+        </div>
+      ) : null}
+      {props.options.waveform === "ribbon" ? (
+        <div style={{ position: "absolute", left: "50%", bottom: showCaptions ? 160 : safeBottom + 16, transform: "translateX(-50%)" }}>
+          <WaveRibbon
+            audio={audio}
+            palette={palette}
+            width={layout.visualizer.width}
+            height={96}
+          />
+        </div>
+      ) : null}
 
       {/* ── Metadata block ── */}
-      <div
+      <MetadataBlock
+        props={props}
+        palette={palette}
+        align="center"
+        revealFrame={recordStart + fps}
+        compact
         style={{
           position: "absolute",
           left: "50%",
@@ -152,16 +193,7 @@ export const PulseReel = (props: ClippedRenderProps) => {
           transform: `translateX(-50%) translateY(${metaY}px)`,
           opacity: metaReveal,
         }}
-      >
-        <MetadataBlock
-          props={props}
-          palette={palette}
-          y={0}
-          align="center"
-          revealFrame={recordStart + fps}
-          compact
-        />
-      </div>
+      />
 
       {/* ── Captions / Lyrics ── */}
       <Captions

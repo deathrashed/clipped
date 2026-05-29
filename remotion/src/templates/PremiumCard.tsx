@@ -2,7 +2,7 @@ import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, us
 import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
-import { ArtworkFrame } from "../materials";
+import { ArtworkFrame } from "../artwork/ArtworkFrame";
 import { MetadataBlock } from "../components/Metadata";
 import { Captions } from "../components/lyrics/Captions";
 import { resolvePalette } from "../lib/palette";
@@ -118,7 +118,11 @@ export const PremiumCard = (props: ClippedRenderProps) => {
 
       {/* ── 4. Static Fading Title / Artist Metadata (Only if Captions are Off) ── */}
       {showMetadata && frame >= textRevealFrame ? (
-        <div
+        <MetadataBlock
+          props={props}
+          palette={palette}
+          align={layout.typography.align}
+          revealFrame={textRevealFrame}
           style={{
             position: "absolute",
             left: layout.typography.left,
@@ -127,15 +131,7 @@ export const PremiumCard = (props: ClippedRenderProps) => {
             opacity: textReveal * globalFadeOpacity,
             zIndex: 20,
           }}
-        >
-          <MetadataBlock
-            props={props}
-            palette={palette}
-            y={0}
-            align={layout.typography.align}
-            revealFrame={textRevealFrame}
-          />
-        </div>
+        />
       ) : null}
 
       {/* ── 5. Synced Lyrics / Captions ── */}
