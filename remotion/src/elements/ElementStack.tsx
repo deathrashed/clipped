@@ -2,7 +2,7 @@ import type { ElementStackProps } from "./types";
 import registry from "./registry";
 import { Vignette, ChromaticAberration, Fisheye } from "./effects/lens";
 import { Noise, Scanline, VHS } from "./effects/texture";
-import { Bloom } from "./effects/glow";
+import { Bloom, Strobe } from "./effects/glow";
 import {
   BrightnessContrast,
   HueSaturation,
@@ -72,6 +72,8 @@ export const ElementStack = ({
           return <VHS key={key} intensity={intensity} opacity={opacity} />;
         case "bloom":
           return <Bloom key={key} intensity={intensity} opacity={opacity} />;
+        case "strobe":
+          return <Strobe key={key} intensity={intensity} />;
         case "brightness-contrast":
           return <BrightnessContrast key={key} intensity={intensity} />;
         case "hue-saturation":
