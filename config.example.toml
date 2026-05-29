@@ -26,8 +26,18 @@ waveform_mode  = "line"
 # Hex colour for the waveform bar (default: vivid cyan)
 waveform_color = "0x00E5FF"
 
+# ── Remotion template defaults ────────────────────────────────────────────────
+remotion_style      = "classic" # classic | brutal | neon | zine | cinematic
+remotion_motion     = "medium"  # low | medium | high
+remotion_waveform   = "radial"  # none | bars | radial | ring
+remotion_palette    = "auto"    # auto | cyan | red | gold | mono
+remotion_scene_pack = "story"
+remotion_effects    = "texture"
+remotion_captions   = "off"
+remotion_fps        = 30
+
 # Default template and platform.
-default_template = "spinner"
+default_template = "gallery_square"
 default_platform = "default"
 
 # ── Named presets ──────────────────────────────────────────────────────────────
@@ -35,23 +45,23 @@ default_platform = "default"
 # Each key overrides the matching [general] key.
 
 [preset.instagram]
-default_template = "reel"
+default_template = "pulse_reel"
 default_platform = "instagram"
 
 [preset.tiktok]
-default_template = "reel"
+default_template = "pulse_reel"
 default_platform = "tiktok"
 
 [preset.youtube_shorts]
-default_template = "reel"
+default_template = "pulse_reel"
 default_platform = "youtube_shorts"
 
 [preset.vertical_full]
-default_template = "reel"
+default_template = "pulse_reel"
 default_platform = "vertical_full"
 
 [preset.archive]
-default_template = "static"
+default_template = "gallery_square"
 default_platform = "default"
 
 [preset.cinematic]
@@ -62,7 +72,7 @@ default_platform = "youtube"
 default_platform = "discord"
 
 [preset.waveformbar]
-default_template = "waveformbar"
+default_template = "record_square"
 default_platform = "default"
 
 # ── Waveform colour variants ───────────────────────────────────────────────────

@@ -4,6 +4,9 @@
 
 | Name | Label | Size | Ideal For |
 | --- | --- | --- | --- |
+| pulse_reel | Pulse Reel | 1080×1920 | Instagram Reels, TikTok, YouTube Shorts, vertical_full |
+| gallery_square | Gallery Square | 1080×1080 | Instagram Feed, Bandcamp, SoundCloud, Archive |
+| record_square | Record Square | 1080×1080 | Instagram Feed, Archive, Twitter/X, Bandcamp |
 | cinematic | Cinematic (21:9 Ken Burns) | 1920×816 | YouTube, Video essays, Archive |
 | fade | Fade (Crossfade Sequence) | 1080×1080 | Full-track previews, Story posts, YouTube |
 | minimal | Minimal (Dark Typographic) | 1080×1080 | Twitter/X, Archive, Bandcamp |
@@ -32,25 +35,26 @@
 
 | Preset | Overrides |
 | --- | --- |
-| instagram | default_template=reel, default_platform=instagram |
-| tiktok | default_template=reel, default_platform=tiktok |
-| youtube_shorts | default_template=reel, default_platform=youtube_shorts |
-| vertical_full | default_template=reel, default_platform=vertical_full |
-| archive | default_template=static, default_platform=default |
+| instagram | default_template=pulse_reel, default_platform=instagram |
+| tiktok | default_template=pulse_reel, default_platform=tiktok |
+| youtube_shorts | default_template=pulse_reel, default_platform=youtube_shorts |
+| vertical_full | default_template=pulse_reel, default_platform=vertical_full |
+| archive | default_template=gallery_square, default_platform=default |
 | cinematic | default_template=cinematic, default_platform=youtube |
 | discord | default_platform=discord |
-| waveformbar | default_template=waveformbar, default_platform=default |
+| waveformbar | default_template=record_square, default_platform=default |
 
 ## Examples
 
 ```bash
 clipped --help
 clipped audio track.mp3 30 45
-clipped video myaudio.mp3 --template spinner --platform default
-clipped video myaudio.mp3 --template reel --platform instagram --start 2:45 --end 3:45
-clipped video myaudio.mp3 --template reel --platform vertical_full
+clipped video myaudio.mp3 --template gallery_square --platform default
+clipped video myaudio.mp3 --template pulse_reel --platform instagram --start 2:45 --end 3:45
+clipped video myaudio.mp3 --template record_square --platform bandcamp --waveform ring
 clipped config show
 clipped doctor
+clipped remotion doctor
 clipped test templates sample.mp3 --dry-run
 clipped batch video --input-dir ./audio --template spinner --platform default --dry-run
 clipped watch --input-dir ./audio --type video --dry-run

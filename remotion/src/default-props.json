@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "templateId": "gallery_square",
+  "compositionId": "gallery-square",
+  "platformName": "default",
+  "width": 1080,
+  "height": 1080,
+  "fps": 30,
+  "durationSeconds": 8,
+  "durationFrames": 240,
+  "assets": {
+    "audioSrc": null,
+    "coverSrc": null,
+    "logoSrc": null,
+    "artistImageSrc": null,
+    "backgroundSrc": null,
+    "lyrics": null,
+    "lyricsJson": null,
+    "extraImageSrcs": [],
+    "mediaSrcs": []
+  },
+  "metadata": {
+    "artist": "Clipped",
+    "title": "Remotion Preview",
+    "album": "Template System",
+    "trackNumber": 1,
+    "year": "2026",
+    "genre": "Preview",
+    "sourceFilename": "preview.mp3"
+  },
+  "audio": {
+    "fadeIn": 0.5,
+    "fadeOut": 0.5,
+    "volume": 1,
+    "originalStart": 0,
+    "preparedDuration": 8
+  },
+  "options": {
+    "style": "classic",
+    "motion": "medium",
+    "waveform": "none",
+    "palette": "auto",
+    "scene_pack": "art_focus",
+    "effects": "texture",
+    "captions": "metadata",
+    "mediaMode": "background",
+    "cleanLogo": true,
+    "logoBg": "auto",
+    "logoFuzz": 15,
+    "seed": ""
+  },
+  "encoding": {
+    "codec": "libx264",
+    "crf": 23,
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "pixelFormat": "yuv420p"
+  }
+}

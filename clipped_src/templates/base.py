@@ -16,7 +16,7 @@ import textwrap
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 # Lazy import to avoid circular dependency
 from typing import TYPE_CHECKING
@@ -32,6 +32,13 @@ class TemplateInfo:
     description: str        # One-line user-facing description
     aspect: tuple[int, int] # Output dimensions (width, height)
     ideal_for: list[str] = field(default_factory=list)  # e.g. ["Instagram", "TikTok"]
+    safe_duration_hint: Optional[float] = None
+    engine: str = "ffmpeg"
+    category: str = "Legacy FFmpeg"
+    composition_id: str | None = None
+    capabilities: list[str] = field(default_factory=list)
+    options: dict[str, Any] = field(default_factory=dict)
+    defaults: dict[str, Any] = field(default_factory=dict)
 
 
 class VideoTemplate(ABC):

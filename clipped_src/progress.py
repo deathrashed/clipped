@@ -81,11 +81,11 @@ def run_ffmpeg_with_progress(
         proc = subprocess.Popen(
             full_cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             text=True,
         )
 
-        stderr_lines: list[str] = []
+        output_lines: list[str] = []
 
         try:
             for line in proc.stdout:  # type: ignore[union-attr]
@@ -98,15 +98,17 @@ def run_ffmpeg_with_progress(
                         pass
                 elif line.startswith("progress=end"):
                     progress.update(task, completed=duration_ms)
-            _, stderr_output = proc.communicate()
-            stderr_lines = stderr_output.splitlines()
+                elif line:
+                    output_lines.append(line)
+            proc.wait()
         except KeyboardInterrupt:
             proc.kill()
+            proc.wait()
             raise
 
         if proc.returncode != 0:
             console.print(f"\n[bold red]FFmpeg Error (exit {proc.returncode}):[/bold red]")
-            for ln in stderr_lines[-20:]:
+            for ln in output_lines[-20:]:
                 console.print(f"  [dim]{ln}[/dim]")
             sys.exit(1)
 

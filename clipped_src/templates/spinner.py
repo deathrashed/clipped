@@ -14,6 +14,7 @@ class SpinnerTemplate(VideoTemplate):
         description="Classic spinning vinyl record on a black background.",
         aspect=(1080, 1080),
         ideal_for=["Instagram Feed", "Archive", "Twitter/X"],
+        safe_duration_hint=15.0,
     )
 
     def get_inputs(self, assets: MediaAssets) -> list[str]:

@@ -7,13 +7,31 @@ PlatformProfile (size, duration limit) → runs FFmpeg with a progress bar.
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 from .config import get_config, validate_output_dirs
 from .platforms import PlatformProfile, get_profile
 from .progress import run_ffmpeg_with_progress
+from .remotion_engine import render_remotion_video, stage_remotion_preview
 from .templates import get_template
 from .utils import resolve_assets
+
+def get_video_encoder_args(codec: str, crf: int, config: dict) -> list[str]:
+    """Return encoder arguments, mapping libx264 to h264_videotoolbox on macOS if enabled."""
+    use_vt = config.get("use_videotoolbox", True)
+    if sys.platform == "darwin" and codec == "libx264" and use_vt:
+        if crf <= 18:
+            q_v = 85
+        elif crf <= 23:
+            q_v = 75
+        elif crf <= 28:
+            q_v = 60
+        else:
+            q_v = 50
+        return ["-c:v", "h264_videotoolbox", "-q:v", str(q_v)]
+    return ["-c:v", codec, "-crf", str(crf)]
+
 
 def _get_ui():
     from .main import UI
@@ -32,6 +50,11 @@ def process_video(
     fade_in: float | None = None,
     fade_out: float | None = None,
     output_path: Path | None = None,
+    cover: str | None = None,
+    logo: str | None = None,
+    background: str | None = None,
+    media: str | None = None,
+    lyrics: str | None = None,
 ) -> Path | None:
     """
     Generate a video from an audio file.
@@ -47,9 +70,20 @@ def process_video(
         extra_config  : Optional config overrides merged into the base config
                         (e.g. {"waveform_mode": "p2p", "waveform_color": "0xFF0000"}).
     """
-    assets  = resolve_assets(src)
+    media_list = [media] if media else None
+    assets  = resolve_assets(
+        src,
+        cover_override=cover,
+        logo_override=logo,
+        background_override=background,
+        media=media_list,
+        lyrics_override=lyrics,
+    )
     config  = get_config()
+    is_preview = False
     if extra_config:
+        extra_config = dict(extra_config)
+        is_preview = extra_config.pop("is_preview_render", False)
         config = {**config, **extra_config}
     profile = get_profile(platform_name)
 
@@ -84,7 +118,16 @@ def process_video(
 
     # ── Discord: audio-only fast path ─────────────────────────────────────────
     if profile.output_format == "mp3":
-        return _export_audio_only(src, assets, config, profile, start, calc_dur, dry_run)
+        return _export_audio_only(
+            src,
+            assets,
+            config,
+            profile,
+            start,
+            calc_dur,
+            dry_run,
+            output_path,
+        )
 
     # ── Template instantiation ────────────────────────────────────────────────
     extra_kwargs: dict = {}
@@ -116,6 +159,43 @@ def process_video(
             template=template_name,
             extension="mp4"
         )
+    if is_preview:
+        output_path = output_path.with_name(f"{output_path.stem} [preview]{output_path.suffix}")
+
+    if getattr(template.info, "engine", "ffmpeg") == "remotion":
+        _get_ui().sys(
+            f"Generating [bold cyan]{template.info.label}[/bold cyan] "
+            f"for [bold magenta]{profile.label}[/bold magenta] with Remotion..."
+        )
+        result = render_remotion_video(
+            assets=assets,
+            template=template,
+            profile=profile,
+            config=config,
+            start=start,
+            duration=calc_dur,
+            output_path=output_path,
+            dry_run=dry_run,
+            fade_in=fade_in,
+            fade_out=fade_out,
+        )
+
+        if dry_run:
+            return None
+
+        if result:
+            _get_ui().info(f"Video saved: [white]{result.name}[/white]")
+            if config.get("copy_to_clipboard", True):
+                subprocess.run(
+                    ["osascript", "-e", f'set the clipboard to (POSIX file "{result}")']
+                )
+                _get_ui().sys("Copied to clipboard.")
+
+            subprocess.run(
+                ["osascript", "-e", f'display notification "{result.name}" with title "Clipped"'],
+                capture_output=True,
+            )
+        return result
 
     # ── Build FFmpeg command ──────────────────────────────────────────────────
     inputs         = template.get_inputs(assets)
@@ -158,7 +238,8 @@ def process_video(
 
     cmd += ["-filter_complex", filter_graph]
     cmd += ["-map", video_map, "-map", audio_map]
-    cmd += ["-c:v", profile.video_codec, "-pix_fmt", "yuv420p", "-crf", str(profile.crf)]
+    encoder_args = get_video_encoder_args(profile.video_codec, profile.crf, config)
+    cmd += encoder_args + ["-pix_fmt", "yuv420p"]
     cmd += ["-t", str(calc_dur)]
     cmd += ["-c:a", profile.audio_codec, "-b:a", profile.audio_bitrate]
     cmd.append(str(output_path))
@@ -206,11 +287,12 @@ def _export_audio_only(
     start: float,
     duration: float,
     dry_run: bool,
+    output_path: Path | None = None,
 ) -> Path | None:
     """Fast-path for audio-only platforms (Discord)."""
     audio_dir  = Path(config["audio_dir"]).expanduser()
     audio_dir.mkdir(parents=True, exist_ok=True)
-    output_path = audio_dir / f"{assets.audio_path.stem}_{profile.name}.mp3"
+    output_path = Path(output_path) if output_path else audio_dir / f"{assets.audio_path.stem}_{profile.name}.mp3"
 
     cmd = ["ffmpeg", "-y"]
     if start:
@@ -244,3 +326,91 @@ def _export_audio_only(
     )
 
     return output_path
+
+
+def run_preview(
+    src: str,
+    template_name: str = "spinner",
+    platform_name: str = "default",
+    start: float = 0,
+    end: float | None = None,
+    duration: float | None = None,
+    port: int = 3000,
+    cover: str | None = None,
+    logo: str | None = None,
+    background: str | None = None,
+    media: str | None = None,
+    lyrics: str | None = None,
+) -> None:
+    """Stage a preview and either open the Remotion Studio or render/open a short FFmpeg clip."""
+    media_list = [media] if media else None
+    assets = resolve_assets(
+        src,
+        cover_override=cover,
+        logo_override=logo,
+        background_override=background,
+        media=media_list,
+        lyrics_override=lyrics,
+    )
+    config = get_config()
+    profile = get_profile(platform_name)
+    template = get_template(template_name, config=config)
+
+    # Resolve preview duration (default to 3 seconds if not specified)
+    preview_dur = duration if duration is not None else float(config.get("preview_duration", 3.0))
+    if end is not None:
+        calc_dur = end - start
+    else:
+        calc_dur = preview_dur
+
+    if getattr(template.info, "engine", "ffmpeg") == "remotion":
+        _get_ui().sys(f"Staging preview assets for [bold cyan]{template.info.label}[/bold cyan]...")
+        
+        # Override default-props.json and copy files to public/jobs/preview
+        stage_remotion_preview(
+            assets=assets,
+            template=template,
+            profile=profile,
+            config=config,
+            start=start,
+            duration=calc_dur,
+            fade_in=config.get("fade_duration", 0.5),
+            fade_out=config.get("fade_duration", 0.5),
+        )
+        
+        # Start the Remotion studio
+        _get_ui().sys(f"Launching Remotion Studio on port {port}...")
+        from .remotion_engine import REMOTION_DIR
+        cmd = ["npx", "--no-install", "remotion", "studio", "src/index.ts", "--port", str(port)]
+        try:
+            subprocess.call(cmd, cwd=REMOTION_DIR)
+        except KeyboardInterrupt:
+            _get_ui().sys("Studio preview stopped.")
+    else:
+        # For FFmpeg templates, render a short clip and open it
+        _get_ui().warn("Remotion Studio only supports Remotion templates. Rendering a short FFmpeg preview clip...")
+        
+        out_dir = Path("~/Music/clipped/_previews").expanduser()
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_ext = profile.output_format if profile else "mp4"
+        out_path = out_dir / f"{assets.audio_path.stem} ({template_name}) [preview].{out_ext}"
+
+        result = process_video(
+            src=src,
+            template_name=template_name,
+            platform_name=platform_name,
+            start=start,
+            end=start + calc_dur,
+            dry_run=False,
+            extra_config={"is_preview_render": True},
+            output_path=out_path,
+            cover=cover,
+            logo=logo,
+            background=background,
+            media=media,
+            lyrics=lyrics,
+        )
+        
+        if result and result.exists():
+            _get_ui().info(f"Opening preview video: {result.name}")
+            subprocess.run(["open", str(result)])
