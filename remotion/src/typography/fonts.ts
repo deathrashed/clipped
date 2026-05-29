@@ -1,47 +1,56 @@
-// Font loading for Clipped typography system.
-// loadFont() must be called at module top level — Remotion injects the CSS.
-// Import { fonts } in any component that uses text.
+import { delayRender, continueRender, staticFile } from "remotion";
 
-import { loadFont as loadInter } from "@remotion/google-fonts/Inter";
-import { loadFont as loadOswald } from "@remotion/google-fonts/Oswald";
-import { loadFont as loadBebasNeue } from "@remotion/google-fonts/BebasNeue";
-import { loadFont as loadSpaceMono } from "@remotion/google-fonts/SpaceMono";
+const localFonts = [
+  // Inter
+  { name: "Inter", src: "fonts/Inter/Inter-Regular.woff2", weight: "400" },
+  { name: "Inter", src: "fonts/Inter/Inter-Medium.woff2", weight: "500" },
+  { name: "Inter", src: "fonts/Inter/Inter-SemiBold.woff2", weight: "600" },
+  { name: "Inter", src: "fonts/Inter/Inter-Bold.woff2", weight: "700" },
+  // Oswald
+  { name: "Oswald", src: "fonts/Oswald/Oswald-Regular.woff2", weight: "400" },
+  { name: "Oswald", src: "fonts/Oswald/Oswald-Medium.woff2", weight: "500" },
+  { name: "Oswald", src: "fonts/Oswald/Oswald-Bold.woff2", weight: "700" },
+  // Bebas Neue
+  { name: "Bebas Neue", src: "fonts/BebasNeue/BebasNeue-Regular.woff2", weight: "400" },
+  // Space Mono
+  { name: "Space Mono", src: "fonts/SpaceMono/SpaceMono-Regular.woff2", weight: "400" },
+  { name: "Space Mono", src: "fonts/SpaceMono/SpaceMono-Bold.woff2", weight: "700" },
+];
 
-const inter = loadInter("normal", {
-  weights: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-});
-const oswald = loadOswald("normal", {
-  weights: ["400", "500", "700"],
-  subsets: ["latin"],
-});
-const bebas = loadBebasNeue("normal", {
-  weights: ["400"],
-  subsets: ["latin"],
-});
-const spaceMono = loadSpaceMono("normal", {
-  weights: ["400", "700"],
-  subsets: ["latin"],
-});
+// Load local fonts programmatically in the browser environment
+if (typeof window !== "undefined" && typeof window.FontFace !== "undefined") {
+  localFonts.forEach((fontSpec) => {
+    const handle = delayRender(`Loading font ${fontSpec.name} weight ${fontSpec.weight}`);
+    const font = new FontFace(
+      fontSpec.name,
+      `url(${staticFile(fontSpec.src)})`,
+      { weight: fontSpec.weight }
+    );
+    font.load()
+      .then((loadedFace) => {
+        document.fonts.add(loadedFace);
+        continueRender(handle);
+      })
+      .catch((err) => {
+        // Fail gracefully to system fallbacks
+        console.warn(`Failed to load font ${fontSpec.name} (${fontSpec.src}) gracefully falling back.`, err);
+        continueRender(handle);
+      });
+  });
+}
 
 /**
- * Font family strings keyed by role.
- * "display" → Oswald (editorial/cinematic) or Bebas Neue (brutal)
- * "body"    → Inter
- * "mono"    → Space Mono (VHS/CRT)
- *
- * Usage: style={{ fontFamily: fonts.display }}
+ * Font family strings keyed by role with robust local system fallbacks.
  */
 export const fonts = {
-  display:  oswald.fontFamily,
-  brutal:   bebas.fontFamily,
-  body:     inter.fontFamily,
-  mono:     spaceMono.fontFamily,
+  display: "'Oswald', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  brutal: "'Bebas Neue', Impact, 'Arial Black', sans-serif",
+  body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  mono: "'Space Mono', Monaco, Consolas, 'Courier New', monospace",
 } as const;
 
 /**
  * Resolve fontFamily string from the token role + typography preset context.
- * "display" uses brutal face for brutal preset, oswald otherwise.
  */
 export const resolveFont = (
   role: "display" | "body" | "mono",

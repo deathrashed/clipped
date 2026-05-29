@@ -15,19 +15,23 @@ import { ArtworkFrame } from "../artwork/ArtworkFrame";
 import { MetadataBlock } from "../components/Metadata";
 import { VinylRecord } from "../components/vinyl/VinylRecord";
 import { Captions } from "../components/lyrics/Captions";
-import { BeatFlash, Vignette, FilmGrain } from "../effects";
-import { RadialBars, SpectrumBars, WaveRibbon } from "../visualizers";
 import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
-import { effectPreset } from "../presets/effects";
 import { useLayout } from "../layouts";
+import { cleanText, compactMeta } from "../lib/text";
+import { resolveScenePreset } from "../presets/scene-presets";
+import { ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight, BeatFlash } from "../effects";
+import { RadialBars, SpectrumBars, WaveRibbon } from "../visualizers";
+import { LumaFade } from "../transitions/LumaFade";
+import { BlurDissolve } from "../transitions/BlurDissolve";
+import { TextFadeUp } from "../transitions/TextFadeUp";
 
 export const PulseReel = (props: ClippedRenderProps) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
   const palette = resolvePalette(props);
   const motion = motionFactor(props.options.motion);
-  const preset = effectPreset(props);
+  const scenePreset = resolveScenePreset(props.options.style);
   
   const layout = useLayout("centered");
   const coverSize = layout.artwork.size;
@@ -71,7 +75,6 @@ export const PulseReel = (props: ClippedRenderProps) => {
     [0, 1],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) },
   );
-  const metaY = interpolate(metaReveal, [0, 1], [32, 0]);
 
   // Safe-area bottom: 12% from bottom for TikTok/IG safe zone
   const safeBottom = layout.safe.bottom;
@@ -135,24 +138,28 @@ export const PulseReel = (props: ClippedRenderProps) => {
         <VinylRecord props={props} palette={palette} size={coverSize} y={artY} revealFrame={recordStart} />
       </div>
 
-      {/* ── Cover reveal (replaces record) ── */}
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: `translate(-50%, calc(-50% + ${artY + coverReveal * 6}px)) scale(${0.92 + coverReveal * 0.08})`,
-          opacity: coverReveal,
-        }}
-      >
-        <ArtworkFrame size={coverSize} preset={props.options.style === "zine" ? "none" : "matte"}>
-          {props.assets.coverSrc ? (
-            <Img src={staticFile(props.assets.coverSrc)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          ) : (
-            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: palette.panel, color: palette.muted, fontSize: 46 }}>No Artwork</div>
-          )}
-        </ArtworkFrame>
-      </div>
+      {/* ── Cover reveal (replaces record, wrapped in BlurDissolve) ── */}
+      {coverReveal > 0 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: `translate(-50%, calc(-50% + ${artY + coverReveal * 6}px)) scale(${0.92 + coverReveal * 0.08})`,
+            zIndex: 12,
+          }}
+        >
+          <BlurDissolve progress={0.5 + coverReveal * 0.5} maxBlur={24}>
+            <ArtworkFrame size={coverSize} preset={props.options.style === "zine" ? "none" : "matte"}>
+              {props.assets.coverSrc ? (
+                <Img src={staticFile(props.assets.coverSrc)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: palette.panel, color: palette.muted, fontSize: 46 }}>No Artwork</div>
+              )}
+            </ArtworkFrame>
+          </BlurDissolve>
+        </div>
+      ) : null}
 
       {/* ── Waveform bars ── */}
       {props.options.waveform === "bars" || props.options.waveform === "mirror" ? (
@@ -178,22 +185,32 @@ export const PulseReel = (props: ClippedRenderProps) => {
         </div>
       ) : null}
 
-      {/* ── Metadata block ── */}
-      <MetadataBlock
-        props={props}
-        palette={palette}
-        align="center"
-        revealFrame={recordStart + fps}
-        compact
+      {/* ── Metadata block (with TextFadeUp entrance) ── */}
+      <TextFadeUp
+        progress={metaReveal}
+        riseDistance={24}
         style={{
           position: "absolute",
           left: "50%",
           top: layout.typography.top,
           width: "88%",
-          transform: `translateX(-50%) translateY(${metaY}px)`,
-          opacity: metaReveal,
+          transform: "translateX(-50%)",
+          zIndex: 20,
         }}
-      />
+      >
+        <MetadataBlock
+          title={cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"))}
+          artist={cleanText(props.metadata.artist, "Unknown Artist")}
+          meta={compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]) || undefined}
+          align="center"
+          revealFrame={recordStart + fps}
+          typographyPreset={scenePreset.typographyPreset}
+          style={{
+            color: palette.text,
+            accent: palette.accent,
+          }}
+        />
+      </TextFadeUp>
 
       {/* ── Captions / Lyrics ── */}
       <Captions
@@ -208,11 +225,33 @@ export const PulseReel = (props: ClippedRenderProps) => {
         }}
       />
 
-      {/* ── Post FX ── */}
-      <Vignette opacity={preset.vignetteOpacity ?? 0.72} />
-      {props.options.effects !== "clean" ? <FilmGrain opacity={0.09} cells={120} /> : null}
-      <BeatFlash props={props} palette={palette} intensity={0.1} />
+      {/* ── LumaFade transition for logo-to-record cut ── */}
+      {frame >= logoEnd - 12 && frame <= logoEnd + 12 ? (
+        <LumaFade
+          progress={interpolate(frame, [logoEnd - 12, logoEnd + 12], [0, 1])}
+          color="rgba(255,255,255,0.85)"
+          peakOpacity={0.7}
+        />
+      ) : null}
+
+      {/* ── Cinematic PostFX Overlays ── */}
+      <ColorGrade preset={scenePreset.colorGrade} />
+      <AtmosphereLayer mode={scenePreset.atmosphere} intensity={1} />
+      {scenePreset.halation.enabled && (
+        <Halation
+          opacity={scenePreset.halation.opacity}
+          blur={scenePreset.halation.blur}
+          warmth={scenePreset.halation.warmth}
+        />
+      )}
+      {scenePreset.ambientLight.enabled && (
+        <AmbientLight
+          color={scenePreset.ambientLight.color}
+          opacity={scenePreset.ambientLight.opacity}
+        />
+      )}
+      {/* Beat flash only for active beat effects */}
+      <BeatFlash props={props} palette={palette} intensity={0.08} />
     </AbsoluteFill>
   );
 };
-

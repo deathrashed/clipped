@@ -7,11 +7,16 @@ import { MetadataBlock } from "../components/Metadata";
 import { Captions } from "../components/lyrics/Captions";
 import { resolvePalette } from "../lib/palette";
 import { useLayout } from "../layouts";
+import { cleanText, compactMeta } from "../lib/text";
+import { resolveScenePreset } from "../presets/scene-presets";
+import { ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight } from "../effects";
+import { BlurDissolve } from "../transitions/BlurDissolve";
 
 export const PremiumCard = (props: ClippedRenderProps) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
   const palette = resolvePalette(props);
+  const scenePreset = resolveScenePreset(props.options.style);
 
   const hasLogo = !!props.assets.logoSrc;
   
@@ -98,7 +103,7 @@ export const PremiumCard = (props: ClippedRenderProps) => {
         </div>
       ) : null}
 
-      {/* ── 3. Album Cover Card (Reveals after logo) ── */}
+      {/* ── 3. Album Cover Card (Reveals after logo, wrapped in BlurDissolve) ── */}
       {coverSrc && frame >= coverRevealFrame ? (
         <div
           style={{
@@ -106,23 +111,33 @@ export const PremiumCard = (props: ClippedRenderProps) => {
             left: layout.artwork.cx,
             top: layout.artwork.cy,
             transform: `translate(-50%, -50%) scale(${0.96 + coverReveal * 0.04})`,
-            opacity: coverReveal * globalFadeOpacity,
             zIndex: 10,
           }}
         >
-          <ArtworkFrame size={coverSize} preset="matte">
-            <Img src={coverSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </ArtworkFrame>
+          <BlurDissolve progress={0.5 + coverReveal * 0.5} maxBlur={24} style={{ opacity: globalFadeOpacity }}>
+            <ArtworkFrame size={coverSize} preset="matte">
+              <Img src={coverSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {scenePreset.rimLight.enabled && (
+                <RimLight
+                  color={scenePreset.rimLight.color}
+                  opacity={scenePreset.rimLight.opacity}
+                  side="all"
+                />
+              )}
+            </ArtworkFrame>
+          </BlurDissolve>
         </div>
       ) : null}
 
-      {/* ── 4. Static Fading Title / Artist Metadata (Only if Captions are Off) ── */}
+      {/* ── 4. Static Fading Title / Artist Metadata ── */}
       {showMetadata && frame >= textRevealFrame ? (
         <MetadataBlock
-          props={props}
-          palette={palette}
+          title={cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"))}
+          artist={cleanText(props.metadata.artist, "Unknown Artist")}
+          meta={compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]) || undefined}
           align={layout.typography.align}
           revealFrame={textRevealFrame}
+          typographyPreset={scenePreset.typographyPreset}
           style={{
             position: "absolute",
             left: layout.typography.left,
@@ -130,6 +145,8 @@ export const PremiumCard = (props: ClippedRenderProps) => {
             width: layout.typography.width,
             opacity: textReveal * globalFadeOpacity,
             zIndex: 20,
+            color: palette.text,
+            accent: palette.accent,
           }}
         />
       ) : null}
@@ -148,7 +165,23 @@ export const PremiumCard = (props: ClippedRenderProps) => {
           }}
         />
       ) : null}
+
+      {/* ── 6. Cinematic PostFX Overlays ── */}
+      <ColorGrade preset={scenePreset.colorGrade} />
+      <AtmosphereLayer mode={scenePreset.atmosphere} intensity={1} />
+      {scenePreset.halation.enabled && (
+        <Halation
+          opacity={scenePreset.halation.opacity}
+          blur={scenePreset.halation.blur}
+          warmth={scenePreset.halation.warmth}
+        />
+      )}
+      {scenePreset.ambientLight.enabled && (
+        <AmbientLight
+          color={scenePreset.ambientLight.color}
+          opacity={scenePreset.ambientLight.opacity}
+        />
+      )}
     </AbsoluteFill>
   );
 };
-
