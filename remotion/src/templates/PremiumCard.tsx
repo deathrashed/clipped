@@ -13,6 +13,7 @@ import { resolveScenePreset } from "../presets/scene-presets";
 import { ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight } from "../effects";
 import { BlurDissolve } from "../transitions/BlurDissolve";
 import { TextTrackIn } from "../transitions/TextTrackIn";
+import { ElementStack } from "../elements";
 
 export const PremiumCard = (props: ClippedRenderProps) => {
   const frame = useCurrentFrame();
@@ -179,6 +180,15 @@ export const PremiumCard = (props: ClippedRenderProps) => {
           }}
         />
       ) : null}
+
+      {/* ── Element Stack (effects, lights, depth, backgrounds, modifiers) ── */}
+      <ElementStack
+        elements={[
+          ...(scenePreset.background || []),
+          ...(scenePreset.effects || []),
+          ...(scenePreset.lights || []),
+        ]}
+      />
 
       {/* ── 6. Cinematic PostFX Overlays ── */}
       <ColorGrade preset={scenePreset.colorGrade} />

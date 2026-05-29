@@ -9,6 +9,7 @@ import { RecordSquare } from "./templates/RecordSquare";
 import { FluidScene } from "./templates/FluidScene";
 import { MetalVHS } from "./templates/MetalVHS";
 import { PremiumCard } from "./templates/PremiumCard";
+import { QAPixelation, QAFerroFluid, QAStrobe } from "./qa";
 
 const typedDefaultProps = defaultProps as ClippedRenderProps;
 
@@ -47,6 +48,11 @@ const calculateMetadata: CalculateMetadataFunction<ClippedRenderProps> = ({ prop
 export const RemotionRoot = () => {
   return (
     <>
+      {/* ── QA Bench: element verification ── */}
+      <Composition id="qa-pixelation" component={QAPixelation} durationInFrames={1} fps={30} width={1080} height={1080} />
+      <Composition id="qa-ferrofluid" component={QAFerroFluid} durationInFrames={1} fps={30} width={1080} height={1080} />
+      <Composition id="qa-strobe" component={QAStrobe} durationInFrames={30} fps={30} width={1080} height={1080} />
+
       {manifest.templates.map((template) => {
         const id = template.composition_id as RemotionCompositionId;
         const component = components[id];

@@ -1,3 +1,4 @@
+import type { ElementInstance, EffectModifierInstance } from "../elements/types";
 import type { TypographyPreset } from "../tokens/typography";
 import type { ColorGradePreset } from "../effects/ColorGrade";
 import type { AtmosphereMode } from "../effects/AtmosphereLayer";
@@ -42,6 +43,13 @@ export type ScenePreset = {
     enabled: boolean;
     opacity: number;
   };
+  effects: ElementInstance[];
+  visualizers: ElementInstance[];
+  modifiers?: EffectModifierInstance[];
+  lights: ElementInstance[];
+  background: ElementInstance[];
+  scene: ElementInstance[];
+  enable3D?: boolean;
 };
 
 const presets: Record<ScenePresetId, ScenePreset> = {
@@ -55,6 +63,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: false, color: "transparent", opacity: 0 },
     visualizer: { glow: false, intensity: 0.3 },
     halo: { enabled: false, opacity: 0 },
+    effects: [],
+    visualizers: [{ id: "spectre", enabled: true, props: { intensity: 0.3 } }],
+    lights: [],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
   cinematic: {
     id: "cinematic",
@@ -66,6 +79,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: false, color: "transparent", opacity: 0 },
     visualizer: { glow: false, intensity: 0.4 },
     halo: { enabled: false, opacity: 0 },
+    effects: [],
+    visualizers: [{ id: "spectre", enabled: true, props: { intensity: 0.4 } }],
+    lights: [{ id: "light-preset", enabled: true, props: { intensity: 0.4 } }],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
   "neo-noir": {
     id: "neo-noir",
@@ -77,6 +95,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: true, color: "rgba(0, 150, 255, 0.3)", opacity: 0.5 },
     visualizer: { glow: true, intensity: 0.6 },
     halo: { enabled: true, opacity: 0.15 },
+    effects: [{ id: "vignette", enabled: true, props: { intensity: 0.6 } }, { id: "chromatic-aberration", enabled: true, props: { intensity: 0.4 } }],
+    visualizers: [{ id: "spectre", enabled: true, props: { intensity: 0.6, glow: true } }],
+    lights: [{ id: "light-preset", enabled: true, props: { intensity: 0.5, variant: "neon-tunnel" } }],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
   "vhs-death": {
     id: "vhs-death",
@@ -88,6 +111,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: true, color: "rgba(255, 100, 100, 0.25)", opacity: 0.4 },
     visualizer: { glow: true, intensity: 0.7 },
     halo: { enabled: true, opacity: 0.25 },
+    effects: [{ id: "vignette", enabled: true, props: { intensity: 0.7 } }, { id: "chromatic-aberration", enabled: true, props: { intensity: 0.5 } }, { id: "scanline", enabled: true, props: { intensity: 0.4 } }],
+    visualizers: [{ id: "spectre", enabled: true, props: { intensity: 0.7, glow: true } }],
+    lights: [{ id: "light-preset", enabled: true, props: { intensity: 0.5, variant: "neon-tunnel" } }],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
   "black-metal": {
     id: "black-metal",
@@ -99,6 +127,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: true, color: "rgba(100, 100, 100, 0.3)", opacity: 0.4 },
     visualizer: { glow: false, intensity: 0.8 },
     halo: { enabled: false, opacity: 0 },
+    effects: [{ id: "vignette", enabled: true, props: { intensity: 0.7 } }, { id: "noise", enabled: true, props: { intensity: 0.3 } }],
+    visualizers: [{ id: "spectre", enabled: true, props: { intensity: 0.8 } }],
+    lights: [],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
   "boom-bap": {
     id: "boom-bap",
@@ -110,6 +143,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: false, color: "transparent", opacity: 0 },
     visualizer: { glow: false, intensity: 0.5 },
     halo: { enabled: false, opacity: 0 },
+    effects: [{ id: "vignette", enabled: true, props: { intensity: 0.5 } }],
+    visualizers: [{ id: "pulsar", enabled: true, props: { intensity: 0.5 } }],
+    lights: [{ id: "light-preset", enabled: true, props: { intensity: 0.4, variant: "warm-glow" } }],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
   "luxury-vinyl": {
     id: "luxury-vinyl",
@@ -121,6 +159,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: true, color: "rgba(255, 215, 0, 0.4)", opacity: 0.6 },
     visualizer: { glow: false, intensity: 0.4 },
     halo: { enabled: false, opacity: 0 },
+    effects: [{ id: "vignette", enabled: true, props: { intensity: 0.5 } }],
+    visualizers: [{ id: "pulsar", enabled: true, props: { intensity: 0.4 } }],
+    lights: [{ id: "light-preset", enabled: true, props: { intensity: 0.3, variant: "warm-glow" } }],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
   brutalist: {
     id: "brutalist",
@@ -132,6 +175,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: false, color: "transparent", opacity: 0 },
     visualizer: { glow: false, intensity: 0.6 },
     halo: { enabled: false, opacity: 0 },
+    effects: [],
+    visualizers: [{ id: "spectre", enabled: true, props: { intensity: 0.6 } }],
+    lights: [],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
   "spotify-canvas": {
     id: "spotify-canvas",
@@ -143,6 +191,11 @@ const presets: Record<ScenePresetId, ScenePreset> = {
     rimLight: { enabled: false, color: "transparent", opacity: 0 },
     visualizer: { glow: false, intensity: 0.3 },
     halo: { enabled: false, opacity: 0 },
+    effects: [{ id: "vignette", enabled: true, props: { intensity: 0.3 } }],
+    visualizers: [{ id: "spectre", enabled: true, props: { intensity: 0.3 } }],
+    lights: [],
+    background: [{ id: "gradient-bg", enabled: true, props: { intensity: 1 } }],
+    scene: [],
   },
 };
 

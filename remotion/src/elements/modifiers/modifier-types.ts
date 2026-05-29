@@ -1,0 +1,93 @@
+import type { EffectModifierId, ModifierDefinition } from "../types";
+import {
+  glowModifierInspector,
+  blurModifierInspector,
+  shadowModifierInspector,
+  strokeModifierInspector,
+  adjustModifierInspector,
+  ditherModifierInspector,
+  pixelateModifierInspector,
+  wobbleModifierInspector,
+} from "../inspector";
+
+export const modifierDefinitions: ModifierDefinition[] = [
+  {
+    id: "glow",
+    label: "Glow",
+    description: "Soft aura glow behind element",
+    inspector: glowModifierInspector,
+    safeByDefault: true,
+    recommendedFor: ["cinematic", "luxury-vinyl", "concert"],
+    avoidFor: ["clean", "black-metal"],
+  },
+  {
+    id: "blur",
+    label: "Blur",
+    description: "Defocus layer for depth effect",
+    inspector: blurModifierInspector,
+    safeByDefault: true,
+    recommendedFor: ["cinematic", "editorial"],
+  },
+  {
+    id: "shadow",
+    label: "Shadow",
+    description: "Drop shadow for depth",
+    inspector: shadowModifierInspector,
+    safeByDefault: true,
+    recommendedFor: ["editorial", "brutalist"],
+  },
+  {
+    id: "stroke",
+    label: "Stroke",
+    description: "Outline edge for text and shapes",
+    inspector: strokeModifierInspector,
+    safeByDefault: true,
+    recommendedFor: ["brutalist", "vhs"],
+  },
+  {
+    id: "adjust",
+    label: "Adjust",
+    description: "Color correction for element",
+    inspector: adjustModifierInspector,
+    safeByDefault: true,
+    recommendedFor: ["all"],
+  },
+  {
+    id: "dither",
+    label: "Dither",
+    description: "Crunchy color quantization and noise",
+    inspector: ditherModifierInspector,
+    safeByDefault: false,
+    recommendedFor: ["vhs", "black-metal", "experimental"],
+    avoidFor: ["clean", "cinematic"],
+  },
+  {
+    id: "pixelate",
+    label: "Pixelate",
+    description: "Blocky pixelation overlay",
+    inspector: pixelateModifierInspector,
+    safeByDefault: false,
+    recommendedFor: ["vhs", "experimental"],
+    avoidFor: ["clean", "cinematic"],
+  },
+  {
+    id: "wobble",
+    label: "Wobble",
+    description: "Retro jitter and distortion",
+    inspector: wobbleModifierInspector,
+    safeByDefault: false,
+    recommendedFor: ["vhs", "metal-vhs", "experimental"],
+    avoidFor: ["clean", "cinematic"],
+  },
+];
+
+export const modifierDefaultProps: Record<EffectModifierId, Record<string, unknown>> = {
+  glow: { intensity: 0.3, radius: 20, color: "#FFFFFF" },
+  blur: { amount: 2 },
+  shadow: { x: 4, y: 4, blur: 10, color: "#000000", opacity: 0.3 },
+  stroke: { width: 2, color: "#FFFFFF", opacity: 1 },
+  adjust: { brightness: 0, contrast: 0, saturation: 0, hue: 0 },
+  dither: { amount: 0.5, pattern: "bayer", colors: 16 },
+  pixelate: { size: 8 },
+  wobble: { amplitude: 2, speed: 3 },
+};

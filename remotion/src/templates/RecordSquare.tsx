@@ -6,6 +6,7 @@ import { MetadataBlock } from "../components/Metadata";
 import { VinylRecord } from "../components/vinyl/VinylRecord";
 import { BeatFlash, PostFxStack, ReactiveHalo, ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight } from "../effects";
 import { RadialBars, SpectrumBars, WaveRibbon } from "../visualizers";
+import { ElementStack } from "../elements";
 import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
 import { Captions } from "../components/lyrics/Captions";
@@ -141,6 +142,15 @@ export const RecordSquare = (props: ClippedRenderProps) => {
           artist: props.metadata.artist,
           album: props.metadata.album,
         }}
+      />
+
+      {/* ── Element Stack (effects, lights, depth, backgrounds) ── */}
+      <ElementStack
+        elements={[
+          ...(scenePreset.background || []),
+          ...(scenePreset.effects || []),
+          ...(scenePreset.lights || []),
+        ]}
       />
 
       {/* ── Cinematic PostFX Overlays ── */}

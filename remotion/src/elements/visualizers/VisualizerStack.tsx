@@ -1,32 +1,29 @@
 import type { CSSProperties } from "react";
 import type { AudioAnalysis } from "../../audio/audio-utils";
 import type { Palette } from "../../lib/palette";
+import type { VisualizerElementProps } from "../types";
 import { SpectrumBars } from "../../visualizers/SpectrumBars";
 import { Oscilloscope } from "../../visualizers/Oscilloscope";
 import { RadialBars } from "../../visualizers/RadialBars";
+import { PulseRings } from "../../visualizers/PulseRings";
 import { FerroFluid } from "./FerroFluid";
-
-export type VisualizerElementProps = {
-  audio: AudioAnalysis;
-  palette: Palette;
-  intensity?: number;
-  opacity?: number;
-  glow?: boolean;
-  variant?: string;
-  width?: number;
-  height?: number;
-};
 
 export const VisualizerStack = ({
   id,
   audio,
   palette,
+  appearance,
   intensity = 0.5,
-  glow = false,
-  variant,
+  color,
+  primaryColor,
+  secondaryColor,
+  density,
+  pattern: patternVal,
+  volume,
   width = 860,
   height = 96,
 }: VisualizerElementProps & { id: string }) => {
+  const opacity = appearance?.opacity ?? 1;
   switch (id) {
     case "spectre":
       return (
@@ -36,8 +33,7 @@ export const VisualizerStack = ({
           count={48}
           width={width}
           height={height}
-          mirror={variant === "mirror"}
-          glow={glow}
+          color={color}
         />
       );
     case "oscilloscope":
@@ -47,19 +43,18 @@ export const VisualizerStack = ({
           palette={palette}
           width={width}
           height={height}
+          color={color}
           strokeWidth={1.5}
-          glow={glow}
         />
       );
     case "pulsar":
       return (
-        <RadialBars
+        <PulseRings
           audio={audio}
           palette={palette}
           size={Math.min(width, height) * 1.2}
-          innerRadius={Math.min(width, height) * 0.35}
-          count={32}
-          mode="ring"
+          ringCount={Math.round(patternVal || 4) + 4}
+          color={primaryColor || color}
         />
       );
     case "circle":
@@ -70,7 +65,18 @@ export const VisualizerStack = ({
           size={Math.min(width, height) * 1.4}
           innerRadius={Math.min(width, height) * 0.35}
           count={64}
-          mode={variant === "flower" ? "flower" : "ring"}
+          mode="ring"
+        />
+      );
+    case "waveform":
+      return (
+        <Oscilloscope
+          audio={audio}
+          palette={palette}
+          width={width}
+          height={height}
+          color={color}
+          strokeWidth={3}
         />
       );
     case "ferro-fluid":
@@ -81,7 +87,7 @@ export const VisualizerStack = ({
             height,
             position: "relative",
             overflow: "hidden",
-            opacity: intensity * 0.7 + 0.3,
+            opacity: (intensity || 0.5) * 0.7 + 0.3,
           }}
         >
           <FerroFluid

@@ -61,8 +61,8 @@ The Elements Registry is a unified, categorized system of visual building blocks
 | Status | Count |
 |--------|-------|
 | Implemented | 28 |
-| Stubbed (not implemented) | 15 |
-| **Total registered** | **43** |
+| Stubbed (not implemented) | 16 |
+| **Total registered** | **44** |
 
 ## Architecture
 
@@ -70,7 +70,7 @@ The Elements Registry is a unified, categorized system of visual building blocks
 elements/
 ├── types.ts            # Shared TypeScript types
 ├── categories.ts       # Category labels and ordering
-├── registry.ts         # 43 element definitions
+├── registry.ts         # 44 element definitions
 ├── ElementStack.tsx     # Render engine — delegates to modular components
 ├── index.ts            # Barrel exports
 ├── text/               # TextElement, LyricsElement, Text3D

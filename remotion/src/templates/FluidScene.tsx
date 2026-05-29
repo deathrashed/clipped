@@ -8,6 +8,7 @@ import { MetadataBlock } from "../components/Metadata";
 import { Captions } from "../components/lyrics/Captions";
 import { BeatFlash, ChromaticAberration, PostFxStack, StarField, ColorGrade, AtmosphereLayer, Halation, AmbientLight } from "../effects";
 import { Oscilloscope, PulseRings } from "../visualizers";
+import { ElementStack } from "../elements";
 import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
 import { useLayout } from "../layouts";
@@ -140,6 +141,15 @@ export const FluidScene = (props: ClippedRenderProps) => {
           artist: props.metadata.artist,
           album: props.metadata.album,
         }}
+      />
+
+      {/* ── Element Stack (effects, lights, depth, backgrounds) ── */}
+      <ElementStack
+        elements={[
+          ...(scenePreset.background || []),
+          ...(scenePreset.effects || []),
+          ...(scenePreset.lights || []),
+        ]}
       />
 
       {/* ── Cinematic PostFX Overlays ── */}
