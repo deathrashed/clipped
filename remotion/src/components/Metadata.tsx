@@ -1,51 +1,43 @@
-import { useCurrentFrame, useVideoConfig } from "remotion";
-import type { ClippedRenderProps } from "../types";
-import type { Palette } from "../lib/palette";
+import type React from "react";
 import { cleanText, compactMeta } from "../lib/text";
 import { MetadataStack, fonts } from "../typography";
+import type { TypographyPreset } from "../tokens/typography";
+import type { Palette } from "../lib/palette";
 
 export const MetadataBlock = ({
-  props,
-  palette,
-  y,
+  title,
+  artist,
+  meta,
   align = "center",
   revealFrame = 20,
-  compact = false,
+  typographyPreset = "cinematic",
   style,
 }: {
-  props: ClippedRenderProps;
-  palette: Palette;
-  y?: number;
+  title: string;
+  artist: string;
+  meta?: string;
   align?: "center" | "left" | "right";
   revealFrame?: number;
-  compact?: boolean;
-  style?: React.CSSProperties;
+  typographyPreset?: TypographyPreset;
+  style?: React.CSSProperties & { accent?: string };
 }) => {
-  const title = cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"));
-  const artist = cleanText(props.metadata.artist, "Unknown Artist");
-  const meta = compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]);
-
-  // Resolve style preset
-  const stylePreset = props.options.style === "brutal" ? "brutal" : 
-                      props.options.style === "vhs" ? "vhs" : 
-                      props.options.style === "minimal" ? "minimal" : "cinematic";
+  const { accent, ...domStyle } = style || {};
 
   return (
     <div
       style={{
         width: "100%",
-        marginTop: y,
         zIndex: 50,
-        ...style,
+        ...domStyle,
       }}
     >
       <MetadataStack
         title={title}
         artist={artist}
-        meta={meta || undefined}
-        preset={stylePreset}
-        textColor={palette.text}
-        accentColor={palette.accent}
+        meta={meta}
+        preset={typographyPreset}
+        textColor={style?.color}
+        accentColor={accent}
         revealFrame={revealFrame}
         align={align}
       />
@@ -53,10 +45,17 @@ export const MetadataBlock = ({
   );
 };
 
-export const LowerThird = ({ props, palette }: { props: ClippedRenderProps; palette: Palette }) => {
-  if (props.options.captions !== "metadata") {
-    return null;
-  }
+export const LowerThird = ({
+  artist,
+  title,
+  palette,
+  style,
+}: {
+  artist: string;
+  title: string;
+  palette: Palette;
+  style?: React.CSSProperties;
+}) => {
   return (
     <div
       style={{
@@ -74,11 +73,11 @@ export const LowerThird = ({ props, palette }: { props: ClippedRenderProps; pale
         justifyContent: "space-between",
         gap: 22,
         zIndex: 50,
+        ...style,
       }}
     >
-      <span>{cleanText(props.metadata.artist, "Unknown Artist")}</span>
-      <span style={{ color: palette.accent }}>{cleanText(props.metadata.title, "Untitled")}</span>
+      <span>{cleanText(artist, "Unknown Artist")}</span>
+      <span style={{ color: palette.accent }}>{cleanText(title, "Untitled")}</span>
     </div>
   );
 };
-

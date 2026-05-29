@@ -2,7 +2,6 @@ export {
   Vignette,
   FilmGrain,
   Scanlines,
-  LightSweep,
   ReactiveHalo,
   BeatFlash,
   CameraShake,
@@ -13,3 +12,12 @@ export {
   NeonTunnel,
   FilmBurn
 } from "./Overlays";
+
+export { LightSweep } from "./LightSweep";
+export { Halation } from "./Halation";
+export { ColorGrade } from "./ColorGrade";
+export { AmbientLight } from "./AmbientLight";
+export { RimLight } from "./RimLight";
+export { DustLayer } from "./DustLayer";
+export { FogLayer } from "./FogLayer";
+export { AtmosphereLayer } from "./AtmosphereLayer";

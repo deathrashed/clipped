@@ -1,36 +1,30 @@
 /**
  * fluid_scene — Square metallic fluid/blob center scene
- *
- * Inspired by the Leaf Dog "Hide Those Eyes" reference:
- *   - Black star/particle field background
- *   - Animated metallic fluid blob at center
- *   - Compact typography at the bottom
- *   - Optional synced lyrics overlay
  */
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
 import { MetadataBlock } from "../components/Metadata";
 import { Captions } from "../components/lyrics/Captions";
-import { BeatFlash, ChromaticAberration, FilmGrain, StarField, Vignette } from "../effects";
+import { BeatFlash, ChromaticAberration, PostFxStack, StarField, ColorGrade, AtmosphereLayer, Halation, AmbientLight } from "../effects";
 import { Oscilloscope, PulseRings } from "../visualizers";
 import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
 import { useLayout } from "../layouts";
+import { cleanText, compactMeta } from "../lib/text";
+import { resolveScenePreset } from "../presets/scene-presets";
 
 export const FluidScene = (props: ClippedRenderProps) => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps } = useVideoConfig();
   const palette = resolvePalette(props);
   const motion = motionFactor(props.options.motion);
   const audio = useAudioReactive(props.assets.audioSrc, 128, props.options.seed);
+  const scenePreset = resolveScenePreset(props.options.style);
 
   const layout = useLayout("centered");
   const blobSize = layout.artwork.size;
   const blobY = layout.artwork.cy - layout.height / 2;
-
-  // Intro: title swoops in after 0.6s
-  const introReveal = spring({ frame: frame - fps * 0.6, fps, config: { damping: 22, stiffness: 100 } });
 
   // Blob animation — morph between rounded shapes
   const bassScale = 1 + audio.bass * 0.22 * motion;
@@ -44,8 +38,10 @@ export const FluidScene = (props: ClippedRenderProps) => {
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <AudioLayer props={props} />
 
-      {/* ── Star field background ── */}
-      <StarField starCount={180} speed={0.3 + audio.full * 0.2} opacity={0.85} />
+      {/* ── Star field background (Only for VHS / Black Metal / Neo Noir styles) ── */}
+      {["vhs-death", "black-metal", "neo-noir"].includes(scenePreset.id) ? (
+        <StarField starCount={120} speed={0.2 + audio.full * 0.15} opacity={0.6} />
+      ) : null}
 
       {/* ── Metallic fluid blob at center ── */}
       <div
@@ -106,7 +102,7 @@ export const FluidScene = (props: ClippedRenderProps) => {
           width={layout.visualizer.width}
           height={48}
           strokeWidth={2}
-          glow
+          glow={scenePreset.visualizer.glow}
         />
       </div>
 
@@ -116,15 +112,19 @@ export const FluidScene = (props: ClippedRenderProps) => {
       {/* ── Compact metadata ── */}
       {props.options.captions === "off" ? (
         <MetadataBlock
-          props={props}
-          palette={palette}
+          title={cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"))}
+          artist={cleanText(props.metadata.artist, "Unknown Artist")}
+          meta={compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]) || undefined}
+          align={layout.typography.align}
           revealFrame={fps * 0.6}
-          compact
+          typographyPreset={scenePreset.typographyPreset}
           style={{
             position: "absolute",
             left: layout.typography.left,
             top: layout.typography.top,
             width: layout.typography.width,
+            color: palette.text,
+            accent: palette.accent,
           }}
         />
       ) : null}
@@ -142,11 +142,25 @@ export const FluidScene = (props: ClippedRenderProps) => {
         }}
       />
 
-      {/* ── Post FX ── */}
+      {/* ── Cinematic PostFX Overlays ── */}
+      <ColorGrade preset={scenePreset.colorGrade} />
+      <AtmosphereLayer mode={scenePreset.atmosphere} intensity={1} />
+      {scenePreset.halation.enabled && (
+        <Halation
+          opacity={scenePreset.halation.opacity}
+          blur={scenePreset.halation.blur}
+          warmth={scenePreset.halation.warmth}
+        />
+      )}
+      {scenePreset.ambientLight.enabled && (
+        <AmbientLight
+          color={scenePreset.ambientLight.color}
+          opacity={scenePreset.ambientLight.opacity}
+        />
+      )}
+
       <BeatFlash props={props} palette={palette} intensity={0.14} />
-      <Vignette opacity={0.55} />
-      <FilmGrain opacity={0.06} cells={100} />
+      <PostFxStack props={props} palette={palette} grainOpacity={0.08} />
     </AbsoluteFill>
   );
 };
-

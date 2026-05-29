@@ -19,11 +19,17 @@ import {
   Scanlines,
   VHSTears,
   Vignette,
+  ColorGrade,
+  AtmosphereLayer,
+  Halation,
+  AmbientLight,
 } from "../effects";
 import { Oscilloscope, SpectrumBars } from "../visualizers";
 import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
 import { useLayout } from "../layouts";
+import { cleanText, compactMeta } from "../lib/text";
+import { resolveScenePreset } from "../presets/scene-presets";
 
 export const MetalVHS = (props: ClippedRenderProps) => {
   const frame = useCurrentFrame();
@@ -31,6 +37,7 @@ export const MetalVHS = (props: ClippedRenderProps) => {
   const palette = resolvePalette(props);
   const motion = motionFactor(props.options.motion);
   const audio = useAudioReactive(props.assets.audioSrc, 128, props.options.seed);
+  const scenePreset = resolveScenePreset(props.options.style);
 
   const layout = useLayout("centered");
   const artSize = layout.artwork.size;
@@ -88,7 +95,7 @@ export const MetalVHS = (props: ClippedRenderProps) => {
           width={layout.width * 0.82}
           height={44}
           strokeWidth={2}
-          glow
+          glow={scenePreset.visualizer.glow}
         />
       </div>
 
@@ -108,15 +115,19 @@ export const MetalVHS = (props: ClippedRenderProps) => {
       {/* ── Compact metadata ── */}
       {props.options.captions === "off" ? (
         <MetadataBlock
-          props={props}
-          palette={palette}
+          title={cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"))}
+          artist={cleanText(props.metadata.artist, "Unknown Artist")}
+          meta={compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]) || undefined}
+          align={layout.typography.align}
           revealFrame={fps * 0.3}
-          compact
+          typographyPreset={scenePreset.typographyPreset}
           style={{
             position: "absolute",
             left: layout.typography.left,
             top: layout.typography.top,
             width: layout.typography.width,
+            color: palette.text,
+            accent: palette.accent,
           }}
         />
       ) : null}
@@ -134,6 +145,23 @@ export const MetalVHS = (props: ClippedRenderProps) => {
         }}
       />
 
+      {/* ── Cinematic PostFX Overlays ── */}
+      <ColorGrade preset={scenePreset.colorGrade} />
+      <AtmosphereLayer mode={scenePreset.atmosphere} intensity={1} />
+      {scenePreset.halation.enabled && (
+        <Halation
+          opacity={scenePreset.halation.opacity}
+          blur={scenePreset.halation.blur}
+          warmth={scenePreset.halation.warmth}
+        />
+      )}
+      {scenePreset.ambientLight.enabled && (
+        <AmbientLight
+          color={scenePreset.ambientLight.color}
+          opacity={scenePreset.ambientLight.opacity}
+        />
+      )}
+
       {/* ── VHS post FX ── */}
       <ChromaticAberration strength={chromaStrength} opacity={0.4} />
       <Scanlines opacity={0.15} />
@@ -144,4 +172,3 @@ export const MetalVHS = (props: ClippedRenderProps) => {
     </AbsoluteFill>
   );
 };
-

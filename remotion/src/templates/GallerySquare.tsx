@@ -4,13 +4,14 @@ import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
 import { ArtworkFrame } from "../artwork/ArtworkFrame";
 import { MetadataBlock } from "../components/Metadata";
-import { BeatFlash, LightSweep, PostFxStack, ReactiveHalo } from "../effects";
+import { BeatFlash, PostFxStack, ReactiveHalo, ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight } from "../effects";
 import { SpectrumBars, WaveRibbon } from "../visualizers";
 import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
-import { effectPreset } from "../presets/effects";
 import { Captions } from "../components/lyrics/Captions";
 import { useLayout } from "../layouts";
+import { cleanText, compactMeta } from "../lib/text";
+import { resolveScenePreset } from "../presets/scene-presets";
 
 export const GallerySquare = (props: ClippedRenderProps) => {
   const frame = useCurrentFrame();
@@ -18,7 +19,7 @@ export const GallerySquare = (props: ClippedRenderProps) => {
   const palette = resolvePalette(props);
   const motion = motionFactor(props.options.motion);
   const audio = useAudioReactive(props.assets.audioSrc, 128, props.options.seed);
-  const preset = effectPreset(props);
+  const scenePreset = resolveScenePreset(props.options.style);
   
   const layout = useLayout("centered");
   const coverSize = layout.artwork.size;
@@ -26,7 +27,6 @@ export const GallerySquare = (props: ClippedRenderProps) => {
 
   const alternateImage = props.assets.artistImageSrc || props.assets.logoSrc || props.assets.coverSrc;
   const showAlternate = props.options.scene_pack === "gallery" && alternateImage && frame > durationInFrames * 0.48;
-  const titleY = props.options.waveform === "none" ? layout.height - 214 : layout.height - 258;
   
   const slide = interpolate(
     frame,
@@ -42,8 +42,16 @@ export const GallerySquare = (props: ClippedRenderProps) => {
     <AbsoluteFill style={{ backgroundColor: palette.bg }}>
       <AudioLayer props={props} />
       <ArtworkBackground src={props.assets.coverSrc} palette={palette} mode="atmospheric" />
-      <ReactiveHalo props={props} palette={palette} size={coverSize * 1.6} y={artY} opacity={preset.haloOpacity} />
-      {preset.lightSweep ? <LightSweep palette={palette} opacity={0.2} /> : null}
+      
+      {scenePreset.halo.enabled && (
+        <ReactiveHalo
+          props={props}
+          palette={palette}
+          size={coverSize * 1.6}
+          y={artY}
+          opacity={scenePreset.halo.opacity}
+        />
+      )}
       
       <div
         style={{
@@ -65,6 +73,13 @@ export const GallerySquare = (props: ClippedRenderProps) => {
                   objectFit: "cover",
                 }}
               />
+              {scenePreset.rimLight.enabled && (
+                <RimLight
+                  color={scenePreset.rimLight.color}
+                  opacity={scenePreset.rimLight.opacity}
+                  side="all"
+                />
+              )}
             </ArtworkFrame>
           </div>
         ) : (
@@ -93,24 +108,36 @@ export const GallerySquare = (props: ClippedRenderProps) => {
                 No Artwork
               </div>
             )}
+            {scenePreset.rimLight.enabled && (
+              <RimLight
+                color={scenePreset.rimLight.color}
+                opacity={scenePreset.rimLight.opacity}
+                side="all"
+              />
+            )}
           </ArtworkFrame>
         )}
       </div>
 
       {props.options.captions === "off" ? (
         <MetadataBlock
-          props={props}
-          palette={palette}
+          title={cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"))}
+          artist={cleanText(props.metadata.artist, "Unknown Artist")}
+          meta={compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]) || undefined}
+          align={layout.typography.align}
           revealFrame={20}
-          compact
+          typographyPreset={scenePreset.typographyPreset}
           style={{
             position: "absolute",
             left: layout.typography.left,
             top: layout.typography.top,
             width: layout.typography.width,
+            color: palette.text,
+            accent: palette.accent,
           }}
         />
       ) : null}
+      
       {props.options.waveform === "bars" || props.options.waveform === "mirror" ? (
         <div style={{ position: "absolute", left: "50%", bottom: layout.height - layout.visualizer.bottom, transform: "translateX(-50%)" }}>
           <SpectrumBars audio={audio} palette={palette} count={42} width={layout.visualizer.width} height={96} mirror={props.options.waveform === "mirror"} />
@@ -121,6 +148,7 @@ export const GallerySquare = (props: ClippedRenderProps) => {
           <WaveRibbon audio={audio} palette={palette} width={layout.visualizer.width} height={112} />
         </div>
       ) : null}
+      
       <Captions
         lyricsSrc={props.assets.lyrics}
         lyricsJson={(props.assets as any).lyricsJson}
@@ -132,9 +160,26 @@ export const GallerySquare = (props: ClippedRenderProps) => {
           album: props.metadata.album,
         }}
       />
+      
+      {/* ── Cinematic PostFX Overlays ── */}
+      <ColorGrade preset={scenePreset.colorGrade} />
+      <AtmosphereLayer mode={scenePreset.atmosphere} intensity={1} />
+      {scenePreset.halation.enabled && (
+        <Halation
+          opacity={scenePreset.halation.opacity}
+          blur={scenePreset.halation.blur}
+          warmth={scenePreset.halation.warmth}
+        />
+      )}
+      {scenePreset.ambientLight.enabled && (
+        <AmbientLight
+          color={scenePreset.ambientLight.color}
+          opacity={scenePreset.ambientLight.opacity}
+        />
+      )}
+
       <BeatFlash props={props} palette={palette} intensity={0.11} />
-      <PostFxStack props={props} palette={palette} grainOpacity={preset.grainOpacity} />
+      <PostFxStack props={props} palette={palette} grainOpacity={0.08} />
     </AbsoluteFill>
   );
 };
-

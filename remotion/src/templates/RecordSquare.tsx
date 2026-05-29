@@ -4,13 +4,14 @@ import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
 import { MetadataBlock } from "../components/Metadata";
 import { VinylRecord } from "../components/vinyl/VinylRecord";
-import { BeatFlash, LightSweep, PostFxStack, ReactiveHalo } from "../effects";
+import { BeatFlash, PostFxStack, ReactiveHalo, ColorGrade, AtmosphereLayer, Halation, AmbientLight, RimLight } from "../effects";
 import { RadialBars, SpectrumBars, WaveRibbon } from "../visualizers";
 import { useAudioReactive } from "../hooks/useAudioReactive";
 import { motionFactor, resolvePalette } from "../lib/palette";
-import { effectPreset } from "../presets/effects";
 import { Captions } from "../components/lyrics/Captions";
 import { useLayout } from "../layouts";
+import { cleanText, compactMeta } from "../lib/text";
+import { resolveScenePreset } from "../presets/scene-presets";
 
 export const RecordSquare = (props: ClippedRenderProps) => {
   const frame = useCurrentFrame();
@@ -18,7 +19,7 @@ export const RecordSquare = (props: ClippedRenderProps) => {
   const palette = resolvePalette(props);
   const motion = motionFactor(props.options.motion);
   const audio = useAudioReactive(props.assets.audioSrc, 160, props.options.seed);
-  const preset = effectPreset(props);
+  const scenePreset = resolveScenePreset(props.options.style);
   
   const layout = useLayout("centered");
   const artSize = layout.artwork.size;
@@ -34,8 +35,17 @@ export const RecordSquare = (props: ClippedRenderProps) => {
     <AbsoluteFill style={{ backgroundColor: palette.bg }}>
       <AudioLayer props={props} />
       <ArtworkBackground src={props.assets.coverSrc} palette={palette} mode="atmospheric" />
-      <ReactiveHalo props={props} palette={palette} size={artSize * 1.64} y={artY} opacity={preset.haloOpacity} />
-      {preset.lightSweep ? <LightSweep palette={palette} opacity={0.24} /> : null}
+      
+      {scenePreset.halo.enabled && (
+        <ReactiveHalo
+          props={props}
+          palette={palette}
+          size={artSize * 1.64}
+          y={artY}
+          opacity={scenePreset.halo.opacity}
+        />
+      )}
+
       <div
         style={{
           position: "absolute",
@@ -49,6 +59,7 @@ export const RecordSquare = (props: ClippedRenderProps) => {
           boxShadow: `0 0 90px ${palette.accent}22`,
         }}
       />
+      
       {["ring", "radial", "flower"].includes(String(props.options.waveform)) ? (
         <div
           style={{
@@ -68,21 +79,47 @@ export const RecordSquare = (props: ClippedRenderProps) => {
           />
         </div>
       ) : null}
-      <VinylRecord props={props} palette={palette} size={artSize} y={artY} />
+
+      {/* Vinyl record container supporting rim lighting */}
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          width: artSize,
+          height: artSize,
+          transform: `translate(-50%, calc(-50% + ${artY}px))`,
+        }}
+      >
+        <VinylRecord props={props} palette={palette} size={artSize} y={0} />
+        {scenePreset.rimLight.enabled && (
+          <RimLight
+            color={scenePreset.rimLight.color}
+            opacity={scenePreset.rimLight.opacity}
+            side="all"
+          />
+        )}
+      </div>
+
       {props.options.captions === "off" ? (
         <MetadataBlock
-          props={props}
-          palette={palette}
+          title={cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"))}
+          artist={cleanText(props.metadata.artist, "Unknown Artist")}
+          meta={compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]) || undefined}
+          align={layout.typography.align}
           revealFrame={20}
-          compact
+          typographyPreset={scenePreset.typographyPreset}
           style={{
             position: "absolute",
             left: layout.typography.left,
             top: layout.typography.top,
             width: layout.typography.width,
+            color: palette.text,
+            accent: palette.accent,
           }}
         />
       ) : null}
+
       {props.options.waveform === "bars" || props.options.waveform === "mirror" ? (
         <div style={{ position: "absolute", left: "50%", bottom: layout.height - layout.visualizer.bottom, transform: "translateX(-50%)" }}>
           <SpectrumBars audio={audio} palette={palette} count={44} width={layout.visualizer.width} height={88} mirror={props.options.waveform === "mirror"} />
@@ -93,6 +130,7 @@ export const RecordSquare = (props: ClippedRenderProps) => {
           <WaveRibbon audio={audio} palette={palette} width={layout.visualizer.width + 10} height={96} />
         </div>
       ) : null}
+
       <Captions
         lyricsSrc={props.assets.lyrics}
         lyricsJson={(props.assets as any).lyricsJson}
@@ -104,8 +142,27 @@ export const RecordSquare = (props: ClippedRenderProps) => {
           album: props.metadata.album,
         }}
       />
+
+      {/* ── Cinematic PostFX Overlays ── */}
+      <ColorGrade preset={scenePreset.colorGrade} />
+      <AtmosphereLayer mode={scenePreset.atmosphere} intensity={1} />
+      {scenePreset.halation.enabled && (
+        <Halation
+          opacity={scenePreset.halation.opacity}
+          blur={scenePreset.halation.blur}
+          warmth={scenePreset.halation.warmth}
+        />
+      )}
+      {scenePreset.ambientLight.enabled && (
+        <AmbientLight
+          color={scenePreset.ambientLight.color}
+          opacity={scenePreset.ambientLight.opacity}
+        />
+      )}
+
       <BeatFlash props={props} palette={palette} intensity={0.12} />
-      <PostFxStack props={props} palette={palette} grainOpacity={preset.grainOpacity} />
+      <PostFxStack props={props} palette={palette} grainOpacity={0.08} />
+
       <div
         style={{
           position: "absolute",
@@ -120,4 +177,3 @@ export const RecordSquare = (props: ClippedRenderProps) => {
     </AbsoluteFill>
   );
 };
-
