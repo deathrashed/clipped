@@ -9,7 +9,7 @@ import {
 import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
-import { ArtworkFrame } from "../materials";
+import { ArtworkFrame } from "../artwork/ArtworkFrame";
 import { MetadataBlock } from "../components/Metadata";
 import { Captions } from "../components/lyrics/Captions";
 import {
@@ -110,9 +110,14 @@ export const MetalVHS = (props: ClippedRenderProps) => {
         <MetadataBlock
           props={props}
           palette={palette}
-          y={layout.typography.top}
           revealFrame={fps * 0.3}
           compact
+          style={{
+            position: "absolute",
+            left: layout.typography.left,
+            top: layout.typography.top,
+            width: layout.typography.width,
+          }}
         />
       ) : null}
 

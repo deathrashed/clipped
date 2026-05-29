@@ -2,7 +2,7 @@ import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame, us
 import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
 import { ArtworkBackground } from "../artwork/ArtworkBackground";
-import { ArtworkFrame } from "../materials";
+import { ArtworkFrame } from "../artwork/ArtworkFrame";
 import { MetadataBlock } from "../components/Metadata";
 import { BeatFlash, LightSweep, PostFxStack, ReactiveHalo } from "../effects";
 import { SpectrumBars, WaveRibbon } from "../visualizers";
@@ -98,7 +98,18 @@ export const GallerySquare = (props: ClippedRenderProps) => {
       </div>
 
       {props.options.captions === "off" ? (
-        <MetadataBlock props={props} palette={palette} y={layout.typography.top} revealFrame={20} compact />
+        <MetadataBlock
+          props={props}
+          palette={palette}
+          revealFrame={20}
+          compact
+          style={{
+            position: "absolute",
+            left: layout.typography.left,
+            top: layout.typography.top,
+            width: layout.typography.width,
+          }}
+        />
       ) : null}
       {props.options.waveform === "bars" || props.options.waveform === "mirror" ? (
         <div style={{ position: "absolute", left: "50%", bottom: layout.height - layout.visualizer.bottom, transform: "translateX(-50%)" }}>

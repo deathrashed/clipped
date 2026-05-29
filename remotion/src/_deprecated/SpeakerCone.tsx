@@ -1,5 +1,5 @@
 import { useCurrentFrame } from "remotion";
-import type { AudioAnalysis } from "./audio-utils";
+import type { AudioAnalysis } from "../audio/audio-utils";
 
 /**
  * SpeakerCone — vibrating physical speaker graphic.

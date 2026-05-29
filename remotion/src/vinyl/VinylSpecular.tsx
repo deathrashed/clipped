@@ -3,8 +3,9 @@ import { motionFactor } from "../tokens/motion";
 
 /**
  * VinylSpecular — world-space fixed specular highlight.
- * Counter-rotates against VinylDisc so the sheen stays stationary
- * while grooves spin underneath — physically correct.
+ * Represents reflections from a stationary light source.
+ * The highlight remains fixed in world space (0 degrees rotation)
+ * while the vinyl disc grooves rotate underneath.
  * Must be rendered OUTSIDE VinylDisc (not as a child).
  */
 export const VinylSpecular = ({
@@ -16,10 +17,6 @@ export const VinylSpecular = ({
   motion?: string;
   opacity?: number;
 }) => {
-  const frame = useCurrentFrame();
-  const mf = motionFactor(motion);
-  const counterRotation = -(frame * (200 / 30) * mf);
-
   return (
     <div
       style={{
@@ -28,7 +25,6 @@ export const VinylSpecular = ({
         width: size,
         height: size,
         borderRadius: "50%",
-        transform: `rotate(${counterRotation}deg)`,
         background: "conic-gradient(from 30deg, rgba(255,255,255,0.18), transparent 20%, rgba(255,255,255,0.08) 30%, transparent 52%, rgba(255,255,255,0.14), transparent 76%)",
         mixBlendMode: "screen",
         opacity,

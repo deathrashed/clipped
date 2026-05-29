@@ -11,16 +11,16 @@ export const MetadataBlock = ({
   align = "center",
   revealFrame = 20,
   compact = false,
+  style,
 }: {
   props: ClippedRenderProps;
   palette: Palette;
-  y: number;
+  y?: number;
   align?: "center" | "left" | "right";
   revealFrame?: number;
   compact?: boolean;
+  style?: React.CSSProperties;
 }) => {
-  const frame = useCurrentFrame();
-  const { width } = useVideoConfig();
   const title = cleanText(props.metadata.title, cleanText(props.metadata.sourceFilename, "Untitled"));
   const artist = cleanText(props.metadata.artist, "Unknown Artist");
   const meta = compactMeta([props.metadata.album, props.metadata.year, props.metadata.genre]);
@@ -33,13 +33,10 @@ export const MetadataBlock = ({
   return (
     <div
       style={{
-        position: "absolute",
-        left: align === "center" ? "50%" : align === "left" ? 92 : undefined,
-        right: align === "right" ? 92 : undefined,
-        top: y,
-        transform: align === "center" ? "translateX(-50%)" : undefined,
-        width: align === "center" ? "86%" : "72%",
+        width: "100%",
+        marginTop: y,
         zIndex: 50,
+        ...style,
       }}
     >
       <MetadataStack
@@ -50,7 +47,7 @@ export const MetadataBlock = ({
         textColor={palette.text}
         accentColor={palette.accent}
         revealFrame={revealFrame}
-        align={align === "center" ? "center" : "left"}
+        align={align}
       />
     </div>
   );

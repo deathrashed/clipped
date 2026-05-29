@@ -89,7 +89,7 @@ export const ReactiveHalo = ({
   palette,
   size,
   y = 0,
-  opacity = 0.72,
+  opacity = 0.38,
 }: {
   props: ClippedRenderProps;
   palette: Palette;

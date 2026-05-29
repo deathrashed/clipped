@@ -118,9 +118,14 @@ export const FluidScene = (props: ClippedRenderProps) => {
         <MetadataBlock
           props={props}
           palette={palette}
-          y={layout.typography.top}
           revealFrame={fps * 0.6}
           compact
+          style={{
+            position: "absolute",
+            left: layout.typography.left,
+            top: layout.typography.top,
+            width: layout.typography.width,
+          }}
         />
       ) : null}
 

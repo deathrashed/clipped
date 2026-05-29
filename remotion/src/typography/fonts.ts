@@ -7,10 +7,22 @@ import { loadFont as loadOswald } from "@remotion/google-fonts/Oswald";
 import { loadFont as loadBebasNeue } from "@remotion/google-fonts/BebasNeue";
 import { loadFont as loadSpaceMono } from "@remotion/google-fonts/SpaceMono";
 
-const inter    = loadInter();
-const oswald   = loadOswald();
-const bebas    = loadBebasNeue();
-const spaceMono = loadSpaceMono();
+const inter = loadInter("normal", {
+  weights: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+});
+const oswald = loadOswald("normal", {
+  weights: ["400", "500", "700"],
+  subsets: ["latin"],
+});
+const bebas = loadBebasNeue("normal", {
+  weights: ["400"],
+  subsets: ["latin"],
+});
+const spaceMono = loadSpaceMono("normal", {
+  weights: ["400", "700"],
+  subsets: ["latin"],
+});
 
 /**
  * Font family strings keyed by role.

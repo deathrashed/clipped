@@ -1,7 +1,7 @@
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import type { ClippedRenderProps } from "../types";
 import { AudioLayer } from "../components/AudioLayer";
-import { BackgroundField } from "../components/Artwork";
+import { ArtworkBackground } from "../artwork/ArtworkBackground";
 import { MetadataBlock } from "../components/Metadata";
 import { VinylRecord } from "../components/vinyl/VinylRecord";
 import { BeatFlash, LightSweep, PostFxStack, ReactiveHalo } from "../effects";
@@ -33,7 +33,7 @@ export const RecordSquare = (props: ClippedRenderProps) => {
   return (
     <AbsoluteFill style={{ backgroundColor: palette.bg }}>
       <AudioLayer props={props} />
-      <BackgroundField props={props} palette={palette} intensity={1.18} />
+      <ArtworkBackground src={props.assets.coverSrc} palette={palette} mode="atmospheric" />
       <ReactiveHalo props={props} palette={palette} size={artSize * 1.64} y={artY} opacity={preset.haloOpacity} />
       {preset.lightSweep ? <LightSweep palette={palette} opacity={0.24} /> : null}
       <div
@@ -70,7 +70,18 @@ export const RecordSquare = (props: ClippedRenderProps) => {
       ) : null}
       <VinylRecord props={props} palette={palette} size={artSize} y={artY} />
       {props.options.captions === "off" ? (
-        <MetadataBlock props={props} palette={palette} y={layout.typography.top} revealFrame={20} compact />
+        <MetadataBlock
+          props={props}
+          palette={palette}
+          revealFrame={20}
+          compact
+          style={{
+            position: "absolute",
+            left: layout.typography.left,
+            top: layout.typography.top,
+            width: layout.typography.width,
+          }}
+        />
       ) : null}
       {props.options.waveform === "bars" || props.options.waveform === "mirror" ? (
         <div style={{ position: "absolute", left: "50%", bottom: layout.height - layout.visualizer.bottom, transform: "translateX(-50%)" }}>

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { MatteBorder } from "./MatteBorder";
-import { ChromeBorder } from "./ChromeBorder";
+import { MatteBorder } from "../materials/MatteBorder";
+import { ChromeBorder } from "../materials/ChromeBorder";
 
 export type FramePreset = "none" | "matte" | "chrome" | "vinyl-sleeve";
 
