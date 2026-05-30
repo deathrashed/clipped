@@ -1,0 +1,21 @@
+{
+  "artist": "Clipped Bot",
+  "output": "/Users/rd/Scripts/Riley/clipped",
+  "photo_sources": [
+    "spotify",
+    "discogs",
+    "lastfm",
+    "audiodb",
+    "metallum"
+  ],
+  "logo_sources": [
+    "audiodb",
+    "fanart",
+    "metallum"
+  ],
+  "selected": {},
+  "candidates": {
+    "photos": [],
+    "logos": []
+  }
+}

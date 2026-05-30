@@ -1,0 +1,15 @@
+{
+  "description": "QA fixture: transform controls — editing position, rotation, and scale",
+  "initialState": {
+    "elements": [
+      { "id": "vignette", "visible": true, "locked": false, "instance": { "id": "vignette", "enabled": true } }
+    ],
+    "selectedId": "vignette"
+  },
+  "edits": [
+    { "field": "transform.position.x", "value": 100, "expected": { "position": { "x": 100 } } },
+    { "field": "transform.position.y", "value": -50, "expected": { "position": { "x": 100, "y": -50 } } },
+    { "field": "transform.rotation.z", "value": 45, "expected": { "rotation": { "z": 45 } } },
+    { "field": "transform.scale", "value": 1.5, "expected": { "scale": 1.5 } }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "description": "QA fixture: inspector control rendering — one element per control type",
+  "elements": [
+    {
+      "id": "vignette",
+      "controlType": "slider",
+      "controlKey": "intensity",
+      "expectedLabel": "Intensity",
+      "expectedDefault": 0.5
+    },
+    {
+      "id": "text",
+      "controlType": "select",
+      "controlKey": "preset",
+      "expectedLabel": "Style",
+      "expectedDefault": "cinematic",
+      "expectedOptions": ["cinematic", "minimal", "brutal", "mono"]
+    },
+    {
+      "id": "gradient-bg",
+      "controlType": "color",
+      "controlKey": "color1",
+      "expectedLabel": "Color 1",
+      "expectedDefault": "#0f0c29"
+    },
+    {
+      "id": "waveform",
+      "controlType": "boolean",
+      "controlKey": "mirror",
+      "expectedLabel": "Mirror",
+      "expectedDefault": false
+    },
+    {
+      "id": "time-display",
+      "controlType": "number",
+      "controlKey": "fontSize",
+      "expectedLabel": "Font Size",
+      "expectedDefault": 28
+    }
+  ]
+}

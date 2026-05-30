@@ -1,0 +1,13 @@
+{
+  "description": "QA fixture: visibility toggle — state transitions for element visibility",
+  "initialElements": [
+    { "id": "vignette", "visible": true, "locked": false, "instance": { "id": "vignette" } },
+    { "id": "bloom", "visible": true, "locked": false, "instance": { "id": "bloom" } },
+    { "id": "noise", "visible": false, "locked": false, "instance": { "id": "noise" } }
+  ],
+  "sequence": [
+    { "action": "toggle", "id": "vignette", "expectedVisible": [false, true, false] },
+    { "action": "toggle", "id": "noise", "expectedVisible": [true, true, true] },
+    { "action": "toggle", "id": "vignette", "expectedVisible": [true, true, true] }
+  ]
+}

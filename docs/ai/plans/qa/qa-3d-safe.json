@@ -1,0 +1,27 @@
+{
+  "$schema": "../qa-fixture-schema.json",
+  "id": "qa-3d-safe",
+  "label": "3D opt-in safety test",
+  "template": "pulse-reel",
+  "frame": 60,
+  "props": {
+    "assets": {
+      "coverSrc": "qa_album_art.png",
+      "logoSrc": "qa_logo.png"
+    },
+    "options": {
+      "style": "clean",
+      "motion": "low"
+    },
+    "elements": {
+      "effects": [
+        { "id": "vignette", "enabled": true, "intensity": 0.5 }
+      ],
+      "background": [
+        { "id": "gradient-bg", "enabled": true, "intensity": 1 }
+      ]
+    }
+  },
+  "expect": "no-errors",
+  "tags": ["3d", "safety"]
+}

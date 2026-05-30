@@ -1,0 +1,63 @@
+{
+  "description": "QA fixture: keyframe serialization — round-trip export/import",
+  "inputState": {
+    "elements": [
+      {
+        "id": "vignette",
+        "visible": true,
+        "locked": false,
+        "instance": {
+          "id": "vignette",
+          "enabled": true,
+          "props": {
+            "intensity": {
+              "keyframes": [
+                { "frame": 0, "value": 0.5, "easing": "linear" },
+                { "frame": 120, "value": 0.8, "easing": "ease" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "bloom",
+        "visible": true,
+        "locked": false,
+        "instance": {
+          "id": "bloom",
+          "enabled": true,
+          "props": {
+            "intensity": {
+              "keyframes": [
+                { "frame": 0, "value": 0, "easing": "linear" },
+                { "frame": 60, "value": 1.5, "easing": "easeOut" }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "selectedId": null
+  },
+  "expectedKeyframeCount": 2,
+  "exportedJson": {
+    "keyframes": [
+      {
+        "elementId": "vignette",
+        "controlKey": "intensity",
+        "keyframes": [
+          { "frame": 0, "value": 0.5, "easing": "linear" },
+          { "frame": 120, "value": 0.8, "easing": "ease" }
+        ]
+      },
+      {
+        "elementId": "bloom",
+        "controlKey": "intensity",
+        "keyframes": [
+          { "frame": 0, "value": 0, "easing": "linear" },
+          { "frame": 60, "value": 1.5, "easing": "easeOut" }
+        ]
+      }
+    ]
+  }
+}
