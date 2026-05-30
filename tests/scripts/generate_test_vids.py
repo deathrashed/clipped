@@ -28,20 +28,21 @@ TEMPLATES = [
 def main():
     parser = argparse.ArgumentParser(description="Generate visual test videos for templates.")
     parser.add_argument("templates", nargs="*", help="Optional specific template name(s) to run.")
-    parser.add_argument("-g", "--genre", choices=["hip-hop", "metal"], default="hip-hop",
+    parser.add_argument("-g", "--genre", choices=["hip-hop", "metal", "eksternal"], default="hip-hop",
                         help="Choose the genre folder to use for tests (default: hip-hop)")
     args = parser.parse_args()
 
     tests_dir = Path(__file__).resolve().parents[1]
-    media_tests_dir = tests_dir.parent / "media" / "tests"
-    genre_dir = media_tests_dir / "audio-templates" / args.genre
+    genre_dir = tests_dir / "audio-templates" / args.genre
     
-    # Locate the mp3 file
-    audio_files = list(genre_dir.glob("*.mp3"))
+    # Locate all mp3 files, including those in artist subfolders
+    audio_files = list(genre_dir.rglob("*.mp3"))
     if not audio_files:
         print(f"Error: No MP3 audio file found in {genre_dir}")
         sys.exit(1)
-    audio_path = audio_files[0]
+    
+    import random
+    audio_path = random.choice(audio_files)
     
     # Allow filtering by templates passed as arguments
     to_run = TEMPLATES
@@ -62,7 +63,7 @@ def main():
     failed = []
     for template, platform, is_remotion in to_run:
         engine_subfolder = "remotion" if is_remotion else "ffmpeg"
-        out_dir = media_tests_dir / "videos" / engine_subfolder
+        out_dir = tests_dir / "videos" / engine_subfolder
         out_dir.mkdir(parents=True, exist_ok=True)
         
         # Format clean template name prefix
@@ -85,6 +86,10 @@ def main():
             "--platform", platform,
             "--output", str(out_path),
         ]
+        
+        # If using eksternal (symlinks to full tracks), clip a 15-second section
+        if args.genre == "eksternal":
+            cmd += ["--start", "60", "--end", "75"]
 
         if is_remotion:
             cmd += ["--captions", "lyrics"]

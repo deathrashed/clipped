@@ -63,7 +63,7 @@ Generated clips belong outside the repository by default:
 
 Do not add `_audio/`, `_video/`, `.venv/`, `__pycache__/`, `.DS_Store`, `.specstory/`, `.vscode/`, or local assistant state to version control.
 
-`media/tests/` contains test assets and generated smoke test outputs.
+`tests/videos/` contains generated smoke test outputs and `tests/audio-templates/` contains test assets.
 
 Remotion job assets live under `src/remotion/public/jobs/` only while rendering and must stay ignored. Remotion generated output belongs in the configured video output directory unless the user explicitly passes `--output`.
 
