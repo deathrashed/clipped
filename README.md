@@ -90,7 +90,7 @@ Clipped relies on several core system and programming environment dependencies. 
 
 ## <img src="https://api.iconify.design/mdi:play-box-multiple-outline.svg?color=%2311c866" height="22"> Examples
 
-The Remotion templates are the primary video renderer. `pulse_reel` builds on the original dynamic reel idea with richer sequencing, audio-reactive accents, and stronger typography.
+The FFmpeg templates are the primary video renderer. The flagship vertical template is the FFmpeg `reel` template, featuring a sequential story (logo reveal -> spinner -> full artwork zoom) with high-energy vertical styling. Remotion is also supported for highly polished visual compositions like `pulse_reel`, `gallery_square`, and `record_square`.
 
 <table>
   <tr>
@@ -108,13 +108,29 @@ The Remotion templates are the primary video renderer. `pulse_reel` builds on th
 </table>
 
 ```bash
-clipped video "track.mp3" --template pulse_reel --platform instagram --start 2:45 --end 3:45
+clipped video "track.mp3" --template reel --platform instagram --start 2:45 --end 3:45
 clipped video "track.mp3" --template gallery_square --platform default --start 0 --end 4:20
 ```
 
-## <img src="https://api.iconify.design/mdi:television-play.svg?color=%2311c866" height="22"> Interactive Showcase
+## <img src="https://api.iconify.design/mdi:television-play.svg?color=%2311c866" height="22"> Web Showcase & Clipper Simulator
 
-To preview all available video templates (Remotion & FFmpeg) and test out CLI options with a simulator before generating, open our local [Interactive Web Showcase](showcase/index.html) in your browser.
+Clipped features a premium, local-first **Interactive Web Showcase & Clipper Simulator** located in the [showcase/index.html](showcase/index.html) folder.
+
+### What it is
+The showcase is a standalone, offline-friendly HTML portal that provides a visual dashboard of your entire Clipped environment. Because it is built with vanilla CSS/JS, it works entirely offline—no servers or databases needed. You can run it simply by double-clicking the file in your file manager or opening it in your browser.
+
+### Showcase Sections
+* **Interactive Clipper Simulator**: A browser-native CLI simulator. Select audio inputs, templates, background settings, and custom overrides (upload your own covers/logos) to generate the exact CLI commands. Click "Run Render Simulation" to watch a live simulated render in the mock terminal, which opens a browser-native preview of the final video.
+* **My Video Clips**: Displays all custom vertical and square videos generated and saved to your project directory (`_video/`). These cards include relative player links and the exact CLI commands used to generate them.
+* **My Audio Clips**: A library of custom clipped audio tracks saved in your project directory (`_audio/`). Play tracks directly inside the browser.
+* **Template Test Renders (Smoke Tests)**: The reference library displaying smoke test videos for all 12 Remotion and FFmpeg templates, along with their command details.
+
+### Synchronization
+* **Automatic Sync**: Every time you render a video or clip an audio file using the Clipped CLI, a hook registers the clip in `showcase/clips.json` and updates the database, causing it to appear instantly in your showcase.
+* **Manual Sync**: If you manually clean, modify, or add files to the `_audio/` and `_video/` folders, you can rebuild the showcase catalog index by running:
+  ```bash
+  uv run scripts/sync_showcase.py
+  ```
 
 ## <img src="https://api.iconify.design/mdi:information-outline.svg?color=%2311c866" height="22"> What It Does
 
@@ -175,7 +191,7 @@ clipped audio "https://youtube.com/watch?v=..." 0:30 1:15
 ### <img src="https://api.iconify.design/mdi:video-outline.svg?color=%23ae42ff" height="18"> Video Render
 
 ```bash
-clipped video "track.mp3" --template pulse_reel --platform instagram --start 2:45 --end 3:45
+clipped video "track.mp3" --template reel --platform instagram --start 2:45 --end 3:45
 clipped video "track.mp3" --template gallery_square --platform default --style cinematic --waveform bars
 clipped video "clip.mp3" --template spinner --platform default
 clipped video "track.mp3" --template vertical_wave --platform vertical_full --dry-run
@@ -196,10 +212,10 @@ clipped templates
 
 | Name | Label | Size | Best For |
 | --- | --- | --- | --- |
-| `pulse_reel` | Pulse Reel | 1080x1920 | Remotion vertical reels for Instagram, TikTok, Shorts, and `vertical_full` |
+| `reel` | Dynamic Reel (Logo -> Spinner -> Artist) | 1080x1920 | vertical flagship vertical reels (Instagram, TikTok, Shorts, `vertical_full`) |
+| `pulse_reel` | Pulse Reel | 1080x1920 | Remotion vertical template with rich sequencing, visual accents, and typography |
 | `gallery_square` | Gallery Square | 1080x1080 | Polished Remotion square artwork posts and archive clips |
 | `record_square` | Record Square | 1080x1080 | Remotion spinning-record posts with radial audio accents |
-| `reel` | Dynamic Reel (Logo -> Spinner -> Artist) | 1080x1920 | Instagram Reels, TikTok, YouTube Shorts, long vertical previews with `vertical_full` |
 | `vertical` | Vertical Spinner | 1080x1920 | Classic vertical album-art spinner and square final artwork reveal |
 | `vertical_wave` | Vertical Wave | 1080x1920 | Vertical spinner with circular audio-reactive waveform styling |
 | `spinner` | Spinner | 1080x1080 | Square rotating record posts and archive clips |
@@ -276,11 +292,11 @@ Named presets can override the general defaults:
 
 ```toml
 [preset.instagram]
-default_template = "pulse_reel"
+default_template = "reel"
 default_platform = "instagram"
 
 [preset.vertical_full]
-default_template = "pulse_reel"
+default_template = "reel"
 default_platform = "vertical_full"
 ```
 

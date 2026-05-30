@@ -195,6 +195,7 @@ class MediaAssets:
         extra_images: list[str] | None = None,
         media: list[str] | None = None,
         lyrics_override: str | None = None,
+        clean_logo: bool | None = None,
     ):
         self.audio_path = audio_path.resolve()
         self.album_dir  = self.audio_path.parent
@@ -211,6 +212,7 @@ class MediaAssets:
         self.extra_images = [p for p in (self._resolve_path_or_url(u) for u in (extra_images or [])) if p]
         self.media = [p for p in (self._resolve_path_or_url(u) for u in (media or [])) if p]
         self.lyrics = self._resolve_path_or_url(lyrics_override) if lyrics_override else None
+        self._clean_logo_override = clean_logo
 
         # Embedded lyrics JSON (pre-parsed for Remotion)
         self._lyrics_json: str | None = None
@@ -274,6 +276,15 @@ class MediaAssets:
     def _clean_logo_background(self, logo_path: Path) -> Path:
         from .config import get_config
         config = get_config()
+        
+        # Check override, falling back to config
+        clean_logo = self._clean_logo_override
+        if clean_logo is None:
+            clean_logo = config.get("clean_logo", config.get("remotion_clean_logos", True))
+            
+        if not clean_logo or str(clean_logo).lower() in ("false", "0", "no"):
+            return logo_path
+
         rmbg_path = config.get("rmbg_path", "/Users/rd/Scripts/Riley/rmbg/bin/rmbg")
         rmbg = Path(rmbg_path).expanduser()
         if not rmbg.exists():

@@ -41,10 +41,10 @@ Remotion templates are declared in `data/templates.manifest.json` and rendered b
 
 Active templates:
 
-- `pulse_reel`: Remotion vertical reel with logo, record motion, metadata, waveform, and cover reveal.
+- `reel`: FFmpeg vertical flagship reel with dynamic logo, spinner, metadata text, and final square-art reveal.
+- `pulse_reel`: Remotion vertical template with logo, record motion, metadata, waveform, and cover reveal.
 - `gallery_square`: Remotion square artwork presentation inspired by polished blurred-background album posts.
 - `record_square`: Remotion square spinning-record composition with radial audio accents.
-- `reel`: FFmpeg vertical flagship reel with dynamic logo, spinner, metadata text, and final square-art reveal.
 - `vertical`: classic vertical spinner and square final artwork reveal.
 - `vertical_wave`: vertical spinner with circular waveform styling.
 - `spinner`: square rotating record.

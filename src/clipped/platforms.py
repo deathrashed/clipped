@@ -43,7 +43,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["pulse_reel", "reel", "vertical", "vertical_wave"],
+        ideal_templates=["reel", "pulse_reel", "vertical", "vertical_wave"],
         notes="Clips longer than 60s will be trimmed.",
     ),
     "tiktok": PlatformProfile(
@@ -52,7 +52,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["pulse_reel", "reel", "vertical", "vertical_wave"],
+        ideal_templates=["reel", "pulse_reel", "vertical", "vertical_wave"],
     ),
     "youtube_shorts": PlatformProfile(
         name="youtube_shorts",
@@ -60,7 +60,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=60, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["pulse_reel", "reel", "vertical", "vertical_wave"],
+        ideal_templates=["reel", "pulse_reel", "vertical", "vertical_wave"],
     ),
     "vertical_full": PlatformProfile(
         name="vertical_full",
@@ -68,7 +68,7 @@ PLATFORMS: dict[str, PlatformProfile] = {
         width=1080, height=1920,
         max_duration=None, max_size_mb=None,
         output_format="mp4",
-        ideal_templates=["pulse_reel", "reel", "vertical", "vertical_wave"],
+        ideal_templates=["reel", "pulse_reel", "vertical", "vertical_wave"],
         notes="No duration cap. Useful for local exports and long-form vertical reels.",
     ),
     "twitter": PlatformProfile(
