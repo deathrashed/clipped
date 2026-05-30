@@ -1,5 +1,77 @@
 var userClips = [
   {
+    "filepath": "../_audio/R.A. the Rugged Man - 3 Kingz (feat. Kool G Rap) (1.14 - 1.59).mp3",
+    "filename": "R.A. the Rugged Man - 3 Kingz (feat. Kool G Rap) (1.14 - 1.59).mp3",
+    "kind": "audio",
+    "template": "clipped_audio",
+    "platform": "default",
+    "start": 74.0,
+    "end": 119.0,
+    "artist": "R.A. the Rugged Man",
+    "title": "3 Kingz (feat. Kool G Rap)",
+    "timestamp": "2026-05-30 20:54:08"
+  },
+  {
+    "filepath": "../_video/Reel \u22c5 R.A. the Rugged Man - 3 Kingz (feat. Kool G Rap).mp4",
+    "filename": "Reel \u22c5 R.A. the Rugged Man - 3 Kingz (feat. Kool G Rap).mp4",
+    "kind": "video",
+    "template": "reel",
+    "platform": "vertical_full",
+    "start": 75.0,
+    "end": 119.0,
+    "artist": "R.A. the Rugged Man",
+    "title": "3 Kingz (feat. Kool G Rap)",
+    "timestamp": "2026-05-30 20:48:31"
+  },
+  {
+    "filepath": "../_audio/Deicide - They Are the Children of the Underworld (0.50 - 1.20).mp3",
+    "filename": "Deicide - They Are the Children of the Underworld (0.50 - 1.20).mp3",
+    "kind": "audio",
+    "template": "clipped_audio",
+    "platform": "default",
+    "start": 50.0,
+    "end": 80.0,
+    "artist": "Deicide",
+    "title": "They Are the Children of the Underworld",
+    "timestamp": "2026-05-30 20:44:03"
+  },
+  {
+    "filepath": "../_audio/Deicide - They Are the Children of the Underworld (1.00 - 1.20).mp3",
+    "filename": "Deicide - They Are the Children of the Underworld (1.00 - 1.20).mp3",
+    "kind": "audio",
+    "template": "clipped_audio",
+    "platform": "default",
+    "start": 60.0,
+    "end": 80.0,
+    "artist": "Deicide",
+    "title": "They Are the Children of the Underworld",
+    "timestamp": "2026-05-30 20:43:07"
+  },
+  {
+    "filepath": "../_audio/Pestilence - Out of the Body (0.00 - 0.25).mp3",
+    "filename": "Pestilence - Out of the Body (0.00 - 0.25).mp3",
+    "kind": "audio",
+    "template": "clipped_audio",
+    "platform": "default",
+    "start": 0.0,
+    "end": 25.0,
+    "artist": "Pestilence",
+    "title": "Out of the Body",
+    "timestamp": "2026-05-30 20:39:19"
+  },
+  {
+    "filepath": "../_audio/Undeath - Lesions of a Different Kind (0.00 - 0.25).mp3",
+    "filename": "Undeath - Lesions of a Different Kind (0.00 - 0.25).mp3",
+    "kind": "audio",
+    "template": "clipped_audio",
+    "platform": "default",
+    "start": 0.0,
+    "end": 25.0,
+    "artist": "Undeath",
+    "title": "Lesions of a Different Kind",
+    "timestamp": "2026-05-30 20:37:25"
+  },
+  {
     "filepath": "../_audio/Juggaknots - Trouble Man (0.01 - 0.05).mp3",
     "filename": "Juggaknots - Trouble Man (0.01 - 0.05).mp3",
     "kind": "audio",

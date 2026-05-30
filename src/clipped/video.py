@@ -188,6 +188,20 @@ def process_video(
         if result:
             _get_ui().info(f"Video saved: [white]{result.name}[/white]")
             
+            if not is_preview:
+                try:
+                    from .audio import process_clip
+                    process_clip(
+                        src=src,
+                        start=start,
+                        end=end or (start + calc_dur),
+                        dry_run=dry_run,
+                        fade_in=fade_in,
+                        fade_out=fade_out,
+                    )
+                except Exception as e:
+                    _get_ui().warn(f"Failed to save corresponding audio clip: {e}")
+
             try:
                 from .utils import register_clip_in_showcase
                 register_clip_in_showcase(
@@ -280,6 +294,20 @@ def process_video(
             return None
 
         _get_ui().info(f"Video saved: [white]{output_path.name}[/white]")
+
+        if not is_preview:
+            try:
+                from .audio import process_clip
+                process_clip(
+                    src=src,
+                    start=start,
+                    end=end or (start + calc_dur),
+                    dry_run=dry_run,
+                    fade_in=fade_in,
+                    fade_out=fade_out,
+                )
+            except Exception as e:
+                _get_ui().warn(f"Failed to save corresponding audio clip: {e}")
 
         try:
             from .utils import register_clip_in_showcase

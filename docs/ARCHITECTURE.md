@@ -259,7 +259,7 @@ Restructure the project to use a conventional layout:
 - Move the Python package to `src/clipped/` (using PEP 517 compliance with `pyproject.toml`).
 - Move the Remotion app to `src/remotion/`.
 - Move persistent non-code metadata, manifests, and QA fixtures to `data/` (e.g. `data/templates.manifest.json`, `data/fixtures/`).
-- Move test fixtures and generated video outputs to `media/tests/` to keep root folder clean.
+- Move generated video outputs to `tests/videos/` to keep root folder clean.
 - Update `bin/clipped`, `install.sh`, docs, tests, and completion scripts to use the new layout.
 
 ### Consequences
