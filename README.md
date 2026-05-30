@@ -116,7 +116,7 @@ clipped video "track.mp3" --template gallery_square --platform default --start 0
 
 Clipped features a premium, local-first **Interactive Web Showcase & Clipper Simulator** located in the [showcase/index.html](showcase/index.html) folder.
 
-* 🚀 **Launch Link**: [Open Showcase in Browser](https://deathrashed.github.io/clipped/showcase/) (Opens on any device — no setup needed)
+* 🚀 **Launch Link**: [Open Showcase in Browser](https://riley-clipped-showcase.netlify.app/showcase/) (Opens on any device — no setup needed)
 * 📂 **Offline Access**: Open `showcase/index.html` directly from the repo on your local machine.
 
 ### What it is
