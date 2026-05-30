@@ -9,7 +9,9 @@ Provides:
 """
 from __future__ import annotations
 
+import functools
 import json
+import shutil
 import subprocess
 import tempfile
 from dataclasses import dataclass
@@ -201,18 +203,29 @@ class MediaAssets:
         # Rich metadata read first to allow iTunes / artist fetching
         self._meta = read_metadata(self.audio_path)
 
-        # Process overrides (downloads/local paths)
-        self.cover = self._resolve_path_or_url(cover_override) if cover_override else self._find(["cover", "front", "folder", "album", "art"], self.album_dir)
-        self.logo = self._resolve_path_or_url(logo_override) if logo_override else self._find(["logo"], self.artist_dir)
-        self.artist = self._resolve_path_or_url(artist_override) if artist_override else self._find(["artist", "band", "photo"], self.artist_dir)
+        self._cover_override = cover_override
+        self._logo_override = logo_override
+        self._artist_override = artist_override
         self.background = self._resolve_path_or_url(background_override) if background_override else None
         
         self.extra_images = [p for p in (self._resolve_path_or_url(u) for u in (extra_images or [])) if p]
         self.media = [p for p in (self._resolve_path_or_url(u) for u in (media or [])) if p]
         self.lyrics = self._resolve_path_or_url(lyrics_override) if lyrics_override else None
 
-        # Auto-fetch logo/artist on-the-fly if missing and artist folder exists
-        if self.artist_dir and self.artist_dir.exists() and (not self.logo or not self.artist):
+        # Embedded lyrics JSON (pre-parsed for Remotion)
+        self._lyrics_json: str | None = None
+        if not self.lyrics:
+            self._lyrics_json = self._extract_embedded_lyrics()
+
+    def _ensure_artist_fetched(self) -> None:
+        if getattr(self, "_artist_fetched", False):
+            return
+        self._artist_fetched = True
+        
+        logo_basic = self._resolve_path_or_url(self._logo_override) if self._logo_override else self._find(["logo"], self.artist_dir)
+        artist_basic = self._resolve_path_or_url(self._artist_override) if self._artist_override else self._find(["artist", "band", "photo"], self.artist_dir)
+        
+        if self.artist_dir and self.artist_dir.exists() and (not logo_basic or not artist_basic):
             try:
                 from .artist_image_fetcher import ArtistImageFetcher
                 fetcher = ArtistImageFetcher(verbose=False)
@@ -221,41 +234,54 @@ class MediaAssets:
                     out_dir=self.artist_dir,
                     artist_folder=self.artist_dir,
                 )
-                if not self.logo:
-                    self.logo = self._find(["logo"], self.artist_dir)
-                if not self.artist:
-                    self.artist = self._find(["artist", "band", "photo"], self.artist_dir)
             except Exception:
                 pass
 
-        if self.logo:
-            self.logo = self._clean_logo_background(self.logo)
+    @functools.cached_property
+    def logo(self) -> Path | None:
+        logo_path = self._resolve_path_or_url(self._logo_override) if self._logo_override else (self._find(["logo"], self.artist_dir) or self._find(["logo"], self.album_dir))
+        if not logo_path:
+            self._ensure_artist_fetched()
+            logo_path = self._find(["logo"], self.artist_dir) or self._find(["logo"], self.album_dir)
+        if logo_path:
+            return self._clean_logo_background(logo_path)
+        return None
 
-        if not self.cover:
-            self.cover = self._extract_embedded_cover()
+    @functools.cached_property
+    def artist(self) -> Path | None:
+        artist_path = self._resolve_path_or_url(self._artist_override) if self._artist_override else (self._find(["artist", "band", "photo"], self.artist_dir) or self._find(["artist", "band", "photo"], self.album_dir))
+        if not artist_path:
+            self._ensure_artist_fetched()
+            artist_path = self._find(["artist", "band", "photo"], self.artist_dir) or self._find(["artist", "band", "photo"], self.album_dir)
+        return artist_path
 
-        if not self.cover:
-            self.cover = self._fetch_itunes_cover()
+    @functools.cached_property
+    def cover(self) -> Path | None:
+        c = self._resolve_path_or_url(self._cover_override) if self._cover_override else self._find(["cover", "front", "folder", "album", "art"], self.album_dir)
+        if not c:
+            c = self._extract_embedded_cover()
+        if not c:
+            c = self._fetch_itunes_cover()
+        return c
 
-        # Fallbacks: if cover is missing in album dir, look in artist dir for anything
-        if not self.cover:
-            self.cover = self.logo or self.artist
-
-        # All available images for custom sequences (cover + artist images)
-        self.all_images = self._find_all([self.album_dir, self.artist_dir])
+    @functools.cached_property
+    def all_images(self) -> list[Path]:
+        images = self._find_all([self.album_dir, self.artist_dir])
         if self.extra_images:
-            self.all_images.extend(self.extra_images)
-
-        # Embedded lyrics JSON (pre-parsed for Remotion)
-        self._lyrics_json: str | None = None
-        if not self.lyrics:
-            self._lyrics_json = self._extract_embedded_lyrics()
+            images.extend(self.extra_images)
+        return images
 
     def _clean_logo_background(self, logo_path: Path) -> Path:
-        rmbg_path = "/Users/rd/Scripts/Riley/rmbg/bin/rmbg"
+        from .config import get_config
+        config = get_config()
+        rmbg_path = config.get("rmbg_path", "/Users/rd/Scripts/Riley/rmbg/bin/rmbg")
         rmbg = Path(rmbg_path).expanduser()
-        if not rmbg.exists() or not logo_path.exists():
-            return logo_path
+        if not rmbg.exists():
+            resolved = shutil.which("rmbg")
+            if resolved:
+                rmbg = Path(resolved)
+            else:
+                return logo_path
 
         # If it's already a transparent PNG, check mode (avoid re-running rmbg)
         if logo_path.suffix.lower() == ".png":
@@ -434,13 +460,27 @@ class MediaAssets:
         for f in files:
             if f.suffix.lower() in img_exts:
                 stem_lower = f.stem.lower()
-                if any(n in stem_lower for n in names_lower):
-                    return f
+                for n in names_lower:
+                    if n in stem_lower:
+                        if n == "art" and "artist" in stem_lower:
+                            continue
+                        return f
 
         # 3. If there is exactly one image in the directory, use it as a fallback.
         img_files = [f for f in files if f.suffix.lower() in img_exts]
         if len(img_files) == 1:
-            return img_files[0]
+            f = img_files[0]
+            stem_lower = f.stem.lower()
+            if "cover" in names_lower:
+                if any(x in stem_lower for x in ["artist", "band", "photo", "logo"]):
+                    return None
+            elif "artist" in names_lower or "band" in names_lower:
+                if any(x in stem_lower for x in ["cover", "front", "folder", "album", "logo"]):
+                    return None
+            elif "logo" in names_lower:
+                if any(x in stem_lower for x in ["cover", "front", "folder", "album", "art", "artist", "band", "photo"]):
+                    return None
+            return f
 
         return None
 
@@ -606,22 +646,25 @@ def get_output_path(
 ) -> Path:
     """
     Generate a sanitized output file path.
-    Format: "Artist - Title.ext" or "Artist - Title (Template).ext"
+    Format: "Template ⋅ Artist - Title.ext" or "Template ⋅ Title.ext"
     """
     base_dir = base_dir.expanduser()
     base_dir.mkdir(parents=True, exist_ok=True)
 
+    # Format prefix using clean template name if provided
+    prefix = ""
+    if template:
+        words = template.replace("_", " ").split()
+        formatted_words = [w.upper() if w.lower() == "vhs" else w.capitalize() for w in words]
+        prefix = " ".join(formatted_words) + " ⋅ "
+
     if artist and title:
-        name = f"{artist} - {title}"
-        if template:
-            name += f" ({template})"
+        name = f"{prefix}{artist} - {title}"
     else:
-        name = title or fallback_stem
-        if template:
-            name += f"_{template}"
+        name = f"{prefix}{title or fallback_stem}"
 
     # Robust sanitization
-    safe = "".join(c for c in name if c.isalnum() or c in " -_").strip()
+    safe = "".join(c for c in name if c.isalnum() or c in " -_().⋅·").strip()
     safe = safe.replace("  ", " ")
     
     return base_dir / f"{safe}.{extension}"

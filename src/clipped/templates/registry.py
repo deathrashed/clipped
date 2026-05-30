@@ -1,8 +1,8 @@
 """
 Template registry — maps string keys to VideoTemplate classes.
 
-Templates are discovered automatically from the `clipped_src/templates/`
-package. Add a new template file and subclass `VideoTemplate` to expose it.
+# Templates are discovered automatically from the `src/clipped/templates/`
+# package. Add a new template file and subclass `VideoTemplate` to expose it.
 """
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ class RemotionTemplate(VideoTemplate):
 
 
 def _manifest_path() -> Path:
-    return Path(__file__).resolve().parents[2] / "remotion" / "templates.manifest.json"
+    return Path(__file__).resolve().parents[3] / "data" / "templates.manifest.json"
 
 
 def _load_remotion_templates() -> dict[str, Type[VideoTemplate]]:

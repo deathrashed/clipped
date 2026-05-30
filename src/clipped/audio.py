@@ -47,6 +47,15 @@ def _notify(title: str, message: str) -> None:
     )
 
 # Maximum clip duration before showing a sanity warning
+def format_time_for_filename(seconds: float) -> str:
+    mins = int(seconds) // 60
+    secs = int(seconds) % 60
+    ms = int(round((seconds - int(seconds)) * 100))
+    if ms > 0:
+        return f"{mins}.{secs:02d}.{ms:02d}"
+    return f"{mins}.{secs:02d}"
+
+
 _DURATION_WARN_SECS = 120.0
 
 
@@ -78,14 +87,28 @@ class AudioClipper:
     # ── Output path ───────────────────────────────────────────────────────────
 
     def _get_output_path(self, artist: str = "", title: str = "") -> Path:
+        base_dir = Path(self.config["audio_dir"])
         if self._custom_output:
-            return self._custom_output
+            if self._custom_output.is_dir() or not self._custom_output.suffix:
+                base_dir = self._custom_output
+                base_dir.mkdir(parents=True, exist_ok=True)
+            else:
+                return self._custom_output
+
+        # Format time suffix: e.g. " (2.41 - 3.06)"
+        start_fmt = format_time_for_filename(self.start)
+        end_fmt = format_time_for_filename(self.end)
+        suffix = f" ({start_fmt} - {end_fmt})"
+
+        adjusted_title = f"{title}{suffix}" if title else ""
+        adjusted_stem = f"{Path(self.src).stem}{suffix}"
+
         from .utils import get_output_path
         return get_output_path(
-            base_dir=Path(self.config["audio_dir"]),
+            base_dir=base_dir,
             artist=artist,
-            title=title,
-            fallback_stem=Path(self.src).stem,
+            title=adjusted_title,
+            fallback_stem=adjusted_stem,
             extension="mp3"
         )
 
@@ -198,8 +221,10 @@ class AudioClipper:
             cmd += ["-af", ",".join(filters)]
         cmd += [
             "-map", "0:a",
+            "-map", "0:v?",
             "-map_metadata", "0",
             "-c:a", "libmp3lame", "-q:a", "2",
+            "-c:v", "copy",
             str(output_path),
         ]
 

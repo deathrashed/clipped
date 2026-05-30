@@ -19,8 +19,8 @@ from .platforms import PlatformProfile
 console = Console()
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-REMOTION_DIR = REPO_ROOT / "remotion"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+REMOTION_DIR = REPO_ROOT / "src" / "remotion"
 REMOTION_PUBLIC_DIR = REMOTION_DIR / "public"
 REMOTION_JOBS_DIR = REMOTION_PUBLIC_DIR / "jobs"
 REMOTION_ENTRYPOINT = "src/index.ts"
@@ -40,12 +40,15 @@ def _shell_quote(args: list[str]) -> str:
 def _copy_asset(src: Path | None, job_dir: Path, name: str) -> str | None:
     if not src:
         return None
-    src = Path(src).expanduser()
+    src = Path(src).expanduser().resolve()
     if not src.exists():
         return None
     suffix = src.suffix.lower() or ".bin"
     dest = job_dir / f"{name}{suffix}"
-    shutil.copyfile(src, dest)
+    try:
+        os.link(src, dest)
+    except OSError:
+        shutil.copyfile(src, dest)
     return f"jobs/{job_dir.name}/{dest.name}"
 
 
@@ -71,7 +74,11 @@ def _clean_logo(src: Path | None, job_dir: Path, config: dict) -> Path | None:
     rmbg_path = config.get("rmbg_path", "/Users/rd/Scripts/Riley/rmbg/bin/rmbg")
     rmbg = Path(rmbg_path).expanduser()
     if not rmbg.exists():
-        return src
+        resolved = shutil.which("rmbg")
+        if resolved:
+            rmbg = Path(resolved)
+        else:
+            return src
         
     dest = job_dir / f"logo_cleaned.png"
     fuzz = config.get("logo_fuzz", config.get("remotion_logo_fuzz", 15))
@@ -95,13 +102,16 @@ def _copy_extra_assets(paths: list[Path], job_dir: Path, prefix: str = "extra") 
     copied: list[str] = []
     seen: set[Path] = set()
     for idx, path in enumerate(paths):
-        path = Path(path).expanduser()
+        path = Path(path).expanduser().resolve()
         if not path.exists() or path in seen:
             continue
         seen.add(path)
         suffix = path.suffix.lower() or ".bin"
         dest = job_dir / f"{prefix}-{idx}{suffix}"
-        shutil.copyfile(path, dest)
+        try:
+            os.link(path, dest)
+        except OSError:
+            shutil.copyfile(path, dest)
         copied.append(f"jobs/{job_dir.name}/{dest.name}")
     return copied
 

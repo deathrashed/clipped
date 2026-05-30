@@ -1,5 +1,5 @@
 #!/bin/zsh
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-export PYTHONPATH="$REPO_DIR"
+export PYTHONPATH="$REPO_DIR/src"
 source "$HOME/Scripts/.config/python/env.sh"
-exec "$HOME/Scripts/.config/python/run.sh" -m clipped_src.main "$@"
+exec "$HOME/Scripts/.config/python/run.sh" -m clipped.main "$@"

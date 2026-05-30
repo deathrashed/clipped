@@ -357,7 +357,13 @@ Examples: 0, 30, 2:45, 3:45. Fade applies to the video audio.</string>
 						<key>Source</key>
 						<string>Text</string>
 						<key>Text</key>
-						<string>reel | Dynamic Reel | logo intro, circular spinner, square final album art
+						<string>pulse_reel | Pulse Reel | Remotion vertical flagship reel
+gallery_square | Gallery Square | Remotion square blurred-background post
+record_square | Record Square | Remotion square spinning-record composition
+fluid_scene | Fluid Scene | Remotion fluid composition
+metal_vhs | Metal VHS | Remotion vintage VHS composition
+premium_card | Premium Card | Remotion glossy 3D card composition
+reel | Dynamic Reel | logo intro, circular spinner, square final album art
 vertical | Vertical Spinner | circular spinner then square album reveal
 vertical_wave | Vertical Wave | 9:16 spinner with reactive waveform styling
 spinner | Spinner | classic circular rotating record, 1:1
@@ -494,7 +500,7 @@ osascript -e 'display notification "Interactive export complete." with title "Cl
 EOF
 chmod +x "$RUNNER"
 
-osascript -e "tell application \"Terminal\" to do script \"zsh ${(q)RUNNER}\""
+"$RUNNER" &gt; /dev/null 2&gt;&amp;1 &amp;
 </string>
 						<key>TimeOutAbortsMacro</key>
 						<true/>
@@ -800,7 +806,7 @@ if [[ "$URL" != http* ]]; then
   osascript -e 'display notification "Clipboard does not contain a URL." with title "Clipped"'
   exit 1
 fi
-osascript -e "tell application \"Terminal\" to do script \"$CLIPPED_BIN audio '$URL'\""
+"$CLIPPED_BIN" audio "$URL" &gt; /dev/null 2&gt;&amp;1 &amp;
 </string>
 						<key>TimeOutAbortsMacro</key>
 						<true/>

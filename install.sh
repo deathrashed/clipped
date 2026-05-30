@@ -10,7 +10,7 @@ CONFIG_DIR="$HOME/.config/clipped"
 mkdir -p "$CONFIG_DIR"
 
 if [[ ! -f "$CONFIG_DIR/config.toml" ]]; then
-    cp config.example.toml "$CONFIG_DIR/config.toml"
+    cp config/config.example.toml "$CONFIG_DIR/config.toml"
     echo "✅ Created default config at $CONFIG_DIR/config.toml"
 else
     echo "ℹ️ Config already exists at $CONFIG_DIR/config.toml"
@@ -32,9 +32,9 @@ bash "$HOME/Scripts/.config/python/setup.sh"
 cat > bin/clipped << 'EOF'
 #!/bin/zsh
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-export PYTHONPATH="$REPO_DIR"
+export PYTHONPATH="$REPO_DIR/src"
 source "$HOME/Scripts/.config/python/env.sh"
-exec "$HOME/Scripts/.config/python/run.sh" -m clipped_src.main "$@"
+exec "$HOME/Scripts/.config/python/run.sh" -m clipped.main "$@"
 EOF
 
 chmod +x bin/clipped
@@ -43,7 +43,7 @@ echo "✅ Set up 'clipped' wrapper script."
 
 # 4. Generate completions
 echo "🚀 Setting up completions..."
-"$HOME/Scripts/.config/python/run.sh" -m clipped_src.main --install-completion zsh 2>/dev/null || true
+"$HOME/Scripts/.config/python/run.sh" -m clipped.main --install-completion zsh 2>/dev/null || true
 
 # 5. Add to PATH
 REPO_BIN="$REPO_DIR/bin"

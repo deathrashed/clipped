@@ -16,19 +16,19 @@ All implementation files live inside `/Users/rd/Scripts/Riley/clipped`. Generate
 
 ### Remotion App
 
-Added a top-level Remotion project at `remotion/`.
+Added a top-level Remotion project at `src/remotion/`.
 
 Important files:
 
-- `remotion/package.json`: pinned Remotion, React, TypeScript, and related creative packages.
-- `remotion/package-lock.json`: locked npm dependency graph.
-- `remotion/remotion.config.ts`: Remotion defaults for codec/image behavior.
-- `remotion/tsconfig.json`: strict TypeScript config.
-- `remotion/templates.manifest.json`: shared cross-language template manifest.
-- `remotion/src/index.ts`: Remotion entrypoint.
-- `remotion/src/Root.tsx`: registers all Remotion compositions.
-- `remotion/src/default-props.json`: safe preview/default props.
-- `remotion/src/types.ts`: TypeScript props/types contract.
+- `src/remotion/package.json`: pinned Remotion, React, TypeScript, and related creative packages.
+- `src/remotion/package-lock.json`: locked npm dependency graph.
+- `src/remotion/remotion.config.ts`: Remotion defaults for codec/image behavior.
+- `src/remotion/tsconfig.json`: strict TypeScript config.
+- `src/remotion/templates.manifest.json`: shared cross-language template manifest.
+- `src/remotion/src/index.ts`: Remotion entrypoint.
+- `src/remotion/src/Root.tsx`: registers all Remotion compositions.
+- `src/remotion/src/default-props.json`: safe preview/default props.
+- `src/remotion/src/types.ts`: TypeScript props/types contract.
 
 The first three Remotion templates are:
 
@@ -38,11 +38,11 @@ The first three Remotion templates are:
 
 Their React implementation files live in:
 
-- `remotion/src/templates/PulseReel.tsx`
-- `remotion/src/templates/GallerySquare.tsx`
-- `remotion/src/templates/RecordSquare.tsx`
+- `src/remotion/src/templates/PulseReel.tsx`
+- `src/remotion/src/templates/GallerySquare.tsx`
+- `src/remotion/src/templates/RecordSquare.tsx`
 
-Reusable Remotion components live in `remotion/src/components/`:
+Reusable Remotion components live in `src/remotion/src/components/`:
 
 - `Artwork.tsx`: blurred background, framed artwork, circular record artwork.
 - `AudioLayer.tsx`: renders prepared audio.
@@ -51,7 +51,7 @@ Reusable Remotion components live in `remotion/src/components/`:
 - `Waveform.tsx`: bars, ring, and radial audio-reactive visualizers.
 - `Stage3D.tsx`: placeholder visual stage wrapper for cinematic/3D-style compositions.
 
-Shared helper modules live in `remotion/src/lib/`:
+Shared helper modules live in `src/remotion/src/lib/`:
 
 - `palette.ts`: palette resolution and motion factors.
 - `text.ts`: metadata text cleanup/formatting helpers.
@@ -60,11 +60,11 @@ Shared helper modules live in `remotion/src/lib/`:
 
 ### Render Bridge
 
-Added `clipped_src/remotion_engine.py`.
+Added `src/clipped/remotion_engine.py`.
 
 This file is the Python-to-Remotion bridge. It:
 
-- Creates a temporary Remotion job directory under `remotion/public/jobs/`.
+- Creates a temporary Remotion job directory under `src/remotion/public/jobs/`.
 - Prepares audio with FFmpeg into a render-ready `audio.wav`.
 - Applies start/end trimming and fade-in/fade-out before Remotion sees the audio.
 - Copies cover/logo/artist/extra image assets into the job directory.
@@ -77,7 +77,7 @@ Important detail: asset staging uses plain file-content copy instead of metadata
 
 ### Render Coordinator
 
-Updated `clipped_src/video.py`.
+Updated `src/clipped/video.py`.
 
 `process_video()` now works as a coordinator:
 
@@ -93,7 +93,7 @@ This preserves existing behavior for legacy templates while making Remotion the 
 
 ### Template Registry
 
-Updated `clipped_src/templates/base.py` and `clipped_src/templates/registry.py`.
+Updated `src/clipped/templates/base.py` and `src/clipped/templates/registry.py`.
 
 `TemplateInfo` now supports:
 
@@ -106,8 +106,8 @@ Updated `clipped_src/templates/base.py` and `clipped_src/templates/registry.py`.
 
 The registry now loads:
 
-- Existing FFmpeg `VideoTemplate` subclasses from `clipped_src/templates/`.
-- Remotion metadata-only templates from `remotion/templates.manifest.json`.
+- Existing FFmpeg `VideoTemplate` subclasses from `src/clipped/templates/`.
+- Remotion metadata-only templates from `src/remotion/templates.manifest.json`.
 
 Remotion templates are manifest-driven. They do not need Python subclasses.
 
@@ -120,7 +120,7 @@ The manifest maps between those two names.
 
 ### CLI And TUI
 
-Updated `clipped_src/main.py`.
+Updated `src/clipped/main.py`.
 
 The user does not normally choose a render engine. They choose templates and options. The selected template decides whether it uses Remotion or FFmpeg.
 
@@ -153,7 +153,7 @@ clipped video track.mp3 --template spinner --platform default
 
 ### Remotion Commands
 
-Added `clipped_src/remotion_cmd.py`.
+Added `src/clipped/remotion_cmd.py`.
 
 New commands:
 
@@ -173,9 +173,9 @@ clipped remotion doctor
 
 Updated:
 
-- `clipped_src/doctor.py`
-- `clipped_src/qa.py`
-- `clipped_src/batch.py`
+- `src/clipped/doctor.py`
+- `src/clipped/qa.py`
+- `src/clipped/batch.py`
 
 `clipped doctor` now checks:
 
@@ -194,9 +194,9 @@ Template QA now uses the shared default-platform resolver so Remotion templates 
 
 Updated:
 
-- `clipped_src/config.py`
+- `src/clipped/config.py`
 - `config.example.toml`
-- `clipped_src/platforms.py`
+- `src/clipped/platforms.py`
 
 New defaults:
 
@@ -237,10 +237,10 @@ Updated:
 `.gitignore` now ignores:
 
 - `.cache/`
-- `remotion/node_modules/`
-- `remotion/out/`
-- `remotion/dist/`
-- `remotion/public/jobs/`
+- `src/remotion/node_modules/`
+- `src/remotion/out/`
+- `src/remotion/dist/`
+- `src/remotion/public/jobs/`
 
 `AGENTS.md` now documents Remotion as part of the tech stack, explains the manifest-driven template system, and lists Remotion validation commands.
 
@@ -330,13 +330,13 @@ Remotion uses `staticFile()` to load staged job assets.
 
 ## How To Add A New Remotion Template
 
-1. Add an entry to `remotion/templates.manifest.json`.
+1. Add an entry to `src/remotion/templates.manifest.json`.
 2. Use an underscored Clipped template name, for example `my_new_template`.
 3. Use a hyphenated Remotion composition ID, for example `my-new-template`.
-4. Create the template React component in `remotion/src/templates/`.
-5. Register it in the `components` map in `remotion/src/Root.tsx`.
-6. Reuse shared components from `remotion/src/components/`.
-7. Add platform profile suggestions in `clipped_src/platforms.py` if it should be recommended.
+4. Create the template React component in `src/remotion/src/templates/`.
+5. Register it in the `components` map in `src/remotion/src/Root.tsx`.
+6. Reuse shared components from `src/remotion/src/components/`.
+7. Add platform profile suggestions in `src/clipped/platforms.py` if it should be recommended.
 8. Run validation:
 
 ```bash
@@ -353,11 +353,11 @@ For most future templates, Python should not need changes. Add to the manifest, 
 
 ## How To Add New Template Options
 
-1. Add the option to the template entry in `remotion/templates.manifest.json`.
+1. Add the option to the template entry in `src/remotion/templates.manifest.json`.
 2. Add a default value under `defaults`.
-3. If it is a global default, add it to `clipped_src/config.py` and `config.example.toml`.
-4. If the TUI should prompt for it, update `_build_remotion_config()` in `clipped_src/main.py`.
-5. Add the prop typing in `remotion/src/types.ts`.
+3. If it is a global default, add it to `src/clipped/config.py` and `config.example.toml`.
+4. If the TUI should prompt for it, update `_build_remotion_config()` in `src/clipped/main.py`.
+5. Add the prop typing in `src/remotion/src/types.ts`.
 6. Consume it in the relevant Remotion component/template.
 
 Good options should be high-level taste controls, not tiny implementation details.
@@ -374,7 +374,7 @@ Examples:
 These passed:
 
 ```bash
-python3 -m compileall -q clipped_src
+python3 -m compileall -q src/clipped
 plutil -lint macros/*.kmmacros
 ./bin/clipped templates
 ./bin/clipped platforms
@@ -415,7 +415,7 @@ Likely next improvements:
 
 ## Current Dirty Tree Note
 
-The repository was already dirty before this implementation. Existing `_video/tests` deletes/additions and `_audio` artifacts were left alone. The Remotion implementation changed source/docs/config files and added the `remotion/` app plus two Python Remotion modules.
+The repository was already dirty before this implementation. Existing `_video/tests` deletes/additions and `_audio` artifacts were left alone. The Remotion implementation changed source/docs/config files and added the `src/remotion/` app plus two Python Remotion modules.
 
 ---
 
@@ -485,17 +485,17 @@ Do not commit the inspiration folder. Use it as reference material only.
 Intended new Remotion folders:
 
 ```text
-remotion/src/audio/
-remotion/src/hooks/
-remotion/src/effects/
-remotion/src/visualizers/
-remotion/src/components/music/
-remotion/src/components/vinyl/
-remotion/src/components/lyrics/
-remotion/src/components/speakers/
-remotion/src/components/media/
-remotion/src/scenes/
-remotion/src/presets/
+src/remotion/src/audio/
+src/remotion/src/hooks/
+src/remotion/src/effects/
+src/remotion/src/visualizers/
+src/remotion/src/components/music/
+src/remotion/src/components/vinyl/
+src/remotion/src/components/lyrics/
+src/remotion/src/components/speakers/
+src/remotion/src/components/media/
+src/remotion/src/scenes/
+src/remotion/src/presets/
 ```
 
 Layer model for templates:
@@ -644,7 +644,7 @@ Planned commands:
 Expected checks:
 
 ```bash
-python3 -m compileall -q clipped_src
+python3 -m compileall -q src/clipped
 ./bin/clipped doctor
 ./bin/clipped templates
 ./bin/clipped platforms
@@ -681,17 +681,17 @@ This section records the first implementation pass after the Remotion visual eng
 
 Added the first reusable Remotion engine modules:
 
-- `remotion/src/audio/audio-utils.ts`
+- `src/remotion/src/audio/audio-utils.ts`
   - shared FFT value helpers
   - RMS
   - bass / low-mid / mid / high-mid / treble / full band analysis
   - fallback synthetic audio values
   - power-of-two-safe audio visualization helper
-- `remotion/src/hooks/useAudioReactive.ts`
+- `src/remotion/src/hooks/useAudioReactive.ts`
   - shared hook for all audio-reactive effects and visualizers
   - uses staged audio when present
-  - falls back to `remotion/public/silence.wav` for Studio/still/default renders
-- `remotion/src/effects/Overlays.tsx`
+  - falls back to `src/remotion/public/silence.wav` for Studio/still/default renders
+- `src/remotion/src/effects/Overlays.tsx`
   - `Vignette`
   - `FilmGrain`
   - `Scanlines`
@@ -700,18 +700,18 @@ Added the first reusable Remotion engine modules:
   - `BeatFlash`
   - `CameraShake`
   - `PostFxStack`
-- `remotion/src/visualizers/Spectrum.tsx`
+- `src/remotion/src/visualizers/Spectrum.tsx`
   - `SpectrumBars`
   - `RadialBars`
   - `WaveRibbon`
-- `remotion/src/components/music/AlbumCard.tsx`
+- `src/remotion/src/components/music/AlbumCard.tsx`
   - `BorderedAlbumCard`
   - `CompactCaption`
-- `remotion/src/components/vinyl/VinylRecord.tsx`
+- `src/remotion/src/components/vinyl/VinylRecord.tsx`
   - reusable spinning vinyl record with grooves and album-label center
-- `remotion/src/presets/effects.ts`
+- `src/remotion/src/presets/effects.ts`
   - preset definitions for `clean`, `texture`, `grain`, `film`, `crt`, `vhs`, `metal_vhs`, and `neon`
-- `remotion/public/silence.wav`
+- `src/remotion/public/silence.wav`
   - tiny silent fallback audio file so Remotion Studio/still renders do not crash when preview props have no staged audio
 
 Also added exact Remotion CLI dependency:
@@ -753,9 +753,9 @@ The goal is now a proper reusable vinyl/spinning-media scene rather than one-off
 
 ## Manifest And Type Updates
 
-Updated `remotion/src/types.ts` with expanded visual style and waveform unions.
+Updated `src/remotion/src/types.ts` with expanded visual style and waveform unions.
 
-Updated `remotion/templates.manifest.json` to expose more reusable modes:
+Updated `src/remotion/templates.manifest.json` to expose more reusable modes:
 
 - `mirror`
 - `ribbon`
@@ -768,7 +768,7 @@ Updated `remotion/templates.manifest.json` to expose more reusable modes:
 Passed:
 
 ```bash
-python3 -m compileall -q clipped_src
+python3 -m compileall -q src/clipped
 cd remotion && npm run typecheck
 cd remotion && npm run compositions
 ```
@@ -808,7 +808,7 @@ Smoke render commands used the Disincarnate test track:
 ## Issues Found And Fixed
 
 - `useAudioData()` throws when called with an empty source.
-  - Fixed by adding `remotion/public/silence.wav` and using it as preview fallback.
+  - Fixed by adding `src/remotion/public/silence.wav` and using it as preview fallback.
 - `visualizeAudio()` requires the sample count to be a power of two.
   - Fixed by normalizing requested sample counts in `useAudioReactive()`.
 - `npm run compositions` failed because the local Remotion package did not expose a CLI binary.
@@ -843,7 +843,7 @@ That setup is intended to avoid per-project Python virtualenv clutter. The prefe
 Current Clipped behavior still depends on the repo-local virtualenv because `bin/clipped` runs:
 
 ```bash
-exec "$REPO_DIR/.venv/bin/python" -m clipped_src.main "$@"
+exec "$REPO_DIR/.venv/bin/python" -m src/clipped.main "$@"
 ```
 
 So do not delete `/Users/rd/Scripts/Riley/clipped/.venv` until the launcher and related references are changed.
@@ -867,7 +867,7 @@ bash /Users/rd/Scripts/.config/python/setup.sh
 
 ```bash
 source "$HOME/Scripts/.config/python/env.sh"
-exec "$HOME/Scripts/.config/python/run.sh" -m clipped_src.main "$@"
+exec "$HOME/Scripts/.config/python/run.sh" -m src/clipped.main "$@"
 ```
 
 4. Patch `.venv` references in `install.sh`, `README.md`, and `tests/test_all_templates.py`.
@@ -876,13 +876,13 @@ exec "$HOME/Scripts/.config/python/run.sh" -m clipped_src.main "$@"
 ```bash
 ./bin/clipped doctor
 ./bin/clipped templates
-python3 -m compileall -q clipped_src
+python3 -m compileall -q src/clipped
 ```
 
 6. After validation passes, the repo-local `.venv` can be removed.
 
 Important Node note:
 
-- Keep `remotion/node_modules` for now.
-- The user has global Node/npm through mise, but Remotion package versions are exact and project-local in `remotion/package-lock.json`.
-- Deleting `remotion/node_modules` is safe only as a temporary space cleanup, and Remotion will need `cd remotion && npm install` before rendering again.
+- Keep `src/remotion/node_modules` for now.
+- The user has global Node/npm through mise, but Remotion package versions are exact and project-local in `src/remotion/package-lock.json`.
+- Deleting `src/remotion/node_modules` is safe only as a temporary space cleanup, and Remotion will need `cd remotion && npm install` before rendering again.
