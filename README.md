@@ -116,8 +116,8 @@ clipped video "track.mp3" --template gallery_square --platform default --start 0
 
 Clipped features a premium, local-first **Interactive Web Showcase & Clipper Simulator** located in the [showcase/index.html](showcase/index.html) folder.
 
-* 🚀 **Launch Link**: [Open Showcase in Browser](file:///Users/rd/Scripts/Riley/clipped/showcase/index.html) (Click to open directly)
-* 📂 **Manual Access**: Double-click [showcase/index.html](showcase/index.html) in your Finder/File Manager.
+* 🚀 **Launch Link**: [Open Showcase in Browser](https://deathrashed.github.io/clipped/showcase/) (Opens on any device — no setup needed)
+* 📂 **Offline Access**: Open `showcase/index.html` directly from the repo on your local machine.
 
 ### What it is
 The showcase is a standalone, offline-friendly HTML portal that provides a visual dashboard of your entire Clipped environment. Because it is built with vanilla CSS/JS, it works entirely offline—no servers or databases needed. You can run it simply by clicking the launch link above or opening the file in your browser.

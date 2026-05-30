@@ -110,7 +110,7 @@ def main():
             card = f"""    <!-- Synced Card -->
     <div class="showcase-card" data-engine="{engine}" data-aspect="{aspect}">
       <div class="card-video-container {aspect_class}">
-        <video src="{clip['filepath']}" controls muted playsinline loop></video>
+        <video src="{clip['filepath']}" controls muted playsinline loop preload="none"></video>
       </div>
       <div class="card-info">
         <div class="card-title">{title_formatted}</div>
