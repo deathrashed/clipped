@@ -25,8 +25,8 @@ HISTORY_FILE   = CONFIG_FILE.parent / "history.txt"
 
 DEFAULT_CONFIG: dict = {
     "general": {
-        "audio_dir":           "~/Music/clipped/_audio",
-        "video_dir":           "~/Music/clipped/_video",
+        "audio_dir":           "/Users/rd/Scripts/Riley/clipped/_audio",
+        "video_dir":           "/Users/rd/Scripts/Riley/clipped/_video",
         "copy_to_clipboard":   True,
         "interactive_preview": True,
         "auto_open_output":    False,
@@ -99,8 +99,8 @@ DEFAULT_CONFIG: dict = {
 
 _DEFAULT_TOML = textwrap.dedent("""\
     [general]
-    audio_dir           = "~/Music/clipped/_audio"
-    video_dir           = "~/Music/clipped/_video"
+    audio_dir           = "/Users/rd/Scripts/Riley/clipped/_audio"
+    video_dir           = "/Users/rd/Scripts/Riley/clipped/_video"
     copy_to_clipboard   = true
     interactive_preview = true
     auto_open_output    = false

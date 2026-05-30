@@ -53,13 +53,22 @@
     .main-heading {
       border-bottom: 1px solid rgb(4, 213, 143);
       color: #e8e0d6;
-      margin: 24px 0px 16px;
+      margin: 32px 0px 16px;
       padding-bottom: 8px;
       width: 100%;
       font-size: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .sub-heading {
+      color: #953ebf;
+      font-size: 16px;
+      font-weight: 700;
+      margin: 20px 0 12px;
+      border-left: 3px solid rgb(4, 213, 143);
+      padding-left: 8px;
     }
 
     /* ==== LINKS & ACTION BUTTONS ==== */
@@ -179,9 +188,9 @@
       margin-bottom: 24px;
     }
 
-    @media (min-width: 600px) {
+    @media (min-width: 700px) {
       .simulator-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.1fr 0.9fr;
       }
     }
 
@@ -222,6 +231,19 @@
       border-color: #04d58f;
     }
 
+    .form-group input[type="file"] {
+      padding: 6px;
+      font-size: 12px;
+      background: rgb(30, 30, 30);
+      cursor: pointer;
+    }
+
+    .row-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
     .terminal-panel {
       background: rgb(10, 10, 10);
       border: 1.5px solid #953ebf;
@@ -229,7 +251,7 @@
       padding: 12px;
       display: flex;
       flex-direction: column;
-      height: 340px;
+      height: 380px;
       box-sizing: border-box;
       transition: border-color 0.2s;
     }
@@ -400,6 +422,7 @@
       font-size: 13px;
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .tag {
@@ -521,7 +544,25 @@
       color: #f4a900;
     }
 
+    .no-clips {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 24px;
+      color: #a39c93;
+      border: 1px dashed #555;
+      border-radius: 8px;
+      background: rgb(20, 20, 20);
+    }
+
   </style>
+  
+  <script>
+    // Graceful fallback for dynamically updated user clips file
+    if (typeof window.userClips === 'undefined') {
+      window.userClips = [];
+    }
+  </script>
+  <script src="clips-list.js" onerror="console.log('No user-generated clips file found yet.')"></script>
 </head>
 <body>
 
@@ -549,21 +590,34 @@
 
   <div class="simulator-grid">
     <div class="control-panel">
+      <!-- Media Source Selection -->
       <div class="form-group">
-        <label for="sim-source">Audio Source (Local/URL)</label>
+        <label for="sim-source">Audio Source</label>
         <select id="sim-source">
           <option value="juggaknots">Juggaknots - Trouble Man (Original Audio)</option>
           <option value="stabwounds">200 Stab Wounds - Masters of Morbidity</option>
           <option value="suicideboys">SuicideboyS - Paris</option>
-          <option value="custom">Custom YouTube Link...</option>
+          <option value="custom_url">Use YouTube URL...</option>
+          <option value="local_path">Use Custom Local Audio File...</option>
         </select>
       </div>
 
-      <div id="custom-url-group" class="form-group" style="display: none;">
+      <!-- YouTube URL Inputs -->
+      <div id="youtube-url-group" class="form-group" style="display: none;">
         <label for="sim-url">YouTube URL</label>
         <input type="text" id="sim-url" value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
       </div>
 
+      <!-- Custom Audio Path & Preview Inputs -->
+      <div id="local-audio-group" class="form-group" style="display: none;">
+        <label>Custom Audio File</label>
+        <div class="row-inputs">
+          <input type="text" id="sim-audio-path" placeholder="CLI Path (e.g. track.mp3)" value="my_track.mp3">
+          <input type="file" id="sim-audio-upload" accept="audio/*">
+        </div>
+      </div>
+
+      <!-- Time range -->
       <div class="form-group">
         <label for="sim-range">Time Range (M:SS / Seconds)</label>
         <div style="display: flex; gap: 8px;">
@@ -573,16 +627,23 @@
         </div>
       </div>
 
+      <!-- Template -->
       <div class="form-group">
         <label for="sim-template">Video Template</label>
         <select id="sim-template">
-          <option value="pulse_reel">pulse_reel (Remotion Flagship Reel)</option>
+          <!-- Remotion templates -->
+          <option value="pulse_reel">pulse_reel (Remotion Reel)</option>
           <option value="gallery_square">gallery_square (Remotion Blurred BG)</option>
           <option value="record_square">record_square (Remotion Spin Record)</option>
-          <option value="reel">reel (FFmpeg Dynamic Reel)</option>
+          <option value="fluid_scene">fluid_scene (Remotion Fluid Wave)</option>
+          <option value="metal_vhs">metal_vhs (Remotion VHS Style)</option>
+          <option value="premium_card">premium_card (Remotion Album Card)</option>
+          <!-- FFmpeg templates -->
+          <option value="reel">reel (FFmpeg Flagship Reel)</option>
           <option value="vertical_wave">vertical_wave (FFmpeg Spinner Wave)</option>
           <option value="vertical">vertical (FFmpeg Classic Spinner)</option>
           <option value="spinner">spinner (FFmpeg Square Record)</option>
+          <option value="spinner_story">spinner_story (FFmpeg Record Story)</option>
           <option value="waveformbar">waveformbar (FFmpeg Cover Panel)</option>
           <option value="static">static (FFmpeg Centered Artwork)</option>
           <option value="minimal">minimal (FFmpeg Dark Typographic)</option>
@@ -591,6 +652,7 @@
         </select>
       </div>
 
+      <!-- Platform -->
       <div class="form-group">
         <label for="sim-platform">Platform Export Profile</label>
         <select id="sim-platform">
@@ -605,9 +667,60 @@
         </select>
       </div>
 
+      <!-- Logo background removal option -->
+      <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
+        <input type="checkbox" id="sim-clean-logo" checked style="width: auto; cursor: pointer; accent-color: #04d58f;">
+        <label for="sim-clean-logo" style="cursor: pointer; user-select: none; font-size: 13px; font-weight: 600; color: #04d58f;">Remove logo background (rmbg)</label>
+      </div>
+
+      <!-- Custom Overrides -->
+      <details>
+        <summary>
+          <div class="summary-header" style="font-size:14px; margin-bottom: 0px; border-bottom: none; color: #04d58f;">
+            <span>Advanced Layout & Asset Overrides</span>
+            <span class="trk-arrow" style="font-size:11px;">▼</span>
+          </div>
+        </summary>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+          <!-- Cover Override -->
+          <div class="form-group">
+            <label>Album Cover Art</label>
+            <div class="row-inputs">
+              <input type="text" id="sim-cover-path" placeholder="CLI Path (e.g. cover.jpg)" value="">
+              <input type="file" id="sim-cover-upload" accept="image/*">
+            </div>
+          </div>
+          <!-- Logo Override -->
+          <div class="form-group">
+            <label>Brand Logo</label>
+            <div class="row-inputs">
+              <input type="text" id="sim-logo-path" placeholder="CLI Path (e.g. logo.png)" value="">
+              <input type="file" id="sim-logo-upload" accept="image/*">
+            </div>
+          </div>
+          <!-- Artist Override -->
+          <div class="form-group">
+            <label>Artist Image</label>
+            <div class="row-inputs">
+              <input type="text" id="sim-artist-path" placeholder="CLI Path (e.g. artist.jpg)" value="">
+              <input type="file" id="sim-artist-upload" accept="image/*">
+            </div>
+          </div>
+          <!-- Background Media Override -->
+          <div class="form-group">
+            <label>Background Media (Video/Image)</label>
+            <div class="row-inputs">
+              <input type="text" id="sim-bg-path" placeholder="CLI Path (e.g. bg.mp4)" value="">
+              <input type="file" id="sim-bg-upload" accept="image/*,video/*">
+            </div>
+          </div>
+        </div>
+      </details>
+
       <button id="run-btn" class="btn-link" style="margin-top: 10px; padding: 10px 0px;">Run Render Simulation</button>
     </div>
 
+    <!-- Terminal panel -->
     <div class="terminal-panel">
       <div class="terminal-header">
         <div class="terminal-dot dot-red"></div>
@@ -625,34 +738,43 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     </div>
   </div>
 
-  <!-- ==== SIMULATOR PREVIEW ==== -->
+  <!-- SIMULATOR PREVIEW -->
   <div class="preview-wrapper" id="preview-wrapper">
     <div class="preview-title" id="preview-title">Generated Preview</div>
     <video class="preview-video" id="preview-video" controls muted playsinline></video>
   </div>
 
-  <!-- ==== SECTION 2: VIDEO SHOWCASE ==== -->
+  <!-- ==== SECTION 2: SHOWCASE GALLERIES ==== -->
   <div class="main-heading" id="showcase">
-    <span>Video Template Showcase</span>
-    <span class="tag">Local Render Renders</span>
+    <span>Video & Audio Showcase</span>
+    <span class="tag">Render Output Hub</span>
   </div>
 
   <div class="btn-container" style="margin-bottom: 16px;">
-    <button class="btn-link active" onclick="filterShowcase('all', this)">All Engines</button>
+    <button class="btn-link active" onclick="filterShowcase('all', this)">All Clips</button>
+    <button class="btn-link" onclick="filterShowcase('custom-clips', this)">My Clips</button>
     <button class="btn-link" onclick="filterShowcase('remotion', this)">Remotion</button>
     <button class="btn-link" onclick="filterShowcase('ffmpeg', this)">FFmpeg</button>
-    <button class="btn-link" onclick="filterShowcase('square', this)">Square (1:1)</button>
-    <button class="btn-link" onclick="filterShowcase('vertical', this)">Vertical (9:16)</button>
+    <button class="btn-link" onclick="filterShowcase('square', this)">Square</button>
+    <button class="btn-link" onclick="filterShowcase('vertical', this)">Vertical</button>
   </div>
 
-  <div class="showcase-grid" id="showcase-grid">
+  <!-- SUBSECTION A: USER-GENERATED CLIPS -->
+  <div class="sub-heading" id="user-clips-heading">My Generated Clips (Auto-Synced)</div>
+  <div class="showcase-grid" id="user-clips-grid">
+    <!-- Loaded dynamically by Javascript from clips-list.js -->
+  </div>
+
+  <!-- SUBSECTION B: REMOTION DYNAMIC RENDERS -->
+  <div class="sub-heading">Remotion Dynamic Renders</div>
+  <div class="showcase-grid">
     <!-- Pulse Reel -->
     <div class="showcase-card" data-engine="remotion" data-aspect="vertical">
       <div class="card-video-container vertical">
         <video src="../media/tests/videos/remotion/Pulse_Reel_Manual.mp4" controls muted playsinline loop></video>
       </div>
       <div class="card-info">
-        <div class="card-title">Pulse Reel (Flagship)</div>
+        <div class="card-title">Pulse Reel</div>
         <div class="card-subtitle">
           <span class="tag">Remotion</span>
           <span class="tag">9:16 Vertical</span>
@@ -700,6 +822,82 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       </div>
     </div>
 
+    <!-- Fluid Scene -->
+    <div class="showcase-card" data-engine="remotion" data-aspect="square">
+      <div class="card-video-container">
+        <video src="../media/tests/videos/remotion/Fluid Scene ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Fluid Scene</div>
+        <div class="card-subtitle">
+          <span class="tag">Remotion</span>
+          <span class="tag">1:1 Square</span>
+        </div>
+      </div>
+      <div class="card-code">
+        clipped video "track.mp3" --template fluid_scene --platform default --start 2:41 --end 3:06
+        <button class="copy-btn" onclick="copyText(this)">Copy</button>
+      </div>
+    </div>
+
+    <!-- Metal VHS -->
+    <div class="showcase-card" data-engine="remotion" data-aspect="square">
+      <div class="card-video-container">
+        <video src="../media/tests/videos/remotion/Metal VHS ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Metal VHS</div>
+        <div class="card-subtitle">
+          <span class="tag">Remotion</span>
+          <span class="tag">1:1 Square</span>
+        </div>
+      </div>
+      <div class="card-code">
+        clipped video "track.mp3" --template metal_vhs --platform default --start 2:41 --end 3:06
+        <button class="copy-btn" onclick="copyText(this)">Copy</button>
+      </div>
+    </div>
+
+    <!-- Premium Card -->
+    <div class="showcase-card" data-engine="remotion" data-aspect="square">
+      <div class="card-video-container">
+        <video src="../media/tests/videos/remotion/Premium Card ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Premium Card</div>
+        <div class="card-subtitle">
+          <span class="tag">Remotion</span>
+          <span class="tag">1:1 Square</span>
+        </div>
+      </div>
+      <div class="card-code">
+        clipped video "track.mp3" --template premium_card --platform default --start 2:41 --end 3:06
+        <button class="copy-btn" onclick="copyText(this)">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBSECTION C: FFMPEG LEGACY RENDERS -->
+  <div class="sub-heading">FFmpeg Legacy Renders</div>
+  <div class="showcase-grid">
+    <!-- Dynamic Reel -->
+    <div class="showcase-card" data-engine="ffmpeg" data-aspect="vertical">
+      <div class="card-video-container vertical">
+        <video src="../media/tests/videos/ffmpeg/Reel ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Dynamic Reel (Flagship)</div>
+        <div class="card-subtitle">
+          <span class="tag">FFmpeg</span>
+          <span class="tag">9:16 Vertical</span>
+        </div>
+      </div>
+      <div class="card-code">
+        clipped video "track.mp3" --template reel --platform vertical_full --start 2:41 --end 3:06
+        <button class="copy-btn" onclick="copyText(this)">Copy</button>
+      </div>
+    </div>
+
     <!-- Vertical Wave -->
     <div class="showcase-card" data-engine="ffmpeg" data-aspect="vertical">
       <div class="card-video-container vertical">
@@ -714,24 +912,6 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       </div>
       <div class="card-code">
         clipped video "track.mp3" --template vertical_wave --platform vertical_full --start 2:41 --end 3:06
-        <button class="copy-btn" onclick="copyText(this)">Copy</button>
-      </div>
-    </div>
-
-    <!-- Spinner -->
-    <div class="showcase-card" data-engine="ffmpeg" data-aspect="square">
-      <div class="card-video-container">
-        <video src="../media/tests/videos/ffmpeg/Spinner ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
-      </div>
-      <div class="card-info">
-        <div class="card-title">Spinner Record</div>
-        <div class="card-subtitle">
-          <span class="tag">FFmpeg</span>
-          <span class="tag">1:1 Square</span>
-        </div>
-      </div>
-      <div class="card-code">
-        clipped video "track.mp3" --template spinner --platform default --start 2:41 --end 3:06
         <button class="copy-btn" onclick="copyText(this)">Copy</button>
       </div>
     </div>
@@ -754,20 +934,38 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       </div>
     </div>
 
-    <!-- Cinematic -->
-    <div class="showcase-card" data-engine="ffmpeg" data-aspect="wide">
-      <div class="card-video-container wide">
-        <video src="../media/tests/videos/ffmpeg/Cinematic ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
+    <!-- Spinner -->
+    <div class="showcase-card" data-engine="ffmpeg" data-aspect="square">
+      <div class="card-video-container">
+        <video src="../media/tests/videos/ffmpeg/Spinner ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
       </div>
       <div class="card-info">
-        <div class="card-title">Cinematic Wide</div>
+        <div class="card-title">Spinner Record</div>
         <div class="card-subtitle">
           <span class="tag">FFmpeg</span>
-          <span class="tag">16:9 Wide</span>
+          <span class="tag">1:1 Square</span>
         </div>
       </div>
       <div class="card-code">
-        clipped video "track.mp3" --template cinematic --platform youtube --start 2:41 --end 3:06
+        clipped video "track.mp3" --template spinner --platform default --start 2:41 --end 3:06
+        <button class="copy-btn" onclick="copyText(this)">Copy</button>
+      </div>
+    </div>
+
+    <!-- Spinner Story -->
+    <div class="showcase-card" data-engine="ffmpeg" data-aspect="vertical">
+      <div class="card-video-container vertical">
+        <video src="../media/tests/videos/ffmpeg/Spinner Story ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Spinner Story</div>
+        <div class="card-subtitle">
+          <span class="tag">FFmpeg</span>
+          <span class="tag">9:16 Vertical</span>
+        </div>
+      </div>
+      <div class="card-code">
+        clipped video "track.mp3" --template spinner_story --platform vertical_full --start 2:41 --end 3:06
         <button class="copy-btn" onclick="copyText(this)">Copy</button>
       </div>
     </div>
@@ -844,20 +1042,20 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       </div>
     </div>
 
-    <!-- Dynamic Reel -->
-    <div class="showcase-card" data-engine="ffmpeg" data-aspect="vertical">
-      <div class="card-video-container vertical">
-        <video src="../media/tests/videos/ffmpeg/Reel ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
+    <!-- Cinematic -->
+    <div class="showcase-card" data-engine="ffmpeg" data-aspect="wide">
+      <div class="card-video-container wide">
+        <video src="../media/tests/videos/ffmpeg/Cinematic ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4" controls muted playsinline loop></video>
       </div>
       <div class="card-info">
-        <div class="card-title">Dynamic Reel</div>
+        <div class="card-title">Cinematic Wide</div>
         <div class="card-subtitle">
           <span class="tag">FFmpeg</span>
-          <span class="tag">9:16 Vertical</span>
+          <span class="tag">16:9 Wide</span>
         </div>
       </div>
       <div class="card-code">
-        clipped video "track.mp3" --template reel --platform vertical_full --start 2:41 --end 3:06
+        clipped video "track.mp3" --template cinematic --platform youtube --start 2:41 --end 3:06
         <button class="copy-btn" onclick="copyText(this)">Copy</button>
       </div>
     </div>
@@ -904,10 +1102,14 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
           <option value="pulse_reel">pulse_reel</option>
           <option value="gallery_square">gallery_square</option>
           <option value="record_square">record_square</option>
+          <option value="fluid_scene">fluid_scene</option>
+          <option value="metal_vhs">metal_vhs</option>
+          <option value="premium_card">premium_card</option>
           <option value="reel">reel</option>
           <option value="vertical_wave">vertical_wave</option>
           <option value="vertical">vertical</option>
           <option value="spinner">spinner</option>
+          <option value="spinner_story">spinner_story</option>
           <option value="waveformbar">waveformbar</option>
           <option value="static">static</option>
           <option value="minimal">minimal</option>
@@ -931,6 +1133,38 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       </div>
     </div>
 
+    <!-- Custom asset inputs for Command Builder -->
+    <details>
+      <summary>
+        <div class="summary-header" style="font-size:14px; margin-bottom: 0px; border-bottom: none; color: #04d58f;">
+          <span>Command Asset Overrides</span>
+          <span class="trk-arrow" style="font-size:11px;">▼</span>
+        </div>
+      </summary>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+        <div class="builder-row">
+          <div class="form-group">
+            <label for="cmd-cover">Cover Art Override (--cover)</label>
+            <input type="text" id="cmd-cover" placeholder="Path to cover image">
+          </div>
+          <div class="form-group">
+            <label for="cmd-logo">Logo Override (--logo)</label>
+            <input type="text" id="cmd-logo" placeholder="Path to logo image">
+          </div>
+        </div>
+        <div class="builder-row">
+          <div class="form-group">
+            <label for="cmd-artist">Artist Art Override (--artist)</label>
+            <input type="text" id="cmd-artist" placeholder="Path to artist image">
+          </div>
+          <div class="form-group">
+            <label for="cmd-bg">Background Override (--background)</label>
+            <input type="text" id="cmd-bg" placeholder="Path to background media">
+          </div>
+        </div>
+      </div>
+    </details>
+
     <div id="video-flags-group" class="form-group">
       <label>Visual Accents & Custom Presets</label>
       <div class="checkbox-group">
@@ -945,6 +1179,9 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
         </label>
         <label class="checkbox-item">
           <input type="checkbox" id="flag-preset" value="instagram"> Apply Preset
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="flag-clean-logo" checked> --clean-logo
         </label>
       </div>
     </div>
@@ -1012,10 +1249,54 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
 </div>
 
 <script>
+  // Global maps for custom local file assets (object URLs)
+  let customAudioURL = null;
+  let customCoverURL = null;
+  let customLogoURL = null;
+  let customArtistURL = null;
+  let customBgURL = null;
+
+  // Listen for custom file picks to build object URLs
+  document.getElementById('sim-audio-upload').addEventListener('change', function(e) {
+    if (this.files[0]) {
+      customAudioURL = URL.createObjectURL(this.files[0]);
+      document.getElementById('sim-audio-path').value = this.files[0].name;
+    }
+  });
+
+  document.getElementById('sim-cover-upload').addEventListener('change', function(e) {
+    if (this.files[0]) {
+      customCoverURL = URL.createObjectURL(this.files[0]);
+      document.getElementById('sim-cover-path').value = this.files[0].name;
+    }
+  });
+
+  document.getElementById('sim-logo-upload').addEventListener('change', function(e) {
+    if (this.files[0]) {
+      customLogoURL = URL.createObjectURL(this.files[0]);
+      document.getElementById('sim-logo-path').value = this.files[0].name;
+    }
+  });
+
+  document.getElementById('sim-artist-upload').addEventListener('change', function(e) {
+    if (this.files[0]) {
+      customArtistURL = URL.createObjectURL(this.files[0]);
+      document.getElementById('sim-artist-path').value = this.files[0].name;
+    }
+  });
+
+  document.getElementById('sim-bg-upload').addEventListener('change', function(e) {
+    if (this.files[0]) {
+      customBgURL = URL.createObjectURL(this.files[0]);
+      document.getElementById('sim-bg-path').value = this.files[0].name;
+    }
+  });
+
   // Custom arrow toggle for details
   document.querySelectorAll('details').forEach(el => {
     el.addEventListener('toggle', () => {
       const arrow = el.querySelector('.trk-arrow');
+      if (!arrow) return;
       if (el.open) {
         arrow.textContent = '▲';
         arrow.style.color = '#f4a900';
@@ -1026,34 +1307,110 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     });
   });
 
+  // Load User Generated Clips Dynamically
+  function loadUserClips() {
+    const grid = document.getElementById('user-clips-grid');
+    const heading = document.getElementById('user-clips-heading');
+    grid.innerHTML = '';
+    
+    if (!window.userClips || window.userClips.length === 0) {
+      grid.innerHTML = `<div class="no-clips">No custom clips generated yet. Render an audio or video file via the CLI wrapper to populate your dynamic clips library.</div>`;
+      return;
+    }
+
+    heading.style.display = 'block';
+
+    window.userClips.forEach(clip => {
+      const card = document.createElement('div');
+      card.className = 'showcase-card';
+      card.setAttribute('data-engine', clip.kind === 'video' ? (clip.template.includes('pulse') || clip.template.includes('square') || clip.template.includes('scene') || clip.template.includes('vhs') || clip.template.includes('card') ? 'remotion' : 'ffmpeg') : 'audio');
+      card.setAttribute('data-aspect', clip.platform.includes('instagram') || clip.platform.includes('tiktok') || clip.platform.includes('vertical') || clip.platform.includes('shorts') ? 'vertical' : (clip.platform.includes('youtube') || clip.platform.includes('twitter') ? 'wide' : 'square'));
+
+      // Determine video vs audio card layout
+      let mediaContainer = '';
+      if (clip.kind === 'video') {
+        const isVertical = clip.platform.includes('instagram') || clip.platform.includes('tiktok') || clip.platform.includes('vertical') || clip.platform.includes('shorts');
+        const isWide = clip.platform.includes('youtube') || clip.platform.includes('twitter');
+        const aspectClass = isVertical ? 'vertical' : (isWide ? 'wide' : '');
+        mediaContainer = `
+          <div class="card-video-container ${aspectClass}">
+            <video src="${clip.filepath}" controls muted playsinline loop></video>
+          </div>
+        `;
+      } else {
+        mediaContainer = `
+          <div style="background: rgb(15,15,15); padding: 20px; border-radius: 6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+            <span style="font-size:32px;">🎵</span>
+            <audio src="${clip.filepath}" controls style="width: 100%;"></audio>
+          </div>
+        `;
+      }
+
+      // Format command
+      let cliCommand = '';
+      if (clip.kind === 'video') {
+        cliCommand = `clipped video "${clip.artist || 'track'}" --template ${clip.template} --platform ${clip.platform} --start ${clip.start} --end ${clip.end}`;
+      } else {
+        cliCommand = `clipped audio "${clip.artist || 'track'}" ${clip.start} ${clip.end}`;
+      }
+
+      card.innerHTML = `
+        ${mediaContainer}
+        <div class="card-info">
+          <div class="card-title">${clip.artist ? clip.artist + ' - ' : ''}${clip.title || clip.filename}</div>
+          <div class="card-subtitle">
+            <span class="tag">${clip.kind.toUpperCase()}</span>
+            <span class="tag">${clip.template || 'Trimmed Audio'}</span>
+            <span class="tag">${clip.platform}</span>
+            <span class="tag" style="color: #953ebf;">${clip.timestamp}</span>
+          </div>
+        </div>
+        <div class="card-code">
+          ${cliCommand}
+          <button class="copy-btn" onclick="copyText(this)">Copy</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Run on load
+  window.addEventListener('DOMContentLoaded', loadUserClips);
+
   // Filter Showcase Cards
   function filterShowcase(type, btn) {
-    // Toggle active classes on filter buttons
     const buttons = btn.parentElement.querySelectorAll('button');
     buttons.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
-    const cards = document.querySelectorAll('.showcase-card');
+    const cards = document.querySelectorAll('.showcase-grid .showcase-card');
     cards.forEach(card => {
       const engine = card.getAttribute('data-engine');
       const aspect = card.getAttribute('data-aspect');
+      const isCustom = card.parentElement.id === 'user-clips-grid';
 
       if (type === 'all') {
         card.style.display = 'flex';
+      } else if (type === 'custom-clips') {
+        if (isCustom) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
       } else if (type === 'remotion' || type === 'ffmpeg') {
-        if (engine === type) {
+        if (engine === type && !isCustom) {
           card.style.display = 'flex';
         } else {
           card.style.display = 'none';
         }
       } else if (type === 'square') {
-        if (aspect === 'square') {
+        if (aspect === 'square' && !isCustom) {
           card.style.display = 'flex';
         } else {
           card.style.display = 'none';
         }
       } else if (type === 'vertical') {
-        if (aspect === 'vertical') {
+        if (aspect === 'vertical' && !isCustom) {
           card.style.display = 'flex';
         } else {
           card.style.display = 'none';
@@ -1065,7 +1422,6 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
   // Copy card CLI strings
   function copyText(button) {
     const codeNode = button.parentElement;
-    // Get text excluding button text
     const text = codeNode.textContent.replace('Copy', '').trim();
     navigator.clipboard.writeText(text).then(() => {
       button.textContent = 'Copied!';
@@ -1082,10 +1438,16 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
   const cmdEnd = document.getElementById('cmd-end');
   const cmdTemplate = document.getElementById('cmd-template');
   const cmdPlatform = document.getElementById('cmd-platform');
+  const cmdCover = document.getElementById('cmd-cover');
+  const cmdLogo = document.getElementById('cmd-logo');
+  const cmdArtist = document.getElementById('cmd-artist');
+  const cmdBg = document.getElementById('cmd-bg');
+  
   const flagDry = document.getElementById('flag-dry');
   const flagStyle = document.getElementById('flag-style');
   const flagWave = document.getElementById('flag-wave');
   const flagPreset = document.getElementById('flag-preset');
+  const flagCleanLogo = document.getElementById('flag-clean-logo');
   const videoOptionsRow = document.getElementById('video-options-row');
   const videoFlagsGroup = document.getElementById('video-flags-group');
   const outputCmd = document.getElementById('output-cmd');
@@ -1106,7 +1468,6 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
 
       let cmd = 'clipped video';
       
-      // Preset flag overrides defaults
       if (flagPreset.checked) {
         cmd += ` "${file}" --preset ${cmdPlatform.value}`;
       } else {
@@ -1114,6 +1475,12 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       }
 
       cmd += ` --start ${start} --end ${end}`;
+
+      // Overrides
+      if (cmdCover.value.trim()) cmd += ` --cover "${cmdCover.value.trim()}"`;
+      if (cmdLogo.value.trim()) cmd += ` --logo "${cmdLogo.value.trim()}"`;
+      if (cmdArtist.value.trim()) cmd += ` --artist "${cmdArtist.value.trim()}"`;
+      if (cmdBg.value.trim()) cmd += ` --background "${cmdBg.value.trim()}"`;
 
       if (flagDry.checked) {
         cmd += ' --dry-run';
@@ -1124,12 +1491,15 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       if (flagWave.checked) {
         cmd += ' --waveform radial';
       }
+      if (!flagCleanLogo.checked) {
+        cmd += ' --no-clean-logo';
+      }
 
       outputCmd.textContent = cmd;
     }
   }
 
-  [cmdMode, cmdFile, cmdStart, cmdEnd, cmdTemplate, cmdPlatform, flagDry, flagStyle, flagWave, flagPreset].forEach(el => {
+  [cmdMode, cmdFile, cmdStart, cmdEnd, cmdTemplate, cmdPlatform, cmdCover, cmdLogo, cmdArtist, cmdBg, flagDry, flagStyle, flagWave, flagPreset, flagCleanLogo].forEach(el => {
     el.addEventListener('change', updateCommand);
     el.addEventListener('input', updateCommand);
   });
@@ -1146,12 +1516,21 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
 
   // Interactive Simulator Logic
   const simSource = document.getElementById('sim-source');
-  const customUrlGroup = document.getElementById('custom-url-group');
+  const youtubeUrlGroup = document.getElementById('youtube-url-group');
+  const localAudioGroup = document.getElementById('local-audio-group');
   const simUrl = document.getElementById('sim-url');
+  const simAudioPath = document.getElementById('sim-audio-path');
   const simStart = document.getElementById('sim-start');
   const simEnd = document.getElementById('sim-end');
   const simTemplate = document.getElementById('sim-template');
   const simPlatform = document.getElementById('sim-platform');
+  
+  const simCoverPath = document.getElementById('sim-cover-path');
+  const simLogoPath = document.getElementById('sim-logo-path');
+  const simArtistPath = document.getElementById('sim-artist-path');
+  const simBgPath = document.getElementById('sim-bg-path');
+  const simCleanLogo = document.getElementById('sim-clean-logo');
+
   const runBtn = document.getElementById('run-btn');
   const terminalLogs = document.getElementById('terminal-logs');
   const progressContainer = document.getElementById('progress-container');
@@ -1161,10 +1540,15 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
   const previewTitle = document.getElementById('preview-title');
 
   simSource.addEventListener('change', () => {
-    if (simSource.value === 'custom') {
-      customUrlGroup.style.display = 'block';
+    if (simSource.value === 'custom_url') {
+      youtubeUrlGroup.style.display = 'block';
+      localAudioGroup.style.display = 'none';
+    } else if (simSource.value === 'local_path') {
+      youtubeUrlGroup.style.display = 'none';
+      localAudioGroup.style.display = 'block';
     } else {
-      customUrlGroup.style.display = 'none';
+      youtubeUrlGroup.style.display = 'none';
+      localAudioGroup.style.display = 'none';
     }
   });
 
@@ -1173,7 +1557,6 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
   runBtn.addEventListener('click', () => {
     if (simulationInterval) clearInterval(simulationInterval);
     
-    // Reset output panels
     previewWrapper.style.display = 'none';
     progressContainer.style.display = 'block';
     progressBar.style.width = '0%';
@@ -1190,9 +1573,12 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     } else if (simSource.value === 'suicideboys') {
       sourceName = 'SuicideboyS - Paris';
       filename = 'paris.mp3';
-    } else {
+    } else if (simSource.value === 'custom_url') {
       sourceName = simUrl.value;
       filename = 'downloaded_audio.mp3';
+    } else {
+      sourceName = simAudioPath.value || 'my_track.mp3';
+      filename = sourceName.split('/').pop();
     }
 
     const template = simTemplate.value;
@@ -1200,35 +1586,70 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     const start = simStart.value;
     const end = simEnd.value;
 
-    const fullCommand = `clipped video "${sourceName}" --template ${template} --platform ${platform} --start ${start} --end ${end}`;
+    let overridesStr = '';
+    if (simCoverPath.value) overridesStr += ` --cover "${simCoverPath.value}"`;
+    if (simLogoPath.value) overridesStr += ` --logo "${simLogoPath.value}"`;
+    if (simArtistPath.value) overridesStr += ` --artist "${simArtistPath.value}"`;
+    if (simBgPath.value) overridesStr += ` --background "${simBgPath.value}"`;
+    if (!simCleanLogo.checked) overridesStr += ' --no-clean-logo';
+
+    const fullCommand = `clipped video "${sourceName}" --template ${template} --platform ${platform} --start ${start} --end ${end}${overridesStr}`;
     
     // Simulate terminal trace steps
     const logs = [
       { t: 0, text: `riley@macbook clipped % ${fullCommand}\n` },
       { t: 300, text: `[cli] Initializing Clipped render job...\n` },
       { t: 600, text: `[cli] Checking runtime dependencies... FFmpeg: OK, yt-dlp: OK, rmbg: OK, uv: OK\n` },
-      { t: 1000, text: simSource.value === 'custom' 
+      { t: 1000, text: simSource.value === 'custom_url' 
           ? `[yt-dlp] Ingesting YouTube audio stream from: ${simUrl.value}...\n`
           : `[mutagen] Scanning local file: ~/Music/Library/${filename}...\n` },
-      { t: 1600, text: simSource.value === 'custom'
+      { t: 1600, text: simSource.value === 'custom_url'
           ? `[yt-dlp] [download] 100% of 3.42MiB downloaded successfully.\n`
-          : `[mutagen] Extracted cover art metadata: 'Cover.jpg' (1080x1080px).\n` },
-      { t: 2000, text: `[mutagen] Tag bindings complete: Title="${sourceName.split(' - ')[1] || 'Track'}", Artist="${sourceName.split(' - ')[0] || 'Artist'}".\n` },
-      { t: 2400, text: `[rmbg] Processing cover elements for spinner transparency...\n` },
-      { t: 2700, text: `[rmbg] Output created: staged transparent logo layer.\n` },
-      { t: 3100, text: `[remotion] Packaging props JSON and initializing compiler...\n` },
-      { t: 3400, text: `[remotion] Spawning headless Chromium (Puppeteer) frame renderer...\n` },
-      { t: 3700, text: `[remotion] [render] Compiling 750 frames at 30 FPS...\n` },
-      { t: 4000, text: `[remotion] [render] Progress: 10% (Frame 75/750) - 14fps\n`, progress: 10 },
-      { t: 4300, text: `[remotion] [render] Progress: 30% (Frame 225/750) - 15fps\n`, progress: 30 },
-      { t: 4600, text: `[remotion] [render] Progress: 60% (Frame 450/750) - 15fps\n`, progress: 60 },
-      { t: 4900, text: `[remotion] [render] Progress: 90% (Frame 675/750) - 16fps\n`, progress: 90 },
-      { t: 5200, text: `[remotion] [render] Progress: 100% (Frame 750/750) - Render complete.\n`, progress: 100 },
-      { t: 5500, text: `[ffmpeg] Multiplexing audio stream and raw frames losslessly...\n` },
-      { t: 5800, text: `[mutagen] Injecting ID3 tags to video container...\n` },
-      { t: 6200, text: `[cli] Success! Render completed in 5.8s.\n[cli] Output saved to: ~/Music/clipped/_video/${template}_${filename.replace(/\.[^/.]+$/, "")}.mp4\n` },
-      { t: 6500, text: `<span class="terminal-prompt">riley@macbook clipped % </span><span class="blinking-cursor">█</span>\n` }
+          : `[mutagen] Extracted cover art metadata: 'Cover.jpg' (1080x1080px).\n` }
     ];
+
+    if (simCoverPath.value) {
+      logs.push({ t: 1800, text: `[cli] Applying custom cover override: ${simCoverPath.value}\n` });
+    }
+    if (simLogoPath.value) {
+      logs.push({ t: 1900, text: `[cli] Applying custom logo override: ${simLogoPath.value}\n` });
+    }
+    if (simArtistPath.value) {
+      logs.push({ t: 2000, text: `[cli] Applying custom artist image override: ${simArtistPath.value}\n` });
+    }
+    if (simBgPath.value) {
+      logs.push({ t: 2100, text: `[cli] Applying custom background override: ${simBgPath.value}\n` });
+    }
+
+    logs.push(
+      { t: 2300, text: `[mutagen] Tag bindings complete: Title="${sourceName.split(' - ')[1] || 'Track'}", Artist="${sourceName.split(' - ')[0] || 'Artist'}".\n` }
+    );
+
+    if (simCleanLogo.checked) {
+      logs.push(
+        { t: 2600, text: `[rmbg] Processing cover elements for spinner transparency...\n` },
+        { t: 2900, text: `[rmbg] Output created: staged transparent logo layer.\n` }
+      );
+    } else {
+      logs.push(
+        { t: 2600, text: `[cli] Skipping logo background removal (clean_logo = False)\n` }
+      );
+    }
+
+    logs.push(
+      { t: 3200, text: `[remotion] Packaging props JSON and initializing compiler...\n` },
+      { t: 3500, text: `[remotion] Spawning headless Chromium (Puppeteer) frame renderer...\n` },
+      { t: 3800, text: `[remotion] [render] Compiling 750 frames at 30 FPS...\n` },
+      { t: 4100, text: `[remotion] [render] Progress: 10% (Frame 75/750) - 14fps\n`, progress: 10 },
+      { t: 4400, text: `[remotion] [render] Progress: 30% (Frame 225/750) - 15fps\n`, progress: 30 },
+      { t: 4700, text: `[remotion] [render] Progress: 60% (Frame 450/750) - 15fps\n`, progress: 60 },
+      { t: 5000, text: `[remotion] [render] Progress: 90% (Frame 675/750) - 16fps\n`, progress: 90 },
+      { t: 5300, text: `[remotion] [render] Progress: 100% (Frame 750/750) - Render complete.\n`, progress: 100 },
+      { t: 5600, text: `[ffmpeg] Multiplexing audio stream and raw frames losslessly...\n` },
+      { t: 5900, text: `[mutagen] Injecting ID3 tags to video container...\n` },
+      { t: 6300, text: `[cli] Success! Render completed in 5.8s.\n[cli] Output saved to: /Users/rd/Scripts/Riley/clipped/_video/${template}_${filename.replace(/\.[^/.]+$/, "")}.mp4\n` },
+      { t: 6600, text: `<span class="terminal-prompt">riley@macbook clipped % </span><span class="blinking-cursor">█</span>\n` }
+    );
 
     logs.forEach(log => {
       setTimeout(() => {
@@ -1240,13 +1661,16 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       }, log.t);
     });
 
-    // Map template select options to real test videos
     setTimeout(() => {
       progressContainer.style.display = 'none';
       let videoSrc = '';
       let title = '';
 
-      if (simSource.value === 'stabwounds') {
+      // Check if user uploaded a custom media/bg video file
+      if (customBgURL && document.getElementById('sim-bg-upload').files[0].type.startsWith('video/')) {
+        videoSrc = customBgURL;
+        title = `Custom Upload Video (Background Override)`;
+      } else if (simSource.value === 'stabwounds') {
         videoSrc = '../assets/examples/200-stab-wounds-masters-of-morbidity-reel.mp4';
         title = '200 Stab Wounds - Masters of Morbidity (pulse_reel)';
       } else if (simSource.value === 'suicideboys') {
@@ -1267,6 +1691,18 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
             videoSrc = '../media/tests/videos/remotion/Record Square ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4';
             title = 'Juggaknots - Trouble Man (record_square)';
             break;
+          case 'fluid_scene':
+            videoSrc = '../media/tests/videos/remotion/Fluid Scene ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4';
+            title = 'Juggaknots - Trouble Man (fluid_scene)';
+            break;
+          case 'metal_vhs':
+            videoSrc = '../media/tests/videos/remotion/Metal VHS ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4';
+            title = 'Juggaknots - Trouble Man (metal_vhs)';
+            break;
+          case 'premium_card':
+            videoSrc = '../media/tests/videos/remotion/Premium Card ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4';
+            title = 'Juggaknots - Trouble Man (premium_card)';
+            break;
           case 'reel':
             videoSrc = '../media/tests/videos/ffmpeg/Reel ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4';
             title = 'Juggaknots - Trouble Man (reel)';
@@ -1282,6 +1718,10 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
           case 'spinner':
             videoSrc = '../media/tests/videos/ffmpeg/Spinner ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4';
             title = 'Juggaknots - Trouble Man (spinner)';
+            break;
+          case 'spinner_story':
+            videoSrc = '../media/tests/videos/ffmpeg/Spinner Story ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4';
+            title = 'Juggaknots - Trouble Man (spinner_story)';
             break;
           case 'waveformbar':
             videoSrc = '../media/tests/videos/ffmpeg/Waveformbar ⋅ Juggaknots - Trouble Man (2.41 - 3.06) [smoke_test].mp4';
@@ -1314,7 +1754,7 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       previewWrapper.style.display = 'flex';
       previewVideo.load();
       previewVideo.play();
-    }, 6600);
+    }, 6700);
   });
 </script>
 

@@ -185,6 +185,22 @@ def process_video(
 
         if result:
             _get_ui().info(f"Video saved: [white]{result.name}[/white]")
+            
+            try:
+                from .utils import register_clip_in_showcase
+                register_clip_in_showcase(
+                    filepath=result,
+                    kind="video",
+                    template=template_name,
+                    platform=platform_name,
+                    start=start,
+                    end=end or (start + calc_dur),
+                    artist=assets.artist_name,
+                    title=assets.track_title
+                )
+            except Exception:
+                pass
+
             if config.get("copy_to_clipboard", True):
                 subprocess.run(
                     ["osascript", "-e", f'set the clipboard to (POSIX file "{result}")']
@@ -263,6 +279,21 @@ def process_video(
 
         _get_ui().info(f"Video saved: [white]{output_path.name}[/white]")
 
+        try:
+            from .utils import register_clip_in_showcase
+            register_clip_in_showcase(
+                filepath=output_path,
+                kind="video",
+                template=template_name,
+                platform=platform_name,
+                start=start,
+                end=end or (start + calc_dur),
+                artist=assets.artist_name,
+                title=assets.track_title
+            )
+        except Exception:
+            pass
+
         if config.get("copy_to_clipboard", True):
             subprocess.run(
                 ["osascript", "-e", f'set the clipboard to (POSIX file "{output_path}")']
@@ -314,6 +345,22 @@ def _export_audio_only(
         )
 
     _get_ui().info(f"Audio saved: [white]{output_path.name}[/white]")
+    
+    try:
+        from .utils import register_clip_in_showcase
+        register_clip_in_showcase(
+            filepath=output_path,
+            kind="audio",
+            template="audio_only",
+            platform=profile.name,
+            start=start,
+            end=start + duration,
+            artist=assets.artist_name,
+            title=assets.track_title
+        )
+    except Exception:
+        pass
+
     if config.get("copy_to_clipboard", True):
         subprocess.run(
             ["osascript", "-e", f'set the clipboard to (POSIX file "{output_path}")']

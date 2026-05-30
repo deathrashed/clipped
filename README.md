@@ -29,6 +29,7 @@
 
 - [Quick Start](#quick-start)
 - [Examples](#examples)
+- [Interactive Showcase](#interactive-showcase)
 - [What It Does](#what-it-does)
 - [Core Technologies](#core-technologies)
 - [Core Workflows](#core-workflows)
@@ -53,6 +54,40 @@ clipped --version
 
 The codebase lives at `~/Scripts/Riley/clipped`. Generated audio and video stay in `~/Music/clipped/_audio` and `~/Music/clipped/_video` so the working tree does not fill up with exports.
 
+<details>
+<summary><strong>Installing & Managing Dependencies on macOS</strong></summary>
+
+Clipped relies on several core system and programming environment dependencies. Run these commands to install or repair your local setup:
+
+- **System Packages (Homebrew)**:
+  Ensure FFmpeg and yt-dlp are installed:
+  ```bash
+  brew install ffmpeg yt-dlp
+  ```
+- **Python Setup (uv)**:
+  Clipped uses the high-performance Python tool `uv` to manage environments. If you need to install or update dependencies:
+  ```bash
+  # Verify uv is installed
+  uv --version
+  
+  # Run doctor checks inside virtualenv
+  uv run clipped doctor
+  ```
+- **Node & Remotion Setup (npm)**:
+  Remotion requires Node 16+ and npm. To clean install or resolve version mismatches in the Remotion package:
+  ```bash
+  cd src/remotion
+  rm -rf node_modules package-lock.json
+  npm install
+  cd ../..
+  ```
+- **Optional Tools (rmbg)**:
+  To strip background colors from logo assets automatically:
+  ```bash
+  brew install deathrashed/rmbg/rmbg
+  ```
+</details>
+
 ## <img src="https://api.iconify.design/mdi:play-box-multiple-outline.svg?color=%2311c866" height="22"> Examples
 
 The Remotion templates are the primary video renderer. `pulse_reel` builds on the original dynamic reel idea with richer sequencing, audio-reactive accents, and stronger typography.
@@ -76,6 +111,10 @@ The Remotion templates are the primary video renderer. `pulse_reel` builds on th
 clipped video "track.mp3" --template pulse_reel --platform instagram --start 2:45 --end 3:45
 clipped video "track.mp3" --template gallery_square --platform default --start 0 --end 4:20
 ```
+
+## <img src="https://api.iconify.design/mdi:television-play.svg?color=%2311c866" height="22"> Interactive Showcase
+
+To preview all available video templates (Remotion & FFmpeg) and test out CLI options with a simulator before generating, open our local [Interactive Web Showcase](showcase/index.html) in your browser.
 
 ## <img src="https://api.iconify.design/mdi:information-outline.svg?color=%2311c866" height="22"> What It Does
 
@@ -292,6 +331,45 @@ default_platform = "vertical_full"
 | `clipped batch` | Process directories of audio or video inputs. |
 | `clipped watch` | Watch a folder and process new audio files. |
 | `clipped docs generate` | Regenerate CLI docs from the current command surface. |
+
+<details>
+<summary><strong>Handy CLI Command Cheatsheet</strong></summary>
+
+Here are some helpful development commands for managing, extending, and fixing Clipped:
+
+- **Checking CLI Structure & Code Integrity**:
+  ```bash
+  ~/Scripts/.config/python/run.sh -m compileall -q src/clipped
+  ```
+- **Managing Configs**:
+  ```bash
+  # View active settings
+  clipped config
+  # Print config schema
+  clipped config --schema
+  ```
+- **Re-generating CLI Documentation**:
+  ```bash
+  clipped docs generate
+  ```
+- **Validating Keyboard Maestro Macros**:
+  ```bash
+  plutil -lint macros/*.kmmacros
+  ```
+</details>
+
+<details>
+<summary><strong>Dependencies & Tooling References</strong></summary>
+
+Refer to these resources for documentation and customization guides:
+
+- **Video Engine**: [Remotion Documentation](https://www.remotion.dev/)
+- **Clipping Engine**: [Mutagen ID3/Metadata Docs](https://mutagen.readthedocs.io/)
+- **Downloader**: [yt-dlp GitHub Repository](https://github.com/yt-dlp/yt-dlp)
+- **Background Cleaner**: [rmbg Background Remover](https://github.com/deathrashed/rmbg)
+- **macOS Automation**: [Keyboard Maestro Wiki](https://wiki.keyboardmaestro.com/)
+- **Audio Workflows**: [Swinsian AppleScript Support](https://swinsian.com/)
+</details>
 
 ## <img src="https://api.iconify.design/mdi:plus-circle-outline.svg?color=%2311c866" height="22"> Adding a Template
 

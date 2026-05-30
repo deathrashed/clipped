@@ -1642,6 +1642,7 @@ def video_cmd(
     background:    Optional[str] = typer.Option(None, "--background", help="Path or URL to background image"),
     media:         Optional[str] = typer.Option(None, "--media", help="Path or URL to media file"),
     lyrics:        Optional[str] = typer.Option(None, "--lyrics", help="Path or URL to lyrics file"),
+    clean_logo:    Optional[bool] = typer.Option(None, "--clean-logo/--no-clean-logo", help="Clean logo background using rmbg"),
 ):
     """
     Generate a video from an audio file.
@@ -1688,6 +1689,7 @@ def video_cmd(
     if effects:        extra["effects"]        = effects
     if captions:       extra["captions"]       = captions
     if seed:           extra["seed"]           = seed
+    if clean_logo is not None: extra["clean_logo"] = clean_logo
 
     out_path = Path(output) if output else None
     if not final_src or not _validate_source(final_src, allow_url=False):
