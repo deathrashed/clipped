@@ -121,9 +121,6 @@ def main():
           <span class="tag" style="color: #953ebf;">{clip['timestamp']}</span>
         </div>
       </div>
-      <div class="card-code">
-        {cli_command}
-        <button class="copy-btn" onclick="copyText(this)">Copy</button>
       </div>
     </div>"""
             video_html.append(card)
@@ -144,9 +141,6 @@ def main():
           <span class="tag" style="color: #953ebf;">{clip['timestamp']}</span>
         </div>
       </div>
-      <div class="card-code">
-        {cli_command}
-        <button class="copy-btn" onclick="copyText(this)">Copy</button>
       </div>
     </div>"""
             audio_html.append(card)
@@ -171,6 +165,23 @@ def main():
             parts = content.split(a_start, 1)
             rest = parts[1].split(a_end, 1)
             content = parts[0] + a_start + "\n" + "\n".join(audio_html) + "\n    " + a_end + rest[1]
+            
+        # Replace audio options
+        opt_start = "<!-- INSERT_AUDIO_OPTIONS_HERE -->"
+        opt_end = "<!-- INSERT_AUDIO_OPTIONS_END -->"
+        if opt_start in content and opt_end in content:
+            audio_options_html = [
+                '          <option value="custom_url">Use YouTube URL...</option>',
+                '          <option value="local_path">Use Custom Local Audio File...</option>'
+            ]
+            for clip in clips:
+                if clip["kind"] == "audio":
+                    title_formatted = f"{clip['artist']} - {clip['title']}" if clip['artist'] else (clip['title'] or clip['filename'])
+                    audio_options_html.append(f'          <option value="{clip["filepath"]}">{title_formatted}</option>')
+                    
+            parts = content.split(opt_start, 1)
+            rest = parts[1].split(opt_end, 1)
+            content = parts[0] + opt_start + "\n" + "\n".join(audio_options_html) + "\n          " + opt_end + rest[1]
             
         html_file.write_text(content, encoding="utf-8")
         

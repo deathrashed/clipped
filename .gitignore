@@ -34,8 +34,9 @@ remotion/public/jobs/
 remotion-research-inspiration/
 
 # Clipped Generated Output
-
-
+_audio/
+_video/
+dist_showcase/
 .qa/
 
 # macOS
