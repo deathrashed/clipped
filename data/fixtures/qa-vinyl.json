@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "templateId": "record_square",
+  "compositionId": "record-square",
+  "platformName": "default",
+  "width": 1080,
+  "height": 1080,
+  "fps": 30,
+  "durationSeconds": 12,
+  "durationFrames": 360,
+  "assets": {
+    "audioSrc": "jobs/1780008199-b9e1bf844f/audio.wav",
+    "coverSrc": "jobs/1780008199-b9e1bf844f/cover.jpg",
+    "logoSrc": null,
+    "artistImageSrc": null,
+    "backgroundSrc": null,
+    "lyrics": null,
+    "lyricsJson": null,
+    "extraImageSrcs": [],
+    "mediaSrcs": []
+  },
+  "metadata": {
+    "artist": "Hiroshi Suzuki",
+    "title": "Romance",
+    "album": "Cat Garden",
+    "trackNumber": 1,
+    "year": "1976",
+    "genre": "Jazz-Funk",
+    "sourceFilename": "01. Romance.mp3"
+  },
+  "audio": {
+    "fadeIn": 0.3,
+    "fadeOut": 0.5,
+    "volume": 1,
+    "originalStart": 63.0,
+    "preparedDuration": 12
+  },
+  "options": {
+    "style": "luxury-vinyl",
+    "motion": "low",
+    "waveform": "ring",
+    "palette": "auto",
+    "scene_pack": "vinyl",
+    "effects": "clean",
+    "captions": "off",
+    "mediaMode": "background",
+    "cleanLogo": true,
+    "logoBg": "auto",
+    "logoFuzz": 15,
+    "seed": ""
+  },
+  "encoding": {
+    "codec": "libx264",
+    "crf": 23,
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "pixelFormat": "yuv420p"
+  }
+}

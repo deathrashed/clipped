@@ -1,0 +1,9 @@
+{
+  "description": "QA fixture: element ordering — move-up/move-down operations",
+  "initialElementIds": ["vignette", "bloom", "noise"],
+  "sequence": [
+    { "operation": "moveDown", "id": "vignette", "expected": ["bloom", "vignette", "noise"] },
+    { "operation": "moveUp", "id": "noise", "expected": ["bloom", "noise", "vignette"] },
+    { "operation": "moveUp", "id": "bloom", "expected": ["bloom", "noise", "vignette"] }
+  ]
+}

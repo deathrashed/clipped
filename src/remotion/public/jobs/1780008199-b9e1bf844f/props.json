@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "templateId": "record_square",
+  "compositionId": "record-square",
+  "platformName": "default",
+  "width": 1080,
+  "height": 1080,
+  "fps": 30,
+  "durationSeconds": 60.0,
+  "durationFrames": 1800,
+  "assets": {
+    "audioSrc": "jobs/1780008199-b9e1bf844f/audio.wav",
+    "coverSrc": "jobs/1780008199-b9e1bf844f/cover.jpg",
+    "logoSrc": "jobs/1780008199-b9e1bf844f/logo.png",
+    "artistImageSrc": "jobs/1780008199-b9e1bf844f/artist.jpg",
+    "backgroundSrc": null,
+    "lyrics": null,
+    "lyricsJson": "[{\"start\": 0.0, \"end\": 3.0, \"text\": \"Ancestral Home in the Twilight Deeps\"}, {\"start\": 3.0, \"end\": 6.0, \"text\": \"Beckons to Me with Unseen Fingers\"}, {\"start\": 6.0, \"end\": 9.0, \"text\": \"Forefathers Haunt\"}, {\"start\": 9.0, \"end\": 12.0, \"text\": \"Calling to Me from This Dark Charnel House\"}, {\"start\": 12.0, \"end\": 15.0, \"text\": \"Corrupted Through Lifelong Seclusion\"}, {\"start\": 15.0, \"end\": 18.0, \"text\": \"Driven by an Unnatural Force\"}, {\"start\": 18.0, \"end\": 21.0, \"text\": \"Drawn to This Vault\"}, {\"start\": 21.0, \"end\": 24.0, \"text\": \"Declivity Where the Light Reaches Not\"}, {\"start\": 24.0, \"end\": 27.0, \"text\": \"Enigmatic Crypt of My Bloodline\"}, {\"start\": 27.0, \"end\": 30.0, \"text\": \"Place of Ancestral Remains\"}, {\"start\": 30.0, \"end\": 33.0, \"text\": \"Temple of My Fascination\"}, {\"start\": 33.0, \"end\": 36.0, \"text\": \"Possessing Me\"}, {\"start\": 36.0, \"end\": 39.0, \"text\": \"Reversion to Past Generations\"}, {\"start\": 39.0, \"end\": 42.0, \"text\": \"a Decadent State of the Mind\"}, {\"start\": 42.0, \"end\": 45.0, \"text\": \"Return to Repellent Scions\"}, {\"start\": 45.0, \"end\": 48.0, \"text\": \"of the Primitive\"}, {\"start\": 48.0, \"end\": 51.0, \"text\": \"Enchanting Black Recesses of the Past\"}, {\"start\": 51.0, \"end\": 54.0, \"text\": \"Welcome Me to My True Home\"}, {\"start\": 54.0, \"end\": 57.0, \"text\": \"Familiar Far Beyond the Tenancy\"}, {\"start\": 57.0, \"end\": 60.0, \"text\": \"of the Body Which I Now Possess\"}, {\"start\": 60.0, \"end\": 63.0, \"text\": \"Eyes Affixed Upon the Dank Portal\"}, {\"start\": 63.0, \"end\": 66.0, \"text\": \"Alone I Lie Entranced\"}, {\"start\": 66.0, \"end\": 69.0, \"text\": \"Echoes of My Forgotten Lives\"}, {\"start\": 69.0, \"end\": 72.0, \"text\": \"Summoning Me to the Gothic Retreat\"}, {\"start\": 72.0, \"end\": 75.0, \"text\": \"Here I Belong\"}, {\"start\": 75.0, \"end\": 78.0, \"text\": \"My Casket Awaits, My Heritage Calls\"}, {\"start\": 78.0, \"end\": 81.0, \"text\": \"Sinister Flashes of Super Sight\"}, {\"start\": 81.0, \"end\": 84.0, \"text\": \"Penetrate the Veils of Empiricism\"}, {\"start\": 84.0, \"end\": 87.0, \"text\": \"Sanity Wanes\"}, {\"start\": 87.0, \"end\": 90.0, \"text\": \"I Witness My Lineage Perish in Flames\"}, {\"start\": 90.0, \"end\": 93.0, \"text\": \"Enigmatic Crypt of My Bloodline\"}, {\"start\": 93.0, \"end\": 96.0, \"text\": \"Place of Ancestral Remains\"}, {\"start\": 96.0, \"end\": 99.0, \"text\": \"Temple of My Fascination\"}, {\"start\": 99.0, \"end\": 102.0, \"text\": \"Possessing Me\"}, {\"start\": 102.0, \"end\": 105.0, \"text\": \"Reversion to Past Generations\"}, {\"start\": 105.0, \"end\": 108.0, \"text\": \"a Decadent State of the Mind\"}, {\"start\": 108.0, \"end\": 111.0, \"text\": \"Return to Repellent Scions\"}, {\"start\": 111.0, \"end\": 114.0, \"text\": \"of the Primitive\"}, {\"start\": 114.0, \"end\": 117.0, \"text\": \"Delving Into the Terrors\"}, {\"start\": 117.0, \"end\": 120.0, \"text\": \"of My Inherited Scorn\"}, {\"start\": 120.0, \"end\": 123.0, \"text\": \"Undeniable Heritage\"}, {\"start\": 123.0, \"end\": 126.0, \"text\": \"Innocent Nevermore\"}, {\"start\": 126.0, \"end\": 129.0, \"text\": \"Though But Twenty-One Winters Have\"}, {\"start\": 129.0, \"end\": 132.0, \"text\": \"Chilled My Bodily Frame\"}, {\"start\": 132.0, \"end\": 135.0, \"text\": \"Blasphemy Pours in Torrents from My Lips\"}, {\"start\": 135.0, \"end\": 138.0, \"text\": \"Enchanting Black Recesses of the Past\"}, {\"start\": 138.0, \"end\": 141.0, \"text\": \"Welcome Me to My True Home\"}, {\"start\": 141.0, \"end\": 144.0, \"text\": \"Familiar Far Beyond the Tenancy\"}, {\"start\": 144.0, \"end\": 147.0, \"text\": \"of the Body Which I Now Possess\"}, {\"start\": 147.0, \"end\": 150.0, \"text\": \"Eyes Affixed Upon the Dank Portal\"}, {\"start\": 150.0, \"end\": 153.0, \"text\": \"Alone I Lie Entranced\"}]",
+    "extraImageSrcs": [
+      "jobs/1780008199-b9e1bf844f/extra-0.jpg",
+      "jobs/1780008199-b9e1bf844f/extra-1.jpg",
+      "jobs/1780008199-b9e1bf844f/extra-2.jpg",
+      "jobs/1780008199-b9e1bf844f/extra-3.png",
+      "jobs/1780008199-b9e1bf844f/extra-4.png"
+    ],
+    "mediaSrcs": []
+  },
+  "metadata": {
+    "artist": "Disincarnate",
+    "title": "Entranced",
+    "album": "Dreams of the Carrion Kind",
+    "trackNumber": 7,
+    "year": "1993-03-01",
+    "genre": "Death Metal",
+    "sourceFilename": "07. Entranced.mp3"
+  },
+  "audio": {
+    "fadeIn": null,
+    "fadeOut": null,
+    "volume": 1,
+    "originalStart": 63.0,
+    "preparedDuration": 60.0
+  },
+  "options": {
+    "style": "classic",
+    "motion": "medium",
+    "waveform": "radial",
+    "palette": "auto",
+    "scene_pack": "story",
+    "effects": "texture",
+    "captions": "lyrics",
+    "mediaMode": "background",
+    "cleanLogo": true,
+    "logoBg": "auto",
+    "logoFuzz": 15,
+    "seed": ""
+  },
+  "encoding": {
+    "codec": "libx264",
+    "crf": 23,
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "pixelFormat": "yuv420p"
+  }
+}

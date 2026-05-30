@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "templateId": "gallery_square",
+  "compositionId": "gallery-square",
+  "platformName": "default",
+  "width": 1080,
+  "height": 1080,
+  "fps": 30,
+  "durationSeconds": 2.0,
+  "durationFrames": 60,
+  "assets": {
+    "audioSrc": "jobs/1780075623-963b45b80e/audio.wav",
+    "coverSrc": "jobs/1780075623-963b45b80e/cover.png",
+    "logoSrc": null,
+    "artistImageSrc": null,
+    "backgroundSrc": null,
+    "lyrics": null,
+    "lyricsJson": null,
+    "extraImageSrcs": [
+      "jobs/1780075623-963b45b80e/extra-0.png"
+    ],
+    "mediaSrcs": []
+  },
+  "metadata": {
+    "artist": "Clipped Bot",
+    "title": "Clipped Test Audio",
+    "album": "Test Suite",
+    "trackNumber": 0,
+    "year": "",
+    "genre": "",
+    "sourceFilename": "test_audio.mp3"
+  },
+  "audio": {
+    "fadeIn": null,
+    "fadeOut": null,
+    "volume": 1,
+    "originalStart": 1.0,
+    "preparedDuration": 2.0
+  },
+  "options": {
+    "style": "classic",
+    "motion": "medium",
+    "waveform": "radial",
+    "palette": "auto",
+    "scene_pack": "story",
+    "effects": "texture",
+    "captions": "lyrics",
+    "mediaMode": "background",
+    "cleanLogo": true,
+    "logoBg": "auto",
+    "logoFuzz": 15,
+    "seed": ""
+  },
+  "encoding": {
+    "codec": "libx264",
+    "crf": 23,
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "pixelFormat": "yuv420p"
+  }
+}

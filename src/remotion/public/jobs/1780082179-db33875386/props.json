@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "templateId": "pulse_reel",
+  "compositionId": "pulse-reel",
+  "platformName": "instagram",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "durationSeconds": 25.000249,
+  "durationFrames": 750,
+  "assets": {
+    "audioSrc": "jobs/1780082179-db33875386/audio.wav",
+    "coverSrc": "jobs/1780082179-db33875386/cover.jpg",
+    "logoSrc": "jobs/1780082179-db33875386/logo.png",
+    "artistImageSrc": "jobs/1780082179-db33875386/artist.jpg",
+    "backgroundSrc": null,
+    "lyrics": null,
+    "lyricsJson": null,
+    "extraImageSrcs": [
+      "jobs/1780082179-db33875386/extra-0.jpg",
+      "jobs/1780082179-db33875386/extra-1.png"
+    ],
+    "mediaSrcs": []
+  },
+  "metadata": {
+    "artist": "Juggaknots",
+    "title": "Trouble Man",
+    "album": "Re:Release",
+    "trackNumber": 2,
+    "year": "2003",
+    "genre": "Hip-Hop",
+    "sourceFilename": "Juggaknots - Trouble Man (2.41 - 3.06).mp3"
+  },
+  "audio": {
+    "fadeIn": null,
+    "fadeOut": null,
+    "volume": 1,
+    "originalStart": 0,
+    "preparedDuration": 25.000249
+  },
+  "options": {
+    "style": "classic",
+    "motion": "medium",
+    "waveform": "radial",
+    "palette": "auto",
+    "scene_pack": "story",
+    "effects": "texture",
+    "captions": "lyrics",
+    "mediaMode": "background",
+    "cleanLogo": true,
+    "logoBg": "auto",
+    "logoFuzz": 15,
+    "seed": ""
+  },
+  "encoding": {
+    "codec": "libx264",
+    "crf": 23,
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "pixelFormat": "yuv420p"
+  }
+}
