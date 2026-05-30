@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>Clipped – Showcase & Simulator</title>
+  <link rel="icon" type="image/png" href="../assets/icon.png" />
 
   <style>
     body {
@@ -17,7 +18,7 @@
     .container {
       background: rgb(30, 30, 30);
       margin: 0 auto;
-      max-width: 820px;
+      max-width: 1100px;
       padding: 24px 18px;
       border-radius: 12px;
       border: 1.5px solid #953ebf;
@@ -246,8 +247,8 @@
     }
 
     .terminal-panel {
-      background: rgb(10, 10, 10);
-      border: 1.5px solid #953ebf;
+      background: #1e1e2e;
+      border: 1.5px solid #313244;
       border-radius: 8px;
       padding: 12px;
       display: flex;
@@ -258,46 +259,38 @@
     }
 
     .terminal-panel:hover {
-      border-color: #f4a900;
+      border-color: #89b4fa;
     }
 
     .terminal-header {
       display: flex;
-      gap: 6px;
       margin-bottom: 10px;
-      border-bottom: 1px solid #222;
+      border-bottom: 1px solid #313244;
       padding-bottom: 6px;
       align-items: center;
+      justify-content: center;
     }
-
-    .terminal-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    .dot-red { background: #ff5f56; }
-    .dot-yellow { background: #ffbd2e; }
-    .dot-green { background: #27c93f; }
 
     .terminal-title {
-      font-size: 11px;
+      font-size: 12px;
       font-family: monospace;
-      color: #a39c93;
-      margin-left: 6px;
+      color: #a6adc8;
+      font-weight: 600;
     }
 
     .terminal-logs {
       flex: 1;
       font-family: monospace;
       font-size: 12px;
-      color: #04d58f;
+      color: #cdd6f4;
       overflow-y: auto;
       white-space: pre-wrap;
       line-height: 1.4;
     }
 
     .terminal-prompt {
-      color: #e8e0d6;
+      color: #89b4fa;
+      font-weight: bold;
     }
 
     .progress-container {
@@ -555,6 +548,88 @@
       background: rgb(20, 20, 20);
     }
 
+  /* ==== MOBILE OPTIMISATIONS ==== */
+  @media (max-width: 480px) {
+    .container {
+      padding: 14px 10px;
+      border-radius: 8px;
+    }
+    .header h1 {
+      font-size: 20px;
+    }
+    .header p {
+      font-size: 13px;
+    }
+    .main-heading {
+      font-size: 16px;
+    }
+    .btn-link {
+      padding: 8px 12px;
+      font-size: 13px;
+      min-height: 44px;
+    }
+    .form-group input, .form-group select, .form-group input[type="text"] {
+      font-size: 16px;
+      padding: 10px 12px;
+      min-height: 44px;
+    }
+    .form-group label {
+      font-size: 12px;
+    }
+    .row-inputs {
+      grid-template-columns: 1fr;
+    }
+    .terminal-panel {
+      height: 280px;
+    }
+    .terminal-logs {
+      font-size: 11px;
+    }
+    .showcase-card {
+      padding: 10px;
+    }
+    .card-code {
+      font-size: 10px;
+      word-break: break-all;
+    }
+    .copy-btn {
+      font-size: 11px;
+      padding: 4px 10px;
+      min-height: 36px;
+      min-width: 44px;
+    }
+    .card-title {
+      font-size: 14px;
+    }
+    .checkbox-group {
+      gap: 10px;
+    }
+    .btn-container {
+      gap: 8px;
+    }
+    .btn-container .btn-link {
+      flex: 1 1 auto;
+      text-align: center;
+    }
+    .details-content {
+      font-size: 13px;
+      padding: 12px;
+    }
+    .sub-heading {
+      font-size: 14px;
+    }
+    .builder-output {
+      font-size: 11px;
+      padding: 8px;
+    }
+    .checkbox-item {
+      font-size: 12px;
+    }
+    .preview-title {
+      font-size: 13px;
+    }
+  }
+
   </style>
   
   <script>
@@ -622,9 +697,9 @@
       <div class="form-group">
         <label for="sim-range">Time Range (M:SS / Seconds)</label>
         <div style="display: flex; gap: 8px;">
-          <input type="text" id="sim-start" value="2:41" style="flex: 1; text-align: center;">
+          <input type="text" id="sim-start" placeholder="0:00" value="0" style="flex: 1; text-align: center;">
           <span style="align-self: center;">to</span>
-          <input type="text" id="sim-end" value="3:06" style="flex: 1; text-align: center;">
+          <input type="text" id="sim-end" placeholder="1:00" value="60" style="flex: 1; text-align: center;">
         </div>
       </div>
 
@@ -633,23 +708,23 @@
         <label for="sim-template">Video Template</label>
         <select id="sim-template">
           <!-- Remotion templates -->
-          <option value="pulse_reel">pulse_reel (Remotion Reel)</option>
-          <option value="gallery_square">gallery_square (Remotion Blurred BG)</option>
-          <option value="record_square">record_square (Remotion Spin Record)</option>
-          <option value="fluid_scene">fluid_scene (Remotion Fluid Wave)</option>
-          <option value="metal_vhs">metal_vhs (Remotion VHS Style)</option>
-          <option value="premium_card">premium_card (Remotion Album Card)</option>
+          <option value="pulse_reel">Pulse Reel</option>
+          <option value="gallery_square">Gallery Square</option>
+          <option value="record_square">Record Square</option>
+          <option value="fluid_scene">Fluid Scene</option>
+          <option value="metal_vhs">Metal VHS</option>
+          <option value="premium_card">Premium Card</option>
           <!-- FFmpeg templates -->
-          <option value="reel">reel (FFmpeg Flagship Reel)</option>
-          <option value="vertical_wave">vertical_wave (FFmpeg Spinner Wave)</option>
-          <option value="vertical">vertical (FFmpeg Classic Spinner)</option>
-          <option value="spinner">spinner (FFmpeg Square Record)</option>
-          <option value="spinner_story">spinner_story (FFmpeg Record Story)</option>
-          <option value="waveformbar">waveformbar (FFmpeg Cover Panel)</option>
-          <option value="static">static (FFmpeg Centered Artwork)</option>
-          <option value="minimal">minimal (FFmpeg Dark Typographic)</option>
-          <option value="fade">fade (FFmpeg Crossfade Sequence)</option>
-          <option value="cinematic">cinematic (FFmpeg Wide Ken Burns)</option>
+          <option value="reel">Reel</option>
+          <option value="vertical_wave">Vertical Wave</option>
+          <option value="vertical">Vertical</option>
+          <option value="spinner">Spinner</option>
+          <option value="spinner_story">Spinner Story</option>
+          <option value="waveformbar">Waveformbar</option>
+          <option value="static">Static</option>
+          <option value="minimal">Minimal</option>
+          <option value="fade">Fade</option>
+          <option value="cinematic">Cinematic</option>
         </select>
       </div>
 
@@ -657,14 +732,14 @@
       <div class="form-group">
         <label for="sim-platform">Platform Export Profile</label>
         <select id="sim-platform">
-          <option value="default">default (Square 1080x1080)</option>
-          <option value="instagram">instagram (Reel 1080x1920, Max 60s)</option>
-          <option value="tiktok">tiktok (Reel 1080x1920, Max 60s)</option>
-          <option value="youtube_shorts">youtube_shorts (Reel 1080x1920, Max 60s)</option>
-          <option value="vertical_full">vertical_full (Reel 1080x1920, Unlimited)</option>
-          <option value="twitter">twitter (1280x720, Max 140s)</option>
-          <option value="youtube">youtube (Wide 1920x1080, Unlimited)</option>
-          <option value="bandcamp">bandcamp (Square 1080x1080, Unlimited)</option>
+          <option value="default">Default</option>
+          <option value="instagram">Instagram</option>
+          <option value="tiktok">TikTok</option>
+          <option value="youtube_shorts">YouTube Shorts</option>
+          <option value="vertical_full">Vertical Full</option>
+          <option value="twitter">Twitter</option>
+          <option value="youtube">YouTube</option>
+          <option value="bandcamp">Bandcamp</option>
         </select>
       </div>
 
@@ -724,14 +799,11 @@
     <!-- Terminal panel -->
     <div class="terminal-panel">
       <div class="terminal-header">
-        <div class="terminal-dot dot-red"></div>
-        <div class="terminal-dot dot-yellow"></div>
-        <div class="terminal-dot dot-green"></div>
         <div class="terminal-title">clipped-terminal</div>
       </div>
       <div class="terminal-logs" id="terminal-logs">Welcome to the Clipped interactive CLI simulator.
 Select parameters on the left and click "Run Render Simulation" to simulate a local render run.
-<span class="terminal-prompt">riley@macbook clipped % </span><span class="blinking-cursor">█</span></div>
+<span class="terminal-prompt">user@clipped ~$ </span><span class="blinking-cursor">█</span></div>
       
       <div class="progress-container" id="progress-container">
         <div class="progress-bar" id="progress-bar"></div>
@@ -1652,8 +1724,8 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       <div class="form-group">
         <label for="cmd-mode">Operation Mode</label>
         <select id="cmd-mode">
-          <option value="video">video (Generate Video Reel)</option>
-          <option value="audio">audio (Trim Audio Only)</option>
+          <option value="video">video</option>
+          <option value="audio">audio</option>
         </select>
       </div>
 
@@ -1666,12 +1738,12 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     <div class="builder-row">
       <div class="form-group">
         <label for="cmd-start">Start Timestamp (`S` or `M:SS`)</label>
-        <input type="text" id="cmd-start" value="1:30">
+        <input type="text" id="cmd-start" value="0">
       </div>
 
       <div class="form-group">
         <label for="cmd-end">End Timestamp (`S` or `M:SS`)</label>
-        <input type="text" id="cmd-end" value="2:15">
+        <input type="text" id="cmd-end" value="60">
       </div>
     </div>
 
@@ -1782,17 +1854,22 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
   <details>
     <summary>
       <div class="summary-header">
-        <span>How to Install and Setup CLI Wrapper globally?</span>
+        <span>How to Download and Install Clipped globally?</span>
         <span class="trk-arrow">▼</span>
       </div>
     </summary>
     <div class="details-content">
+      <h3>Quick Download</h3>
+      <p>Clone the repository or download the ZIP from GitHub to get started:</p>
+      <ul>
+        <li><code>git clone https://github.com/deathrashed/clipped.git</code></li>
+        <li><code>cd clipped</code></li>
+      </ul>
       <h3>Global CLI Installation</h3>
       <p>Clipped can be set up globally by running the install script in the repository. Make sure the output path is added to your shell profile path (e.g. <code>.zshrc</code>):</p>
       <ul>
-        <li><code>cd ~/Scripts/Riley/clipped</code></li>
         <li><code>./install.sh</code></li>
-        <li><code>export PATH="$PATH:$HOME/Scripts/Riley/clipped/bin"</code></li>
+        <li><code>export PATH="$PATH:$HOME/.local/bin"</code></li>
         <li>Check connection: <code>clipped --help</code></li>
       </ul>
     </div>
@@ -2109,7 +2186,7 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     
     // Simulate terminal trace steps
     const logs = [
-      { t: 0, text: `riley@macbook clipped % ${fullCommand}\n` },
+      { t: 0, text: `user@clipped ~$ ${fullCommand}\n` },
       { t: 300, text: `[cli] Initializing Clipped render job...\n` },
       { t: 600, text: `[cli] Checking runtime dependencies... FFmpeg: OK, yt-dlp: OK, rmbg: OK, uv: OK\n` },
       { t: 1000, text: simSource.value === 'custom_url' 
@@ -2160,7 +2237,7 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
       { t: 5600, text: `[ffmpeg] Multiplexing audio stream and raw frames losslessly...\n` },
       { t: 5900, text: `[mutagen] Injecting ID3 tags to video container...\n` },
       { t: 6300, text: `[cli] Success! Render completed in 5.8s.\n[cli] Output saved to: /Users/rd/Scripts/Riley/clipped/_video/${template}_${filename.replace(/\.[^/.]+$/, "")}.mp4\n` },
-      { t: 6600, text: `<span class="terminal-prompt">riley@macbook clipped % </span><span class="blinking-cursor">█</span>\n` }
+      { t: 6600, text: `<span class="terminal-prompt">user@clipped ~$ </span><span class="blinking-cursor">█</span>\n` }
     );
 
     logs.forEach(log => {
