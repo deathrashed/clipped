@@ -258,6 +258,21 @@ class AudioClipper:
         HISTORY_FILE.write_text(self.src)
         _get_ui().info(f"Saved clip: [white]{path.name}[/white]")
 
+        try:
+            from .utils import register_clip_in_showcase
+            register_clip_in_showcase(
+                filepath=path,
+                kind="audio",
+                template="clipped_audio",
+                platform="default",
+                start=self.start,
+                end=self.end,
+                artist=artist,
+                title=title
+            )
+        except Exception:
+            pass
+
         if self.config.get("copy_to_clipboard", True):
             subprocess.run(
                 ["osascript", "-e", f'set the clipboard to (POSIX file "{path}")']

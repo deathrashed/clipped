@@ -680,3 +680,63 @@ def get_youtube_title(url: str) -> str:
     if res.returncode == 0 and res.stdout.strip():
         return res.stdout.strip()
     return "YouTube_Clip"
+
+
+# ── Showcase registration helper ──────────────────────────────────────────────
+
+def register_clip_in_showcase(
+    filepath: Path,
+    kind: str,  # "video" or "audio"
+    template: str = "",
+    platform: str = "",
+    start: float = 0.0,
+    end: float | None = None,
+    artist: str = "",
+    title: str = "",
+) -> None:
+    import json
+    import os
+    from datetime import datetime
+    
+    try:
+        repo_root = Path(__file__).resolve().parents[2]
+        showcase_dir = repo_root / "showcase"
+        showcase_dir.mkdir(exist_ok=True)
+        
+        json_file = showcase_dir / "clips.json"
+        js_file = showcase_dir / "clips-list.js"
+        
+        clips = []
+        if json_file.exists():
+            try:
+                clips = json.loads(json_file.read_text(encoding="utf-8"))
+            except Exception:
+                clips = []
+                
+        # Calculate relative path from showcase_dir to output file
+        try:
+            rel_path = os.path.relpath(filepath, start=showcase_dir)
+        except Exception:
+            rel_path = str(filepath)
+            
+        new_clip = {
+            "filepath": rel_path,
+            "filename": filepath.name,
+            "kind": kind,
+            "template": template,
+            "platform": platform,
+            "start": start,
+            "end": end,
+            "artist": artist,
+            "title": title,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        # Append new clip and save
+        clips.insert(0, new_clip)  # Newest clips first
+        json_file.write_text(json.dumps(clips, indent=2), encoding="utf-8")
+        js_file.write_text(f"var userClips = {json.dumps(clips, indent=2)};\n", encoding="utf-8")
+        
+    except Exception as e:
+        print(f"Warning: Failed to register clip in showcase: {e}", file=sys.stderr)
+
