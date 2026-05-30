@@ -215,86 +215,31 @@ def get_config() -> dict:
     return load_config()["general"]
 
 
-def _format_toml_value(value: Any) -> str:
-    """Format a simple scalar value for config.toml."""
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, (int, float)) and not isinstance(value, bool):
-        return str(value)
-    if isinstance(value, Path):
-        value = str(value)
-    escaped = str(value).replace("\\", "\\\\").replace('"', '\\"')
-    return f'"{escaped}"'
-
-
-def _find_section(lines: list[str], section: str) -> tuple[int | None, int | None]:
-    header = f"[{section}]"
-    start = None
-    for idx, line in enumerate(lines):
-        if line.strip() == header:
-            start = idx
-            break
-    if start is None:
-        return None, None
-
-    end = len(lines)
-    for idx in range(start + 1, len(lines)):
-        stripped = lines[idx].strip()
-        if stripped.startswith("[") and stripped.endswith("]"):
-            end = idx
-            break
-    return start, end
-
-
 def update_config_key(key: str, value: Any, section: str = "general") -> None:
     """
-    Persist one simple scalar config key.
-
-    This intentionally avoids a new TOML writer dependency. Existing comments
-    and sections are preserved for normal one-line scalar values, but complex
-    TOML constructs such as arrays of tables are outside this helper's scope.
+    Persist one config key using tomlkit to preserve comments and structure.
     """
+    import tomlkit
+    
     CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     if not CONFIG_FILE.exists():
         CONFIG_FILE.write_text(_DEFAULT_TOML)
 
     original = CONFIG_FILE.read_text()
-    lines = original.splitlines(keepends=True)
-    start, end = _find_section(lines, section)
-
-    if start is None or end is None:
-        if lines and not lines[-1].endswith("\n"):
-            lines[-1] = f"{lines[-1]}\n"
-        if lines and lines[-1].strip():
-            lines.append("\n")
-        lines.append(f"[{section}]\n")
-        start = len(lines) - 1
-        end = len(lines)
-
-    formatted = _format_toml_value(value)
-    key_pattern = re.compile(
-        rf"^(\s*{re.escape(key)}\s*=\s*)(.*?)(\s*(#.*)?)?$"
-    )
-
-    for idx in range(start + 1, end):
-        line = lines[idx]
-        newline = "\n" if line.endswith("\n") else ""
-        body = line[:-1] if newline else line
-        match = key_pattern.match(body)
-        if match:
-            suffix = match.group(3) or ""
-            lines[idx] = f"{match.group(1)}{formatted}{suffix}{newline}"
-            break
-    else:
-        insert_at = end
-        while insert_at > start + 1 and not lines[insert_at - 1].strip():
-            insert_at -= 1
-        lines.insert(insert_at, f"{key} = {formatted}\n")
-
-    CONFIG_FILE.write_text("".join(lines))
     try:
-        with CONFIG_FILE.open("rb") as f:
-            tomllib.load(f)
+        doc = tomlkit.parse(original)
+        
+        if section not in doc:
+            doc.add(section, tomlkit.table())
+            
+        target = doc[section]
+        if isinstance(target, dict):
+            target[key] = value
+        else:
+            # target is likely a Table
+            target[key] = value
+        
+        CONFIG_FILE.write_text(tomlkit.dumps(doc))
     except Exception:
         CONFIG_FILE.write_text(original)
         raise

@@ -3,3 +3,4 @@ rich
 questionary
 yt-dlp
 mutagen
+tomlkit

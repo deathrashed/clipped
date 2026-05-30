@@ -249,23 +249,27 @@ Add CLI tooling for:
 ## ADR-0010: Source Package Layout
 
 ### Status
-Proposed
+Accepted
 
 ### Context
-The active Python package currently lives in `clipped_src/`. That name is explicit, but it is less standard than modern Python's `src/<package>/` layout.
+The active Python package originally lived in `clipped_src/`, and the Remotion project lived at the root-level `remotion/`. Having both at the root was cluttered and nonstandard.
 
 ### Decision
-Keep `clipped_src/` stable for the current cleanup pass. If the package is renamed later, prefer `src/clipped/` and update `bin/clipped`, `install.sh`, docs, tests, and all `python -m clipped_src.main` references in one migration.
-
-Do not rename the package itself to `src`; `src` should be a container directory, not the importable application package.
+Restructure the project to use a conventional layout:
+- Move the Python package to `src/clipped/` (using PEP 517 compliance with `pyproject.toml`).
+- Move the Remotion app to `src/remotion/`.
+- Move persistent non-code metadata, manifests, and QA fixtures to `data/` (e.g. `data/templates.manifest.json`, `data/fixtures/`).
+- Move test fixtures and generated video outputs to `media/tests/` to keep root folder clean.
+- Update `bin/clipped`, `install.sh`, docs, tests, and completion scripts to use the new layout.
 
 ### Consequences
 **Positive:**
-- Avoids breaking the CLI wrapper and Keyboard Maestro workflows during taxonomy cleanup.
-- Leaves a clear migration path to a conventional Python layout.
+- Enforces standard Python and React directory structures.
+- Removes repository root clutter.
+- Keeps test fixtures and generated outputs outside of code paths.
 
 **Negative:**
-- The package name remains slightly nonstandard until a dedicated packaging pass.
+- Requires updating all absolute and relative file path configurations in Python, TypeScript, and shell scripts.
 
 ## ADR-0011: Remotion-First Video Rendering
 
@@ -276,7 +280,7 @@ Accepted
 The FFmpeg template system is reliable for utility renders, but richer motion graphics, typography, audio-reactive visuals, and reusable visual components are difficult to maintain as filter graphs.
 
 ### Decision
-Add a top-level `remotion/` React/TypeScript app as Clipped's primary video renderer for new templates. Python remains the CLI/TUI, metadata resolver, platform/profile coordinator, and macOS automation layer. Remotion templates are declared in `remotion/templates.manifest.json`; `clipped_src/remotion_engine.py` prepares render props/assets and invokes the local Remotion CLI. Existing FFmpeg templates remain available as legacy templates and FFmpeg remains the audio-only/export utility path.
+Add a nested `src/remotion/` React/TypeScript app as Clipped's primary video renderer for new templates. Python remains the CLI/TUI, metadata resolver, platform/profile coordinator, and macOS automation layer. Remotion templates are declared in `data/templates.manifest.json`; `src/clipped/remotion_engine.py` prepares render props/assets and invokes the local Remotion CLI. Existing FFmpeg templates remain available as legacy templates and FFmpeg remains the audio-only/export utility path.
 
 ### Consequences
 **Positive:**
@@ -297,7 +301,7 @@ Accepted
 Templates mix effects, visualizers, backgrounds, and lights in ad-hoc patterns. Adding a new effect required edits to every template, and there was no shared catalog of what visual building blocks exist or are safe to use.
 
 ### Decision
-Create `remotion/src/elements/` with a registry of 40+ categorized element definitions (text, visualizers, effects/glow, effects/color, effects/texture, effects/lens, depth, shapes3d, backgrounds, lights, scene3d). A single `<ElementStack>` component accepts `ElementInstance[]` arrays and renders only safe, implemented, opt-in-compliant elements. Scene presets include the element arrays, wired into all 6 templates.
+Create `src/remotion/src/elements/` with a registry of 40+ categorized element definitions (text, visualizers, effects/glow, effects/color, effects/texture, effects/lens, depth, shapes3d, backgrounds, lights, scene3d). A single `<ElementStack>` component accepts `ElementInstance[]` arrays and renders only safe, implemented, opt-in-compliant elements. Scene presets include the element arrays, wired into all 6 templates.
 
 Each element definition includes: id, label, category, group, tier (core/premium/experimental/disabled), implementation status, defaultProps, full inspector schema (Transform, Appearance, element-specific controls), and safety metadata. Default props are merged at render time via `applyElementDefaults()` in `ElementStack.tsx`.
 

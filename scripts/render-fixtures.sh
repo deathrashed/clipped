@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REMOTION_DIR="$SCRIPT_DIR/../remotion"
+REMOTION_DIR="$SCRIPT_DIR/../src/remotion"
 QA_DIR="$SCRIPT_DIR/../.qa/phase-3-art-direction"
 mkdir -p "$QA_DIR"
 
@@ -13,7 +13,7 @@ render() {
   cd "$REMOTION_DIR"
   npx remotion still src/index.ts "$comp" "$QA_DIR/$label.png" \
     --frame=60 \
-    --props "src/fixtures/$fixture.json" \
+    --props "../../data/fixtures/$fixture.json" \
     --log=warn 2>/dev/null
 }
 

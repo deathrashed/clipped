@@ -1,7 +1,7 @@
 import { Composition, type CalculateMetadataFunction } from "remotion";
 import type { ReactElement } from "react";
 import defaultProps from "./default-props.json";
-import manifest from "../templates.manifest.json";
+import manifest from "../../../data/templates.manifest.json";
 import type { ClippedRenderProps, RemotionCompositionId, RemotionTemplateId } from "./types";
 import { GallerySquare } from "./templates/GallerySquare";
 import { PulseReel } from "./templates/PulseReel";

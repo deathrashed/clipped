@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 
-DEFAULT_TEMPLATES_DIR = Path("clipped_src/templates")
+DEFAULT_TEMPLATES_DIR = Path("src/clipped/templates")
 DEFAULT_OUTPUT = Path("data/training/clipped_training_data.jsonl")
 
 

@@ -47,7 +47,7 @@ Format: [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-#### Video Templates (new module: `clipped_src/templates/`)
+#### Video Templates (new module: `src/clipped/templates/`)
 - **Spinner** (`spinner`) — 1:1 rotating record on black. Refactored into `templates/spinner.py`.
 - **Fade** (`fade`) — crossfade image sequence. Refactored into `templates/fade.py`.
 - **Static** (`static`) — centered album art. Refactored into `templates/static.py`.
@@ -57,13 +57,13 @@ Format: [Semantic Versioning](https://semver.org/).
 - Template registry (`templates/registry.py`) — single source of truth for all templates.
 - Abstract base class (`templates/base.py`) — `VideoTemplate` ABC with shared helpers.
 
-#### Platform Export Profiles (new module: `clipped_src/platforms.py`)
+#### Platform Export Profiles (new module: `src/clipped/platforms.py`)
 - `default`, `instagram`, `tiktok`, `youtube_shorts`, `twitter`, `discord`, `youtube`, `bandcamp`
 - Each profile carries dimensions, max duration, max file size, codec settings, and suggested template.
 - `discord` platform routes to audio-only MP3 export (8 MB size warning).
 - Platform dimension override: if profile size differs from template native, auto-scales output.
 
-#### FFmpeg Progress Bar (new module: `clipped_src/progress.py`)
+#### FFmpeg Progress Bar (new module: `src/clipped/progress.py`)
 - Real-time Rich progress bar during video encoding via `-progress pipe:1`.
 - Shows percentage, elapsed time, and ETA.
 - Replaces silent `subprocess.run(capture_output=True)` that appeared to hang.

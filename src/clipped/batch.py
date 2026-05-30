@@ -3,9 +3,11 @@ from __future__ import annotations
 import time
 from pathlib import Path
 from typing import Iterable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import typer
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, BarColumn, TaskProgressColumn
 
 from .audio import process_clip
 from .utils import parse_time
@@ -39,9 +41,29 @@ def batch_audio(
         console.print(f"[yellow]No files found for pattern {pattern} in {input_dir}[/yellow]")
         raise typer.Exit(1)
 
-    for path in files:
-        console.print(f"\n[bold]Processing audio:[/bold] {path.name}")
-        process_clip(str(path), start_secs, end_secs, dry_run=dry_run)
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeElapsedColumn(),
+        console=console,
+    ) as progress:
+        overall_task = progress.add_task("[bold cyan]Batch Audio", total=len(files))
+        
+        with ThreadPoolExecutor() as pool:
+            futures = {
+                pool.submit(process_clip, str(path), start_secs, end_secs, dry_run=dry_run): path
+                for path in files
+            }
+            for future in as_completed(futures):
+                path = futures[future]
+                try:
+                    future.result()
+                    progress.console.print(f"[green]✔ Finished:[/green] {path.name}")
+                except Exception as e:
+                    progress.console.print(f"[red]✖ Failed {path.name}:[/red] {e}")
+                progress.advance(overall_task)
 
     console.print("\n[green]Batch audio processing complete.[/green]")
 
@@ -79,17 +101,38 @@ def batch_video(
         console.print(f"[yellow]No files found for pattern {pattern} in {input_dir}[/yellow]")
         raise typer.Exit(1)
 
-    for path in files:
-        console.print(f"\n[bold]Processing video:[/bold] {path.name}")
-        process_video(
-            str(path),
-            template_name=template,
-            platform_name=platform,
-            start=start_secs,
-            end=end_secs,
-            dry_run=dry_run,
-            extra_config=extra_config,
-        )
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeElapsedColumn(),
+        console=console,
+    ) as progress:
+        overall_task = progress.add_task("[bold cyan]Batch Video", total=len(files))
+        
+        with ThreadPoolExecutor() as pool:
+            futures = {
+                pool.submit(
+                    process_video,
+                    str(path),
+                    template_name=template,
+                    platform_name=platform,
+                    start=start_secs,
+                    end=end_secs,
+                    dry_run=dry_run,
+                    extra_config=extra_config,
+                ): path
+                for path in files
+            }
+            for future in as_completed(futures):
+                path = futures[future]
+                try:
+                    future.result()
+                    progress.console.print(f"[green]✔ Finished:[/green] {path.name}")
+                except Exception as e:
+                    progress.console.print(f"[red]✖ Failed {path.name}:[/red] {e}")
+                progress.advance(overall_task)
 
     console.print("\n[green]Batch video processing complete.[/green]")
 

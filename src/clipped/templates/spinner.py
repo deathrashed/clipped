@@ -28,14 +28,15 @@ class SpinnerTemplate(VideoTemplate):
 
         if assets.cover:
             graph = (
+                "[1:v]scale=1080:1080:force_original_aspect_ratio=increase,"
+                "crop=1080:1080,gblur=sigma=40,eq=brightness=-0.3:saturation=0.6[bg];"
                 "[1:v]scale=800:800:force_original_aspect_ratio=decrease,"
                 "pad=800:800:(ow-iw)/2:(oh-ih)/2:color=black@0[art];"
                 "[art]format=rgba,"
                 "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
                 f"a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2,2)),255,0)'[fg];"
                 f"[fg]rotate=t*{speed}:c=none[fr];"
-                "color=s=1080x1080:c=black[bg];"
-                "[bg][fr]overlay=(W-w)/2:(H-h)/2[outv]"
+                "[bg][fr]overlay=(W-w)/2:(H-h)/2-70[outv]"
             )
         else:
             graph = "color=s=1080x1080:c=black[outv]"
