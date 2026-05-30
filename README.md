@@ -116,8 +116,11 @@ clipped video "track.mp3" --template gallery_square --platform default --start 0
 
 Clipped features a premium, local-first **Interactive Web Showcase & Clipper Simulator** located in the [showcase/index.html](showcase/index.html) folder.
 
+* 🚀 **Launch Link**: [Open Showcase in Browser](file:///Users/rd/Scripts/Riley/clipped/showcase/index.html) (Click to open directly)
+* 📂 **Manual Access**: Double-click [showcase/index.html](showcase/index.html) in your Finder/File Manager.
+
 ### What it is
-The showcase is a standalone, offline-friendly HTML portal that provides a visual dashboard of your entire Clipped environment. Because it is built with vanilla CSS/JS, it works entirely offline—no servers or databases needed. You can run it simply by double-clicking the file in your file manager or opening it in your browser.
+The showcase is a standalone, offline-friendly HTML portal that provides a visual dashboard of your entire Clipped environment. Because it is built with vanilla CSS/JS, it works entirely offline—no servers or databases needed. You can run it simply by clicking the launch link above or opening the file in your browser.
 
 ### Showcase Sections
 * **Interactive Clipper Simulator**: A browser-native CLI simulator. Select audio inputs, templates, background settings, and custom overrides (upload your own covers/logos) to generate the exact CLI commands. Click "Run Render Simulation" to watch a live simulated render in the mock terminal, which opens a browser-native preview of the final video.
