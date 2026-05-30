@@ -55,6 +55,7 @@ def process_video(
     background: str | None = None,
     media: str | None = None,
     lyrics: str | None = None,
+    clean_logo: bool | None = None,
 ) -> Path | None:
     """
     Generate a video from an audio file.
@@ -78,6 +79,7 @@ def process_video(
         background_override=background,
         media=media_list,
         lyrics_override=lyrics,
+        clean_logo=clean_logo,
     )
     config  = get_config()
     is_preview = False
@@ -388,6 +390,7 @@ def run_preview(
     background: str | None = None,
     media: str | None = None,
     lyrics: str | None = None,
+    clean_logo: bool | None = None,
 ) -> None:
     """Stage a preview and either open the Remotion Studio or render/open a short FFmpeg clip."""
     media_list = [media] if media else None
@@ -398,6 +401,7 @@ def run_preview(
         background_override=background,
         media=media_list,
         lyrics_override=lyrics,
+        clean_logo=clean_logo,
     )
     config = get_config()
     profile = get_profile(platform_name)

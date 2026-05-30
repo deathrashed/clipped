@@ -64,19 +64,19 @@ DEFAULT_CONFIG: dict = {
     },
     "preset": {
         "instagram": {
-            "default_template": "pulse_reel",
+            "default_template": "reel",
             "default_platform": "instagram",
         },
         "tiktok": {
-            "default_template": "pulse_reel",
+            "default_template": "reel",
             "default_platform": "tiktok",
         },
         "youtube_shorts": {
-            "default_template": "pulse_reel",
+            "default_template": "reel",
             "default_platform": "youtube_shorts",
         },
         "vertical_full": {
-            "default_template": "pulse_reel",
+            "default_template": "reel",
             "default_platform": "vertical_full",
         },
         "archive": {
@@ -133,19 +133,19 @@ _DEFAULT_TOML = textwrap.dedent("""\
     # Each key overrides the matching [general] key.
 
     [preset.instagram]
-    default_template = "pulse_reel"
+    default_template = "reel"
     default_platform = "instagram"
 
     [preset.tiktok]
-    default_template = "pulse_reel"
+    default_template = "reel"
     default_platform = "tiktok"
 
     [preset.youtube_shorts]
-    default_template = "pulse_reel"
+    default_template = "reel"
     default_platform = "youtube_shorts"
 
     [preset.vertical_full]
-    default_template = "pulse_reel"
+    default_template = "reel"
     default_platform = "vertical_full"
 
     [preset.archive]

@@ -759,10 +759,22 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     <button class="btn-link" onclick="filterShowcase('vertical', this)">Vertical</button>
   </div>
 
-  <!-- SUBSECTION A: USER-GENERATED CLIPS -->
-  <div class="sub-heading" id="user-clips-heading">My Generated Clips (Auto-Synced)</div>
-  <div class="showcase-grid" id="user-clips-grid">
+  <!-- SUBSECTION A1: USER-GENERATED VIDEOS -->
+  <div class="sub-heading" id="user-videos-heading" style="display: none;">My Generated Videos</div>
+  <div class="showcase-grid" id="user-videos-grid">
     <!-- Loaded dynamically by Javascript from clips-list.js -->
+  </div>
+
+  <!-- SUBSECTION A2: USER-GENERATED AUDIO CLIPS -->
+  <div class="sub-heading" id="user-audios-heading" style="display: none;">My Generated Audio Clips</div>
+  <div class="showcase-grid" id="user-audios-grid">
+    <!-- Loaded dynamically by Javascript from clips-list.js -->
+  </div>
+
+  <!-- ==== SECTION 3: TEMPLATE TEST RENDERS ==== -->
+  <div class="main-heading" id="template-tests">
+    <span>Template Test Renders (Smoke Tests)</span>
+    <span class="tag">Reference Library</span>
   </div>
 
   <!-- SUBSECTION B: REMOTION DYNAMIC RENDERS -->
@@ -877,8 +889,8 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     </div>
   </div>
 
-  <!-- SUBSECTION C: FFMPEG LEGACY RENDERS -->
-  <div class="sub-heading">FFmpeg Legacy Renders</div>
+  <!-- SUBSECTION C: FFMPEG DYNAMIC RENDERS -->
+  <div class="sub-heading">FFmpeg Dynamic Renders</div>
   <div class="showcase-grid">
     <!-- Dynamic Reel -->
     <div class="showcase-card" data-engine="ffmpeg" data-aspect="vertical">
@@ -1309,69 +1321,92 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
 
   // Load User Generated Clips Dynamically
   function loadUserClips() {
-    const grid = document.getElementById('user-clips-grid');
-    const heading = document.getElementById('user-clips-heading');
-    grid.innerHTML = '';
+    const videoGrid = document.getElementById('user-videos-grid');
+    const videoHeading = document.getElementById('user-videos-heading');
+    const audioGrid = document.getElementById('user-audios-grid');
+    const audioHeading = document.getElementById('user-audios-heading');
     
-    if (!window.userClips || window.userClips.length === 0) {
-      grid.innerHTML = `<div class="no-clips">No custom clips generated yet. Render an audio or video file via the CLI wrapper to populate your dynamic clips library.</div>`;
-      return;
+    videoGrid.innerHTML = '';
+    audioGrid.innerHTML = '';
+    
+    let hasVideos = false;
+    let hasAudios = false;
+    
+    if (window.userClips && window.userClips.length > 0) {
+      window.userClips.forEach(clip => {
+        const card = document.createElement('div');
+        card.className = 'showcase-card';
+        card.setAttribute('data-engine', clip.kind === 'video' ? (clip.template.includes('pulse') || clip.template.includes('square') || clip.template.includes('scene') || clip.template.includes('vhs') || clip.template.includes('card') ? 'remotion' : 'ffmpeg') : 'audio');
+        card.setAttribute('data-aspect', clip.platform ? (clip.platform.includes('instagram') || clip.platform.includes('tiktok') || clip.platform.includes('vertical') || clip.platform.includes('shorts') ? 'vertical' : (clip.platform.includes('youtube') || clip.platform.includes('twitter') ? 'wide' : 'square')) : 'square');
+
+        // Determine video vs audio card layout
+        let mediaContainer = '';
+        if (clip.kind === 'video') {
+          hasVideos = true;
+          const isVertical = clip.platform ? (clip.platform.includes('instagram') || clip.platform.includes('tiktok') || clip.platform.includes('vertical') || clip.platform.includes('shorts')) : false;
+          const isWide = clip.platform ? (clip.platform.includes('youtube') || clip.platform.includes('twitter')) : false;
+          const aspectClass = isVertical ? 'vertical' : (isWide ? 'wide' : '');
+          mediaContainer = `
+            <div class="card-video-container ${aspectClass}">
+              <video src="${clip.filepath}" controls muted playsinline loop></video>
+            </div>
+          `;
+        } else {
+          hasAudios = true;
+          mediaContainer = `
+            <div style="background: rgb(15,15,15); padding: 20px; border-radius: 6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+              <span style="font-size:32px;">🎵</span>
+              <audio src="${clip.filepath}" controls style="width: 100%;"></audio>
+            </div>
+          `;
+        }
+
+        // Format command
+        let cliCommand = '';
+        if (clip.kind === 'video') {
+          cliCommand = `clipped video "${clip.artist || 'track'}" --template ${clip.template} --platform ${clip.platform} --start ${clip.start} --end ${clip.end}`;
+        } else {
+          cliCommand = `clipped audio "${clip.artist || 'track'}" ${clip.start} ${clip.end}`;
+        }
+
+        card.innerHTML = `
+          ${mediaContainer}
+          <div class="card-info">
+            <div class="card-title">${clip.artist ? clip.artist + ' - ' : ''}${clip.title || clip.filename}</div>
+            <div class="card-subtitle">
+              <span class="tag">${clip.kind.toUpperCase()}</span>
+              <span class="tag">${clip.template || 'Trimmed Audio'}</span>
+              <span class="tag">${clip.platform || 'default'}</span>
+              <span class="tag" style="color: #953ebf;">${clip.timestamp}</span>
+            </div>
+          </div>
+          <div class="card-code">
+            ${cliCommand}
+            <button class="copy-btn" onclick="copyText(this)">Copy</button>
+          </div>
+        `;
+        
+        if (clip.kind === 'video') {
+          videoGrid.appendChild(card);
+        } else {
+          audioGrid.appendChild(card);
+        }
+      });
     }
 
-    heading.style.display = 'block';
+    if (hasVideos) {
+      videoHeading.style.display = 'block';
+    } else {
+      videoGrid.innerHTML = `<div class="no-clips" style="width:100%; grid-column: 1 / -1;">No generated videos found in <code>_video/</code> directory. Run a video render via CLI to sync.</div>`;
+      videoHeading.style.display = 'block';
+    }
 
-    window.userClips.forEach(clip => {
-      const card = document.createElement('div');
-      card.className = 'showcase-card';
-      card.setAttribute('data-engine', clip.kind === 'video' ? (clip.template.includes('pulse') || clip.template.includes('square') || clip.template.includes('scene') || clip.template.includes('vhs') || clip.template.includes('card') ? 'remotion' : 'ffmpeg') : 'audio');
-      card.setAttribute('data-aspect', clip.platform.includes('instagram') || clip.platform.includes('tiktok') || clip.platform.includes('vertical') || clip.platform.includes('shorts') ? 'vertical' : (clip.platform.includes('youtube') || clip.platform.includes('twitter') ? 'wide' : 'square'));
-
-      // Determine video vs audio card layout
-      let mediaContainer = '';
-      if (clip.kind === 'video') {
-        const isVertical = clip.platform.includes('instagram') || clip.platform.includes('tiktok') || clip.platform.includes('vertical') || clip.platform.includes('shorts');
-        const isWide = clip.platform.includes('youtube') || clip.platform.includes('twitter');
-        const aspectClass = isVertical ? 'vertical' : (isWide ? 'wide' : '');
-        mediaContainer = `
-          <div class="card-video-container ${aspectClass}">
-            <video src="${clip.filepath}" controls muted playsinline loop></video>
-          </div>
-        `;
-      } else {
-        mediaContainer = `
-          <div style="background: rgb(15,15,15); padding: 20px; border-radius: 6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
-            <span style="font-size:32px;">🎵</span>
-            <audio src="${clip.filepath}" controls style="width: 100%;"></audio>
-          </div>
-        `;
-      }
-
-      // Format command
-      let cliCommand = '';
-      if (clip.kind === 'video') {
-        cliCommand = `clipped video "${clip.artist || 'track'}" --template ${clip.template} --platform ${clip.platform} --start ${clip.start} --end ${clip.end}`;
-      } else {
-        cliCommand = `clipped audio "${clip.artist || 'track'}" ${clip.start} ${clip.end}`;
-      }
-
-      card.innerHTML = `
-        ${mediaContainer}
-        <div class="card-info">
-          <div class="card-title">${clip.artist ? clip.artist + ' - ' : ''}${clip.title || clip.filename}</div>
-          <div class="card-subtitle">
-            <span class="tag">${clip.kind.toUpperCase()}</span>
-            <span class="tag">${clip.template || 'Trimmed Audio'}</span>
-            <span class="tag">${clip.platform}</span>
-            <span class="tag" style="color: #953ebf;">${clip.timestamp}</span>
-          </div>
-        </div>
-        <div class="card-code">
-          ${cliCommand}
-          <button class="copy-btn" onclick="copyText(this)">Copy</button>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
+    if (hasAudios) {
+      audioHeading.style.display = 'block';
+    } else {
+      audioGrid.innerHTML = `<div class="no-clips" style="width:100%; grid-column: 1 / -1;">No generated audio clips found in <code>_audio/</code> directory. Run an audio clip via CLI to sync.</div>`;
+      audioHeading.style.display = 'block';
+    }
   }
 
   // Run on load
@@ -1387,7 +1422,7 @@ Select parameters on the left and click "Run Render Simulation" to simulate a lo
     cards.forEach(card => {
       const engine = card.getAttribute('data-engine');
       const aspect = card.getAttribute('data-aspect');
-      const isCustom = card.parentElement.id === 'user-clips-grid';
+      const isCustom = card.parentElement.id === 'user-videos-grid' || card.parentElement.id === 'user-audios-grid';
 
       if (type === 'all') {
         card.style.display = 'flex';

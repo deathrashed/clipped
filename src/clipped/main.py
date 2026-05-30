@@ -1711,6 +1711,7 @@ def video_cmd(
         background=background,
         media=media,
         lyrics=lyrics,
+        clean_logo=clean_logo,
     )
 
 
@@ -1749,6 +1750,7 @@ def preview_cmd(
     background:    Optional[str] = typer.Option(None, "--background", help="Path or URL to background image"),
     media:         Optional[str] = typer.Option(None, "--media", help="Path or URL to media file"),
     lyrics:        Optional[str] = typer.Option(None, "--lyrics", help="Path or URL to lyrics file"),
+    clean_logo:    Optional[bool] = typer.Option(None, "--clean-logo/--no-clean-logo", help="Clean logo background using rmbg"),
     port:          int = typer.Option(3000, "--port", "-p", help="Remotion Studio port."),
 ):
     """
@@ -1794,6 +1796,7 @@ def preview_cmd(
             background=background,
             media=media,
             lyrics=lyrics,
+            clean_logo=clean_logo,
         )
     except Exception as e:
         UI.err(f"Preview failed: {e}")
