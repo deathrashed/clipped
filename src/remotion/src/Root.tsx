@@ -9,6 +9,19 @@ import { RecordSquare } from "./templates/RecordSquare";
 import { FluidScene } from "./templates/FluidScene";
 import { MetalVHS } from "./templates/MetalVHS";
 import { PremiumCard } from "./templates/PremiumCard";
+import { VinylSleevePro } from "./templates/VinylSleevePro";
+import { ArtistFocusPro } from "./templates/ArtistFocusPro";
+import { MetadataCardPro } from "./templates/MetadataCardPro";
+import { WaveformStagePro } from "./templates/WaveformStagePro";
+import { MetalVHSPro } from "./templates/MetalVHSPro";
+import { GlassCardPro } from "./templates/GlassCardPro";
+import { NeonPulsePro } from "./templates/NeonPulsePro";
+import { ConcertPosterPro } from "./templates/ConcertPosterPro";
+import { CinematicPro } from "./templates/CinematicPro";
+import { SpinnerPro } from "./templates/SpinnerPro";
+import { CollectorCard } from "./templates/CollectorCard";
+import { BandIntro } from "./templates/BandIntro";
+import { AudioOrb } from "./templates/AudioOrb";
 import { QAPixelation, QAFerroFluid, QAStrobe } from "./qa";
 
 const typedDefaultProps = defaultProps as ClippedRenderProps;
@@ -20,6 +33,19 @@ const components: Record<RemotionCompositionId, (props: ClippedRenderProps) => R
   "fluid-scene": FluidScene,
   "metal-vhs": MetalVHS,
   "premium-card": PremiumCard,
+  "vinyl-sleeve-pro": VinylSleevePro,
+  "artist-focus-pro": ArtistFocusPro,
+  "metadata-card-pro": MetadataCardPro,
+  "waveform-stage-pro": WaveformStagePro,
+  "metal-vhs-pro": MetalVHSPro,
+  "glass-card-pro": GlassCardPro,
+  "neon-pulse-pro": NeonPulsePro,
+  "concert-poster-pro": ConcertPosterPro,
+  "cinematic-pro": CinematicPro,
+  "spinner-pro": SpinnerPro,
+  "collector-card": CollectorCard,
+  "band-intro": BandIntro,
+  "audio-orb": AudioOrb,
 };
 
 const calculateMetadata: CalculateMetadataFunction<ClippedRenderProps> = ({ props }) => {

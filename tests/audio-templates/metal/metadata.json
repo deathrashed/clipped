@@ -1,0 +1,136 @@
+{
+  "artist": "Deicide",
+  "output": "/Users/rd/Scripts/Riley/clipped/tests/audio-templates/metal",
+  "photo_sources": [
+    "spotify",
+    "discogs",
+    "lastfm",
+    "audiodb",
+    "metallum"
+  ],
+  "logo_sources": [
+    "audiodb",
+    "fanart",
+    "metallum"
+  ],
+  "selected": {
+    "photo": "/Users/rd/Scripts/Riley/clipped/tests/audio-templates/metal/artist.jpg",
+    "logo": "/Users/rd/Scripts/Riley/clipped/tests/audio-templates/metal/logo.png"
+  },
+  "candidates": {
+    "photos": [
+      {
+        "kind": "photo",
+        "source": "lastfm",
+        "url": "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+        "score": 50,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "lastfm size=mega"
+      },
+      {
+        "kind": "photo",
+        "source": "lastfm",
+        "url": "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+        "score": 40,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "lastfm size=extralarge"
+      },
+      {
+        "kind": "photo",
+        "source": "lastfm",
+        "url": "https://lastfm.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png",
+        "score": 30,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "lastfm size=large"
+      },
+      {
+        "kind": "photo",
+        "source": "lastfm",
+        "url": "https://lastfm.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png",
+        "score": 20,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "lastfm size=medium"
+      },
+      {
+        "kind": "photo",
+        "source": "lastfm",
+        "url": "https://lastfm.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png",
+        "score": 10,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "lastfm size=small"
+      },
+      {
+        "kind": "photo",
+        "source": "lastfm",
+        "url": "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+        "score": 1,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "lastfm size="
+      },
+      {
+        "kind": "photo",
+        "source": "audiodb",
+        "url": "https://r2.theaudiodb.com/images/media/artist/thumb/deicide-5003af50b6bc3.jpg",
+        "score": 120,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "audiodb artist=Deicide field=strArtistThumb"
+      },
+      {
+        "kind": "photo",
+        "source": "audiodb",
+        "url": "https://r2.theaudiodb.com/images/media/artist/fanart/deicide-4f841cfa826a7.jpg",
+        "score": 115,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "audiodb artist=Deicide field=strArtistFanart"
+      },
+      {
+        "kind": "photo",
+        "source": "audiodb",
+        "url": "https://r2.theaudiodb.com/images/media/artist/fanart/deicide-5003af2b4f563.jpg",
+        "score": 110,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "audiodb artist=Deicide field=strArtistFanart2"
+      },
+      {
+        "kind": "photo",
+        "source": "audiodb",
+        "url": "https://r2.theaudiodb.com/images/media/artist/fanart/lde7sj1609577470.jpg",
+        "score": 105,
+        "width": null,
+        "height": null,
+        "transparent": false,
+        "notes": "audiodb artist=Deicide field=strArtistFanart3"
+      }
+    ],
+    "logos": [
+      {
+        "kind": "logo",
+        "source": "audiodb",
+        "url": "https://r2.theaudiodb.com/images/media/artist/logo/deicide-5003b07e85200.png",
+        "score": 130,
+        "width": null,
+        "height": null,
+        "transparent": true,
+        "notes": "audiodb artist=Deicide"
+      }
+    ]
+  }
+}

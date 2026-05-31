@@ -186,6 +186,357 @@
         "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
         "seed": "text"
       }
+    },
+    {
+      "name": "vinyl_sleeve_pro",
+      "label": "Vinyl Sleeve Pro",
+      "description": "Album cover sleeve with spinning record reveal and phased logo intro. Uses album art as hero.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "vinyl-sleeve-pro",
+      "aspect": [1080, 1920],
+      "ideal_for": ["Instagram Reels", "TikTok", "Music promos"],
+      "capabilities": ["logo", "palette", "motion_blur", "transitions"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "artist_focus_pro",
+      "label": "Artist Focus Pro",
+      "description": "Artist image hero background with logo, album cover card, and metadata. Built for artist promos.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "artist-focus-pro",
+      "aspect": [1080, 1920],
+      "ideal_for": ["Artist promos", "Instagram Reels", "TikTok", "Stories"],
+      "capabilities": ["logo", "artist_image", "palette", "motion_blur", "transitions"],
+      "defaults": {
+        "style": "cinematic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop", "vhs"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "metadata_card_pro",
+      "label": "Metadata Card Pro",
+      "description": "Rich metadata display with sequential field reveals: track, artist, album, year, genre, label.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "metadata-card-pro",
+      "aspect": [1080, 1920],
+      "ideal_for": ["Archives", "Library previews", "Bandcamp"],
+      "capabilities": ["palette", "transitions"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "waveform_stage_pro",
+      "label": "Waveform Stage Pro",
+      "description": "Large audio-reactive waveform hero with album cover above and metadata at top.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "waveform-stage-pro",
+      "aspect": [1080, 1920],
+      "ideal_for": ["Audio previews", "Instagram Reels", "TikTok", "Stories"],
+      "capabilities": ["audio_visualization", "palette", "transitions"],
+      "defaults": {
+        "style": "cinematic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "glass_card_pro",
+      "label": "Glass Card Pro",
+      "description": "Apple Music-style frosted glass card with album art, logo, title, and artist in a compact layout.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "glass-card-pro",
+      "aspect": [1080, 1920],
+      "ideal_for": ["Instagram Reels", "Stories", "Music promos"],
+      "capabilities": ["logo", "palette", "transitions"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "neon_pulse_pro",
+      "label": "Neon Pulse Pro",
+      "description": "Genre-aware animated glow with waveform accent, album cover reveal, and compact metadata.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "neon-pulse-pro",
+      "aspect": [1080, 1920],
+      "ideal_for": ["EDM", "Metal", "Instagram Reels", "TikTok"],
+      "capabilities": ["audio_visualization", "logo", "palette", "transitions"],
+      "defaults": {
+        "style": "neon",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "ribbon"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "concert_poster_pro",
+      "label": "Concert Poster Pro",
+      "description": "Animated concert poster layout with bold typography, album cover reveal, and event metadata.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "concert-poster-pro",
+      "aspect": [1080, 1350],
+      "ideal_for": ["Promos", "Stories", "Instagram Feed"],
+      "capabilities": ["palette", "transitions"],
+      "defaults": {
+        "style": "brutal",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "cinematic_pro",
+      "label": "Cinematic Pro",
+      "description": "Feature-rich vertical reel with logo, slow zooms, motion blur, metadata, and cover reveal. Premium widescreen aesthetic.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "cinematic-pro",
+      "aspect": [1080, 1920],
+      "ideal_for": ["Instagram Reels", "TikTok", "YouTube Shorts"],
+      "capabilities": ["audio_visualization", "logo", "palette", "motion_blur", "transitions", "captions"],
+      "defaults": {
+        "style": "cinematic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop", "vhs"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "radial", "ring", "ribbon", "flower", "particles"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "spinner_pro",
+      "label": "Spinner Pro",
+      "description": "Logo intro, rotating record with audio-reactive ring, artist photo reveal, and metadata overlay.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "spinner-pro",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Feed", "Bandcamp", "Twitter/X", "Archive"],
+      "capabilities": ["audio_visualization", "logo", "palette", "motion_blur", "transitions"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "ring",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop", "vhs"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "ring", "radial", "ribbon", "flower"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "collector_card",
+      "label": "Collector Card",
+      "description": "Art-focused collector showcase with blurred background, framed cover, badge-style metadata, and optional logo.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "collector-card",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Feed", "Bandcamp", "Archive"],
+      "capabilities": ["logo", "palette", "transitions"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "band_intro",
+      "label": "Band Intro",
+      "description": "Full-bleed logo intro transitioning to artist/band photo with track metadata. Clean branded presentation.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "band-intro",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Feed", "Bandcamp", "Artist pages"],
+      "capabilities": ["logo", "artist_image", "palette", "transitions"],
+      "defaults": {
+        "style": "classic",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop", "vhs"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "audio_orb",
+      "label": "Audio Orb",
+      "description": "Audio-reactive metallic orb at center with genre-color glow, star field background, and metadata.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "audio-orb",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Feed", "Archive", "Audio visualizations"],
+      "capabilities": ["audio_visualization", "palette", "motion_blur", "transitions"],
+      "defaults": {
+        "style": "neon",
+        "motion": "medium",
+        "waveform": "none",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "hiphop", "vhs"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "radial", "ring", "ribbon", "flower", "particles"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
+    },
+    {
+      "name": "metal_vhs_pro",
+      "label": "Metal VHS Pro",
+      "description": "Brutal metal VHS aesthetic with glitch typography, scanlines, chromatic aberration, chrome-framed cover, and oscilloscope.",
+      "engine": "remotion",
+      "category": "Remotion",
+      "composition_id": "metal-vhs-pro",
+      "aspect": [1080, 1080],
+      "ideal_for": ["Instagram Reels", "TikTok", "Metal promos", "Instagram Feed"],
+      "capabilities": ["audio_visualization", "logo", "palette", "captions", "transitions"],
+      "defaults": {
+        "style": "vhs",
+        "motion": "medium",
+        "waveform": "bars",
+        "palette": "auto",
+        "captions": "off",
+        "seed": ""
+      },
+      "options": {
+        "style": ["classic", "brutal", "neon", "zine", "cinematic", "vhs", "hiphop"],
+        "motion": ["low", "medium", "high"],
+        "waveform": ["none", "bars", "mirror", "radial", "ring", "ribbon", "flower", "particles"],
+        "palette": ["auto", "cyan", "red", "gold", "mono"],
+        "captions": ["off", "metadata", "lyrics", "lower_third", "impact"],
+        "seed": "text"
+      }
     }
   ]
 }

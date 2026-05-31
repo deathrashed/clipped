@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "templateId": "vinyl_sleeve_pro",
+  "compositionId": "vinyl-sleeve-pro",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "durationSeconds": 8,
+  "durationFrames": 240,
+  "assets": {
+    "audioSrc": "test_audio.mp3",
+    "coverSrc": "test_cover.jpg",
+    "logoSrc": "test_logo.png",
+    "artistImageSrc": "test_artist.jpg",
+    "backgroundSrc": null,
+    "lyrics": null,
+    "lyricsJson": null,
+    "extraImageSrcs": [],
+    "mediaSrcs": []
+  },
+  "metadata": {
+    "artist": "Deicide",
+    "title": "They Are the Children of the Underworld",
+    "album": "Legion",
+    "trackNumber": 3,
+    "year": "1992",
+    "genre": "Death Metal",
+    "sourceFilename": "03. They Are the Children of the Underworld.mp3"
+  },
+  "audio": {
+    "fadeIn": 0.5,
+    "fadeOut": 0.5,
+    "volume": 1,
+    "originalStart": 0,
+    "preparedDuration": 8
+  },
+  "options": {
+    "style": "classic",
+    "motion": "medium",
+    "waveform": "none",
+    "palette": "auto",
+    "scene_pack": "art_focus",
+    "effects": "texture",
+    "captions": "metadata",
+    "mediaMode": "background",
+    "cleanLogo": true,
+    "logoBg": "auto",
+    "logoFuzz": 15,
+    "seed": ""
+  },
+  "encoding": {
+    "codec": "libx264",
+    "crf": 23,
+    "audioCodec": "aac",
+    "audioBitrate": "192k",
+    "pixelFormat": "yuv420p"
+  }
+}
