@@ -50,7 +50,7 @@ DEFAULT_CONFIG: dict = {
         "rmbg_path":            "/Users/rd/Scripts/Riley/rmbg/bin/rmbg",
         "default_captions":     "off",
         "remotion_fps":         30,
-        "default_template":     "gallery_square",
+        "default_template":     "vinyl_sleeve_pro",
         "default_platform":    "default",
         "use_videotoolbox":     True,
         
@@ -64,15 +64,15 @@ DEFAULT_CONFIG: dict = {
     },
     "preset": {
         "instagram": {
-            "default_template": "reel",
+            "default_template": "vinyl_sleeve_pro",
             "default_platform": "instagram",
         },
         "tiktok": {
-            "default_template": "reel",
+            "default_template": "waveform_stage_pro",
             "default_platform": "tiktok",
         },
         "youtube_shorts": {
-            "default_template": "reel",
+            "default_template": "artist_focus_pro",
             "default_platform": "youtube_shorts",
         },
         "vertical_full": {
@@ -88,6 +88,7 @@ DEFAULT_CONFIG: dict = {
             "default_platform": "youtube",
         },
         "discord": {
+            "default_template": "spinner_pro",
             "default_platform": "discord",
         },
         "waveformbar": {
@@ -124,7 +125,7 @@ _DEFAULT_TOML = textwrap.dedent("""\
     rmbg_path           = "/Users/rd/Scripts/Riley/rmbg/bin/rmbg"
     default_captions    = "off"
     remotion_fps        = 30
-    default_template    = "gallery_square"
+    default_template    = "vinyl_sleeve_pro"
     default_platform    = "default"
     use_videotoolbox    = true      # use Apple VideoToolbox GPU acceleration on macOS
 
@@ -133,15 +134,15 @@ _DEFAULT_TOML = textwrap.dedent("""\
     # Each key overrides the matching [general] key.
 
     [preset.instagram]
-    default_template = "reel"
+    default_template = "vinyl_sleeve_pro"
     default_platform = "instagram"
 
     [preset.tiktok]
-    default_template = "reel"
+    default_template = "waveform_stage_pro"
     default_platform = "tiktok"
 
     [preset.youtube_shorts]
-    default_template = "reel"
+    default_template = "artist_focus_pro"
     default_platform = "youtube_shorts"
 
     [preset.vertical_full]
@@ -157,6 +158,7 @@ _DEFAULT_TOML = textwrap.dedent("""\
     default_platform = "youtube"
 
     [preset.discord]
+    default_template = "spinner_pro"
     default_platform = "discord"
 
     [preset.waveformbar]
