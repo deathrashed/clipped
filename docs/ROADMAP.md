@@ -1,5 +1,19 @@
 # Roadmap — Clipped
 
+## Cloud & Web Showcase
+
+### v1 (Current)
+- ✓ Cloud audio clipping
+- ✓ Dynamic showcase
+- ✓ Audio library
+
+### v2 (Planned)
+- ○ Cloud video rendering
+- ○ Template marketplace
+- ○ Batch rendering
+
+---
+
 ## Phase 4: Elements Registry (Current)
 
 Registry-driven element system with inspector schemas, modifier effects, scene presets, and 6-template compatibility.

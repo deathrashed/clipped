@@ -1,9 +1,3 @@
-"""
-Template registry — maps string keys to VideoTemplate classes.
-
-# Templates are discovered automatically from the `src/clipped/templates/`
-# package. Add a new template file and subclass `VideoTemplate` to expose it.
-"""
 from __future__ import annotations
 
 import importlib

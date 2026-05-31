@@ -36,11 +36,12 @@ remotion-research-inspiration/
 # Clipped Generated Output
 _audio/
 _video/
-dist_showcase/
+showcase/dist/
 .qa/
 
 # macOS
 .DS_Store
 
-# Local Netlify folder
-.netlify
+# Netlify local state/builds
+.netlify/
+showcase/.netlify/

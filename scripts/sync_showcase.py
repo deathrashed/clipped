@@ -1,191 +1,189 @@
 #!/usr/bin/env python3
+"""
+sync_showcase.py — Rebuild showcase/clips.json and clips-list.js.
+Stop injecting static HTML cards into showcase/index.html to support SPA views.
+
+Run before deploying:
+    uv run scripts/sync_showcase.py
+"""
 import json
 import os
+import re
 from pathlib import Path
 from datetime import datetime
 
+
+def parse_filename(name: str, kind: str) -> tuple[str, str, str, str | None, str | None]:
+    """
+    Returns (template, artist, title, clip_start, clip_end).
+    """
+    stem = re.sub(r'\.(mp3|flac|wav|m4a|mp4|mov|mkv)$', '', name, flags=re.IGNORECASE)
+
+    template = "clipped_audio" if kind == "audio" else "video"
+
+    # Check for template prefix "Reel ⋅ …" or "Vertical ⋅ …"
+    for sep in [" ⋅ ", " · "]:
+        if sep in stem:
+            parts = stem.split(sep, 1)
+            template = parts[0].strip().lower().replace(" ", "_")
+            stem = parts[1].strip()
+            break
+
+    # Parse clip range suffix "(2.41 - 3.06)" or "(0.50 - 1.20)"
+    clip_start = clip_end = None
+    range_match = re.search(r'\((\d+\.\d+)\s*-\s*(\d+\.\d+)\)\s*$', stem)
+    if range_match:
+        clip_start = range_match.group(1)
+        clip_end = range_match.group(2)
+        stem = stem[:range_match.start()].rstrip()
+
+    # Strip smoke test suffix
+    stem = re.sub(r'\s*\[smoke_test\]\s*$', '', stem).strip()
+
+    # Split "Artist - Title"
+    artist = ""
+    title = stem
+    if " - " in stem:
+        parts = stem.split(" - ", 1)
+        artist = parts[0].strip()
+        title = parts[1].strip()
+
+    return template, artist, title, clip_start, clip_end
+
+
 def main():
     repo_root = Path(__file__).resolve().parents[1]
-    showcase_dir = repo_root / "showcase"
+    showcase_base = repo_root / "showcase"
+    showcase_public = showcase_base / "public"
     audio_dir = repo_root / "_audio"
     video_dir = repo_root / "_video"
-    
-    clips = []
-    
-    # Helper to parse filename
-    def parse_filename(name, kind):
-        template = "clipped_audio" if kind == "audio" else "video"
-        artist = ""
-        title = name.replace(".mp3", "").replace(".flac", "").replace(".mp4", "").replace(".wav", "")
-        
-        # Check for template dot separator " ⋅ " (or solid dot " · ")
-        dot_seps = [" ⋅ ", " · "]
-        for sep in dot_seps:
-            if sep in title:
-                parts = title.split(sep, 1)
-                tpl = parts[0].strip().lower().replace(" ", "_")
-                # e.g., "pulse_reel", "reel", "vertical"
-                template = tpl
-                title = parts[1].strip()
-                break
-                
-        # Split artist and title by " - "
-        if " - " in title:
-            parts = title.split(" - ", 1)
-            artist = parts[0].strip()
-            title = parts[1].strip()
-            
-        return template, artist, title
+    smoke_dir = repo_root / "tests" / "videos"
 
-    # Scan audio
+    clips = []
+
+    # 1. Audio Clips
     if audio_dir.exists():
-        for f in audio_dir.iterdir():
+        for f in sorted(audio_dir.iterdir()):
             if f.is_file() and f.suffix.lower() in [".mp3", ".flac", ".wav", ".m4a"]:
-                tpl, artist, title = parse_filename(f.name, "audio")
-                rel_path = os.path.relpath(f, start=showcase_dir)
+                if "/tmp/" in str(f) or f.name.startswith("tmp_") or "/tmp/" in str(f.resolve()):
+                    print(f"Skipped local path: {f}")
+                    continue
+                tpl, artist, title, cs, ce = parse_filename(f.name, "audio")
+                rel_path = f"_audio/{f.name}"
                 clips.append({
                     "filepath": rel_path,
                     "filename": f.name,
                     "kind": "audio",
                     "template": tpl,
+                    "engine": "audio",
+                    "aspect": "square",
                     "platform": "default",
-                    "start": 0,
-                    "end": None,
+                    "clip_start": cs,
+                    "clip_end": ce,
                     "artist": artist,
                     "title": title,
-                    "timestamp": datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+                    "timestamp": datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
                 })
-                
-    # Scan video
+
+    # 2. Video Renders
     if video_dir.exists():
-        for f in video_dir.iterdir():
+        for f in sorted(video_dir.iterdir()):
             if f.is_file() and f.suffix.lower() in [".mp4", ".mov", ".mkv"]:
-                tpl, artist, title = parse_filename(f.name, "video")
-                # Deduce platform from template (e.g. reels -> instagram, squares -> default)
+                if "/tmp/" in str(f) or f.name.startswith("tmp_") or "/tmp/" in str(f.resolve()):
+                    print(f"Skipped local path: {f}")
+                    continue
+                tpl, artist, title, cs, ce = parse_filename(f.name, "video")
+
+                is_remotion = any(k in tpl for k in ["pulse", "square", "scene", "vhs", "card", "fluid", "premium"])
+                engine = "remotion" if is_remotion else "ffmpeg"
+
                 platform = "default"
                 if tpl in ["pulse_reel", "reel", "vertical", "vertical_wave", "spinner_story"]:
                     platform = "vertical_full"
-                rel_path = os.path.relpath(f, start=showcase_dir)
+
+                is_vertical = any(k in platform for k in ["instagram", "tiktok", "vertical", "shorts"])
+                aspect = "9:16" if is_vertical else "1:1"
+
+                rel_path = f"_video/{f.name}"
                 clips.append({
                     "filepath": rel_path,
                     "filename": f.name,
                     "kind": "video",
                     "template": tpl,
+                    "engine": engine,
+                    "aspect": aspect,
                     "platform": platform,
-                    "start": 0,
-                    "end": None,
+                    "clip_start": cs,
+                    "clip_end": ce,
                     "artist": artist,
                     "title": title,
-                    "timestamp": datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+                    "timestamp": datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
                 })
-                
-    # Sort by timestamp newest first
+
+    # 3. Smoke Tests
+    if smoke_dir.exists():
+        for f in sorted(smoke_dir.rglob("*.mp4")):
+            if "[smoke_test]" in f.name:
+                if "/tmp/" in str(f) or f.name.startswith("tmp_") or "/tmp/" in str(f.resolve()):
+                    print(f"Skipped local path: {f}")
+                    continue
+                tpl, artist, title, cs, ce = parse_filename(f.name, "video")
+                kind = "remotion" if "remotion" in str(f) else "ffmpeg"
+                rel_path = str(f.relative_to(repo_root))
+                clips.append({
+                    "filepath": rel_path,
+                    "filename": f.name,
+                    "kind": "smoke",
+                    "template": tpl,
+                    "engine": kind,
+                    "aspect": "9:16" if "reel" in tpl or "vertical" in tpl else "1:1",
+                    "platform": "default",
+                    "artist": "Test",
+                    "title": tpl.replace('_', ' ').title(),
+                    "timestamp": datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+                })
+
     clips.sort(key=lambda x: x["timestamp"], reverse=True)
-    
-    # Save database
-    json_file = showcase_dir / "clips.json"
-    js_file = showcase_dir / "clips-list.js"
-    json_file.write_text(json.dumps(clips, indent=2), encoding="utf-8")
-    js_file.write_text(f"var userClips = {json.dumps(clips, indent=2)};\n", encoding="utf-8")
-    
-    # Generate static HTML cards for index.html
-    video_html = []
-    audio_html = []
-    
-    for clip in clips:
-        t = clip.get("template", "")
-        is_remotion = any(k in t for k in ["pulse", "square", "scene", "vhs", "card"])
-        engine = "remotion" if is_remotion else "ffmpeg"
-        
-        platform = clip.get("platform", "default") or "default"
-        is_vertical = any(k in platform for k in ["instagram", "tiktok", "vertical", "shorts"])
-        is_wide = any(k in platform for k in ["youtube", "twitter"])
-        aspect = "vertical" if is_vertical else ("wide" if is_wide else "square")
-        aspect_class = "vertical" if is_vertical else ("wide" if is_wide else "")
-        
-        title_formatted = f"{clip['artist']} - {clip['title']}" if clip['artist'] else (clip['title'] or clip['filename'])
-        
-        if clip["kind"] == "video":
-            cli_command = f"clipped video \\\"{clip['artist'] or 'track'}\\\" --template {clip['template']} --platform {clip['platform']} --start {clip['start']} --end {clip['end']}"
-            card = f"""    <!-- Synced Card -->
-    <div class="showcase-card" data-engine="{engine}" data-aspect="{aspect}">
-      <div class="card-video-container {aspect_class}">
-        <video src="{clip['filepath']}" controls muted playsinline loop preload="none"></video>
-      </div>
-      <div class="card-info">
-        <div class="card-title">{title_formatted}</div>
-        <div class="card-subtitle">
-          <span class="tag">VIDEO</span>
-          <span class="tag">{clip['template']}</span>
-          <span class="tag">{clip['platform']}</span>
-          <span class="tag" style="color: #953ebf;">{clip['timestamp']}</span>
-        </div>
-      </div>
-      </div>
-    </div>"""
-            video_html.append(card)
-        else:
-            cli_command = f"clipped audio \\\"{clip['artist'] or 'track'}\\\" {clip['start']} {clip['end']}"
-            card = f"""    <!-- Synced Card -->
-    <div class="showcase-card" data-engine="audio" data-aspect="square">
-      <div style="background: rgb(15,15,15); padding: 20px; border-radius: 6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
-        <span style="font-size:32px;">🎵</span>
-        <audio src="{clip['filepath']}" controls style="width: 100%;"></audio>
-      </div>
-      <div class="card-info">
-        <div class="card-title">{title_formatted}</div>
-        <div class="card-subtitle">
-          <span class="tag">AUDIO</span>
-          <span class="tag">{clip['template']}</span>
-          <span class="tag">{clip['platform']}</span>
-          <span class="tag" style="color: #953ebf;">{clip['timestamp']}</span>
-        </div>
-      </div>
-      </div>
-    </div>"""
-            audio_html.append(card)
-            
-    # Read and replace in index.html
-    html_file = showcase_dir / "index.html"
-    if html_file.exists():
-        content = html_file.read_text(encoding="utf-8")
-        
-        # Replace videos
-        v_start = "<!-- INSERT_USER_VIDEOS_HERE -->"
-        v_end = "<!-- INSERT_USER_VIDEOS_END -->"
-        if v_start in content and v_end in content:
-            parts = content.split(v_start, 1)
-            rest = parts[1].split(v_end, 1)
-            content = parts[0] + v_start + "\n" + "\n".join(video_html) + "\n    " + v_end + rest[1]
-            
-        # Replace audios
-        a_start = "<!-- INSERT_USER_AUDIOS_HERE -->"
-        a_end = "<!-- INSERT_USER_AUDIOS_END -->"
-        if a_start in content and a_end in content:
-            parts = content.split(a_start, 1)
-            rest = parts[1].split(a_end, 1)
-            content = parts[0] + a_start + "\n" + "\n".join(audio_html) + "\n    " + a_end + rest[1]
-            
-        # Replace audio options
-        opt_start = "<!-- INSERT_AUDIO_OPTIONS_HERE -->"
-        opt_end = "<!-- INSERT_AUDIO_OPTIONS_END -->"
-        if opt_start in content and opt_end in content:
-            audio_options_html = [
-                '          <option value="custom_url">Use YouTube URL...</option>',
-                '          <option value="local_path">Use Custom Local Audio File...</option>'
-            ]
-            for clip in clips:
-                if clip["kind"] == "audio":
-                    title_formatted = f"{clip['artist']} - {clip['title']}" if clip['artist'] else (clip['title'] or clip['filename'])
-                    audio_options_html.append(f'          <option value="{clip["filepath"]}">{title_formatted}</option>')
-                    
-            parts = content.split(opt_start, 1)
-            rest = parts[1].split(opt_end, 1)
-            content = parts[0] + opt_start + "\n" + "\n".join(audio_options_html) + "\n          " + opt_end + rest[1]
-            
-        html_file.write_text(content, encoding="utf-8")
-        
-    print(f"Successfully synced {len(clips)} clips to showcase database and pre-rendered index.html.")
+
+    # Write JSON + JS
+    (showcase_public / "clips.json").write_text(json.dumps(clips, indent=2), encoding="utf-8")
+    (showcase_public / "clips-list.js").write_text(
+        f"var userClips = {json.dumps(clips, indent=2)};\n", encoding="utf-8"
+    )
+
+    # Build audio source options for simulator dropdown
+    audio_options = [
+        '          <option value="upload">Upload your own audio file...</option>',
+    ]
+    for c in clips:
+        if c["kind"] == "audio":
+            label = f"{c['artist']} — {c['title']}" if c['artist'] else (c['title'] or c['filename'])
+            audio_options.append(f'          <option value="{c["filepath"]}">{label}</option>')
+
+    # Inject only the options into index.html
+    html_file = showcase_public / "index.html"
+    if not html_file.exists():
+        print(f"WARNING: {html_file} not found, skipping HTML injection.")
+        return
+
+    content = html_file.read_text(encoding="utf-8")
+
+    def inject(html: str, start_marker: str, end_marker: str, lines: list[str]) -> str:
+        if start_marker not in html or end_marker not in html:
+            return html
+        pre, rest = html.split(start_marker, 1)
+        _, post = rest.split(end_marker, 1)
+        return pre + start_marker + "\n" + "\n".join(lines) + "\n    " + end_marker + post
+
+    # Clear previous injections but keep markers
+    content = inject(content, "<!-- INSERT_USER_VIDEOS_HERE -->", "<!-- INSERT_USER_VIDEOS_END -->", [])
+    content = inject(content, "<!-- INSERT_USER_AUDIOS_HERE -->", "<!-- INSERT_USER_AUDIOS_END -->", [])
+    content = inject(content, "<!-- INSERT_SMOKE_TESTS_HERE -->", "<!-- INSERT_SMOKE_TESTS_END -->", [])
+    content = inject(content, "<!-- INSERT_AUDIO_OPTIONS_HERE -->", "<!-- INSERT_AUDIO_OPTIONS_END -->", audio_options)
+
+    html_file.write_text(content, encoding="utf-8")
+    print(f"Synced {len(clips)} items to clips.json. HTML cards removed for SPA transition.")
+
 
 if __name__ == "__main__":
     main()

@@ -264,6 +264,8 @@ class MediaAssets:
             c = self._extract_embedded_cover()
         if not c:
             c = self._fetch_itunes_cover()
+        if not c:
+            c = self.artist
         return c
 
     @functools.cached_property

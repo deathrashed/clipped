@@ -7,6 +7,17 @@ Format: [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+### Added (Web Showcase)
+- **Cloud Audio Clipping Pipeline**: Netlify background functions (`clip-request`, `clip-job-background`) for serverless `yt-dlp` + `ffmpeg` extraction.
+- **Dynamic Showcase & Library**: SPA architecture using `clips.json` for dynamic galleries without inline HTML bloat.
+- **Blob Storage Lifecycle**: 1-hour TTL on Netlify Blob storage for transient job data and audio artifacts.
+- **Honest UI**: Clear capability delineation indicating cloud MP4 video rendering is unavailable.
+- **Showcase Docs View**: Concise documentation view with external links to GitHub as single-source-of-truth.
+- **UX/A11y Polish**: Added Iconify-based "Cloud Status" card, accessibility focus states, reduced-motion media queries, and responsive mobile layouts for narrow screens.
+- **System Health / Diagnostics**: Internal `view-diagnostics` page to verify clips loaded, Netlify endpoints, and blob storage connectivity.
+
+*Note: The Web Showcase is now considered a V1 feature freeze candidate, currently deployed to production and awaiting physical mobile QA.*
+
 ### Changed
 - Refreshed repository taxonomy: agent docs restored at the root, config/docs moved back to canonical locations, test helpers moved under `tests/`, and generation helpers moved under `scripts/`.
 - Updated default preset definitions so `instagram`, `tiktok`, `youtube_shorts`, and `vertical_full` use the dynamic `reel` template.

@@ -1,23 +1,22 @@
-"""
-Vertical Spinner template — rotating record on a 9:16 canvas.
-Output: 1080×1920. Ideal for Instagram Reels, TikTok, YouTube Shorts.
-
-Layout:
-  - Top 60%:  blurred + darkened album art as background fill
-  - Centre:   crisp circular spinning record
-  - Bottom:   metadata text overlays
-"""
 from __future__ import annotations
 from .base import VideoTemplate, TemplateInfo
+from .polish import blurred_bg, fallback_bg, circular_art, square_art, readable_common
 from ..utils import MediaAssets
 
+_W = 1080
+_H = 1920
+_SPINNER = 850
+_COVER = 950
+_ART_Y = 350
+_TITLE_Y = 1380
+_ARTIST_Y = 1495
 
 class VerticalTemplate(VideoTemplate):
     info = TemplateInfo(
         name="vertical",
-        label="Vertical Spinner (9:16 Reel)",
-        description="Rotating record on a blurred background. Built for Reels & TikTok.",
-        aspect=(1080, 1920),
+        label="Vertical Premium Spinner (9:16)",
+        description="Polished Reel-style spinner with safe text and smooth album reveal.",
+        aspect=(_W, _H),
         ideal_for=["Instagram Reels", "TikTok", "YouTube Shorts"],
     )
 
@@ -28,97 +27,61 @@ class VerticalTemplate(VideoTemplate):
         return inputs
 
     def get_filter_graph(self, assets: MediaAssets, duration: float) -> str:
-        # Load from config
-        speed = self.config.get("vertical_spinner_speed", 0.5)
-        reveal_start = self.config.get("vertical_reveal_start_percent", 0.82)
-        f_dur = self.config.get("vertical_transition_duration", 2.0)
-        
-        t_out = duration * reveal_start
-        
-        # Background: scaled, cropped, blurred, dimmed
-        bg = (
-            f"[1:v]scale=1080:1920:force_original_aspect_ratio=increase,"
-            f"crop=1080:1920,gblur=sigma=30,eq=brightness=-0.25[bg];"
-        )
+        speed = self.config.get("vertical_spinner_speed", 0.7)
+        cover_idx = 1 if assets.cover else None
+
+        t_spin = min(1.0, max(0.4, duration * 0.08))
+        t_text = min(7.0, max(2.5, duration * 0.35))
+        t_reveal = max(t_text + 2.0, duration * 0.72)
+        t_reveal = min(t_reveal, max(t_spin + 1.5, duration - 1.5))
+        t_spin_end = t_reveal + 0.5
+        t_text_end = max(t_reveal - 0.3, t_text + 1.5)
+
+        steps = []
+
         if assets.cover:
-            # 1. Spinner (Circular, Rotating, Fades OUT at t_out)
-            fg_spinner = (
-                "[1:v]scale=720:720:force_original_aspect_ratio=decrease,"
-                "pad=720:720:(ow-iw)/2:(oh-ih)/2:color=black@0[art_circle];"
-                "[art_circle]format=rgba,"
-                "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
-                f"a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2,2)),255,0)'[fg_circle];"
-                f"[fg_circle]rotate=t*{speed}:c=none,"
-                f"fade=t=out:st={t_out}:d={f_dur}:alpha=1[fr];"
-            )
-            
-            # 2. Square Cover (Full, Non-Rotating, Fades IN at t_out)
-            fg_square = (
-                "[1:v]scale=900:900:force_original_aspect_ratio=decrease,"
-                "pad=900:900:(ow-iw)/2:(oh-ih)/2:color=black@0[art_square];"
-                "[art_square]format=rgba,"
-                f"fade=t=in:st={t_out}:d={f_dur}:alpha=1[sq];"
-            )
+            steps.append(blurred_bg(cover_idx, _W, _H, blur=40, brightness=-0.32, saturation=0.6, label="bg"))
 
-            # Compose: Base -> Overlay Spinner -> Overlay Square
-            compose = (
-                f"[bg][fr]overlay=(W-w)/2:(H-h)/2-200[v_spinner];"
-                f"[v_spinner][sq]overlay=(W-w)/2:(H-h)/2-200[outv]"
+            steps.append(circular_art(cover_idx, _SPINNER, speed, "spin_raw"))
+            steps.append(
+                f"[spin_raw]fade=t=in:st={t_spin}:d=1:alpha=1,"
+                f"fade=t=out:st={t_reveal}:d=1:alpha=1[spin]"
             )
-            graph = bg + fg_spinner + fg_square + compose
+            steps.append(f"[bg][spin]overlay=(W-w)/2:{_ART_Y}:enable='between(t,{t_spin},{t_spin_end})'[v1]")
+
+            steps.append(square_art(cover_idx, _COVER, "cover_raw"))
+            steps.append(f"[cover_raw]fade=t=in:st={t_reveal}:d=1:alpha=1[cover]")
+            steps.append(f"[v1][cover]overlay=(W-w)/2:{_ART_Y}:enable='gte(t,{t_reveal})'[outv]")
         else:
-            graph = "color=s=1080x1920:c=black[outv]"
+            steps.append(fallback_bg(_W, _H, "outv"))
 
-        return graph + ";" + self._drawtext_overlay(assets, duration, t_out, link_in="[outv]")
+        return ";".join(steps) + ";" + self._text(assets, t_text, t_text_end)
 
-    def _drawtext_overlay(self, assets: "MediaAssets", duration: float, t_out_video: float, link_in: str = "[outv]", link_out: str = "[v]") -> str:
-        """Override: show only Track Title and Band Name under the spinner."""
+    def _text(self, assets, start, end, link_in="[outv]", link_out="[v]"):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        # Load from config
-        t_in_p    = self.config.get("vertical_text_in_percent", 0.25)
-        f_dur     = self.config.get("vertical_text_fade_duration", 1.0)
-        overlap   = self.config.get("vertical_text_reveal_overlap", 1.0)
+        title = self._wrap_text(assets.track_title.strip().strip('"').strip("'"), width=24, max_lines=2)
+        artist = self._wrap_text(assets.artist_name.strip().strip('"').strip("'"), width=24, max_lines=1)
 
-        # Aggressive cleanup: strip quotes and leading/trailing whitespace
-        title  = assets.track_title.strip().strip('"').strip("'")
-        artist = assets.artist_name.strip().strip('"').strip("'")
+        title_src = self._drawtext_source(title, "title")
+        artist_src = self._drawtext_source(artist, "artist")
+        title_lines = self._line_count(title)
 
-        title_text  = self._wrap_text(title,  width=24, max_lines=2)
-        artist_text = self._wrap_text(artist, width=24, max_lines=2)
-        title_src   = self._drawtext_source(title_text,  prefix="title")
-        artist_src  = self._drawtext_source(artist_text, prefix="artist")
+        title_fs = 68
+        artist_fs = 48
+        y_title = int(_TITLE_Y - ((title_lines - 1) * title_fs * 1.15))
+        y_artist = _ARTIST_Y
 
-        # Timing: In at configured percentage, Out at reveal + overlap
-        t_text_start = duration * t_in_p
-        t_end = t_out_video + overlap
-
-        alpha_title  = self.get_fade_alpha(t_text_start,       t_end, f_dur)
-        alpha_artist = self.get_fade_alpha(t_text_start + 1.2, t_end, f_dur)
-
-        title_lines  = self._line_count(title_text)
-        artist_lines = self._line_count(artist_text)
-
-        # Height calculation
-        title_fs  = 48
-        artist_fs = 34
-        lh_factor = 1.15
-        gap       = 15
-
-        h_title = title_lines * title_fs * lh_factor
-
-        # Positioning: Anchor the title area, then stack artist below it
-        y_title  = int(1280 - (h_title - (title_fs * lh_factor)))
-        y_artist = int(y_title + h_title + gap)
-
-        common = ":text_align=center:expansion=none"
+        common = readable_common(self)
+        alpha_title = self.get_fade_alpha(start, end, 1.25)
+        alpha_artist = self.get_fade_alpha(start + 0.8, end, 1.25)
 
         return (
             f"{link_in}"
             f"drawtext={title_src}:fontcolor=white:fontsize={title_fs}{common}"
-            f":x=(w-text_w)/2:y={y_title}:alpha='{alpha_title}',"
-            f"drawtext={artist_src}:fontcolor=white:fontsize={artist_fs}{common}"
-            f":x=(w-text_w)/2:y={y_artist}:alpha='{alpha_artist}'"
+            f":x=(w-text_w)/2:y={y_title}:enable='between(t,{start},{end})':alpha='{alpha_title}',"
+            f"drawtext={artist_src}:fontcolor=0xBBBBBB:fontsize={artist_fs}{common}"
+            f":x=(w-text_w)/2:y={y_artist}:enable='between(t,{start+0.8},{end})':alpha='{alpha_artist}'"
             f"{link_out}"
         )

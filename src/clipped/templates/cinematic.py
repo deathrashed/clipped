@@ -1,24 +1,15 @@
-"""
-Cinematic template — 21:9 ultrawide letterbox with a slow zoom (Ken Burns) on artwork.
-Output: 1920×816. Cinematic, dramatic.
-
-Layout:
-  - Artwork: fills width, slow pan/zoom via zoompan filter
-  - Letterbox bars: top and bottom 18% black bars
-  - Metadata: white text on lower letterbox bar
-"""
 from __future__ import annotations
 from .base import VideoTemplate, TemplateInfo
+from .polish import solid, readable, year, genre
 from ..utils import MediaAssets
-
 
 class CinematicTemplate(VideoTemplate):
     info = TemplateInfo(
         name="cinematic",
-        label="Cinematic (21:9 Ken Burns)",
-        description="Ultrawide letterbox with a slow zoom on artwork. Dramatic and filmic.",
-        aspect=(1920, 816),
-        ideal_for=["YouTube", "Video essays", "Archive"],
+        label="Cinematic",
+        description="Real cinematic crop with slow zoom, dark lower band and staged lower-third.",
+        aspect=(1920,1080),
+        ideal_for=["YouTube", "Archive", "Promos"],
     )
 
     def get_inputs(self, assets: MediaAssets) -> list[str]:
@@ -29,39 +20,35 @@ class CinematicTemplate(VideoTemplate):
 
     def get_filter_graph(self, assets: MediaAssets, duration: float) -> str:
         if assets.cover:
-            # Duration for zoompan (in frames at 25fps)
-            total_frames = max(250, int(duration * 25))
+            frames = max(150, int(duration * 25))
             graph = (
-                # Scale art to 1920×1920, then slow zoom from 1.0→1.08 over duration
-                f"[1:v]scale=1920:1920:force_original_aspect_ratio=increase,crop=1920:1920,"
-                f"zoompan=z='min(zoom+0.0002,1.08)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
-                f":d={total_frames}:s=1920x1920:fps=25[zoomed];"
-                # Crop to 1920×816 from centre
-                "[zoomed]crop=1920:816[outv]"
+                f"[1:v]scale=2160:2160:force_original_aspect_ratio=increase,crop=2160:2160,"
+                f"zoompan=z='min(zoom+0.00016,1.08)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+                f"d={frames}:s=1920x1080:fps=25,eq=brightness=-0.08:saturation=0.9[scene];"
+                f"color=s=1920x230:c=black@0.72,format=rgba[band];"
+                f"[scene][band]overlay=0:850[outv]"
             )
         else:
-            graph = "color=s=1920x816:c=black[outv]"
+            graph = solid(1920,1080,"outv")
+        return graph + ";" + self._text(assets, 1.0, duration)
 
-        return graph + ";" + self._drawtext_overlay(assets)
-
-    def _drawtext_overlay(self, assets: "MediaAssets", link_in: str = "[outv]", link_out: str = "[v]") -> str:
-        """Cinematic lower-third text overlay."""
+    def _text(self, assets, start, end, link_in="[outv]", link_out="[v]"):
         if not self.has_drawtext():
             return f"{link_in}null{link_out}"
 
-        title  = self._wrap_text(assets.track_title, width=36, max_lines=2)
-        artist = self._wrap_text(assets.artist_name, width=28, max_lines=1)
-        album  = self._wrap_text(assets.album_name, width=30, max_lines=1)
-        artist_album = f"{artist}  ·  {album}"
+        title = self._wrap_text(assets.track_title, 40, 2)
+        artist = self._wrap_text(assets.artist_name, 35, 1)
+        detail = " · ".join(x for x in [getattr(assets, "album_name", ""), year(assets), genre(assets)] if x)
 
-        title_src       = self._drawtext_source(title, prefix="title")
-        artist_album_src = self._drawtext_source(artist_album, prefix="artist_album")
+        title_src = self._drawtext_source(title, "title")
+        artist_src = self._drawtext_source(artist, "artist")
+        detail_src = self._drawtext_source(detail, "detail")
+        common = readable(self, "left")
 
         return (
             f"{link_in}"
-            f"drawtext={title_src}:fontcolor=white:fontsize=42:expansion=none"
-            f":x=80:y=690:enable='gt(t,1)':alpha='if(lt(t,2),t-1,1)',"
-            f"drawtext={artist_album_src}:fontcolor=0xAAAAAA:fontsize=26:expansion=none"
-            f":x=80:y=752:enable='gt(t,1.5)':alpha='if(lt(t,2.5),t-1.5,1)'"
+            f"drawtext={title_src}:fontcolor=white:fontsize=52{common}:x=90:y=875:enable='between(t,{start},{end})':alpha='{self.get_fade_alpha(start,end,1)}',"
+            f"drawtext={artist_src}:fontcolor=0xD0D0D0:fontsize=34{common}:x=92:y=970:enable='between(t,{start+0.35},{end})':alpha='{self.get_fade_alpha(start+0.35,end,1)}',"
+            f"drawtext={detail_src}:fontcolor=0x999999:fontsize=26{common}:x=92:y=1020:enable='between(t,{start+0.7},{end})':alpha='{self.get_fade_alpha(start+0.7,end,1)}'"
             f"{link_out}"
         )
