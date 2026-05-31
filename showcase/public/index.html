@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clipped Showcase — Production Studio</title>
+  
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="clips-list.js"></script> <!-- Fallback -->
+
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --panel: #161616;
+      --panel-light: #1f1f1f;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --muted: #888;
+      --green: #04d58f;
+      --purple: #953ebf;
+      --gold: #f4a900;
+      --red: #ff4b4b;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* TOP NAVIGATION */
+    .nav-top {
+      height: 48px;
+      background: rgba(13, 13, 13, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand iconify-icon {
+      color: var(--green);
+      font-size: 20px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-link {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .nav-link:hover { color: var(--text); background: var(--panel-light); }
+    .nav-link.active { color: var(--green); background: rgba(4, 213, 143, 0.1); }
+
+    /* WORKSPACE LAYOUT */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1px;
+      background: var(--border);
+      min-height: calc(100vh - 48px);
+    }
+
+    main {
+      background: var(--bg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .preview-stack {
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: calc(100vh - 48px);
+      position: sticky;
+      top: 48px;
+      overflow-y: auto;
+    }
+
+    /* PANELS */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .panel.tight { padding: 12px; }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title span { display: flex; align-items: center; gap: 8px; }
+
+    /* FORM ELEMENTS */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .form-input, .form-select {
+      width: 100%;
+      background: var(--panel-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: var(--green); }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+    /* WAVEFORM EDITOR */
+    .waveform-editor {
+      background: var(--panel-light);
+      border-radius: 8px;
+      height: 120px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .waveform-canvas-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+    }
+
+    .waveform-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .waveform-selection-overlay {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      background: rgba(4, 213, 143, 0.2);
+      border-left: 1px solid var(--green);
+      border-right: 1px solid var(--green);
+      cursor: ew-resize;
+    }
+
+    .handle {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 24px;
+      background: var(--green);
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(4, 213, 143, 0.5);
+    }
+    .handle-start { left: -4px; }
+    .handle-end { right: -4px; }
+
+    .wave-time {
+      position: absolute;
+      bottom: 4px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 8px;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    /* ASSET GRID */
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .asset-card {
+      background: var(--panel-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .asset-card:hover { border-color: var(--muted); background: var(--border); }
+    .asset-card.active { border-color: var(--purple); background: rgba(149, 62, 191, 0.1); }
+    
+    .asset-preview {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.3;
+      filter: grayscale(1);
+    }
+    .asset-card.active .asset-preview { opacity: 0.8; filter: none; }
+
+    .asset-icon { font-size: 24px; color: var(--muted); position: relative; z-index: 1; }
+    .asset-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; position: relative; z-index: 1; }
+
+    /* TEMPLATE GRID */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+    }
+
+    .tpl-card {
+      background: var(--panel-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .tpl-card:hover { background: var(--border); }
+    .tpl-card.active { border-color: var(--green); background: rgba(4, 213, 143, 0.05); }
+
+    .tpl-thumb {
+      background: var(--bg);
+      aspect-ratio: 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--muted);
+    }
+
+    .tpl-name { font-size: 11px; font-weight: 600; }
+    .tpl-engine { font-size: 9px; text-transform: uppercase; color: var(--muted); }
+
+    /* LIVE PREVIEW */
+    .preview-frame {
+      display: flex;
+      justify-content: center;
+      padding: 20px 0;
+      background: radial-gradient(circle at center, #1a1a1a 0%, #0d0d0d 100%);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .phone {
+      width: 200px;
+      height: 355px;
+      background: #000;
+      border-radius: 32px;
+      border: 8px solid #222;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .phone.square { width: 280px; height: 280px; border-radius: 20px; }
+    .phone.wide { width: 280px; height: 158px; border-radius: 12px; }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .preview-cover {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(45deg, #222, #333);
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      margin-bottom: 20px;
+      z-index: 2;
+    }
+
+    .preview-wave {
+      width: 100%;
+      height: 40px;
+      background: rgba(4, 213, 143, 0.1);
+      margin-bottom: 20px;
+      z-index: 2;
+    }
+
+    .preview-caption { z-index: 2; }
+    .preview-caption small { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+    .preview-caption h3 { font-size: 16px; margin: 4px 0; font-weight: 800; }
+    .preview-caption p { font-size: 9px; color: var(--muted); }
+
+    .preview-grid-lines {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 20px 20px;
+      opacity: 0.2;
+      z-index: 1;
+    }
+
+    /* BUTTONS */
+    .btn-primary {
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(4, 213, 143, 0.3); }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-ghost:hover { background: var(--panel-light); border-color: var(--muted); }
+
+    .btn-mini {
+      background: var(--panel-light);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-mini:hover { color: var(--text); border-color: var(--muted); }
+
+    /* QUEUE / JOB LIST */
+    .queue-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px;
+      padding: 8px;
+      background: var(--panel-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .queue-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .queue-status { font-size: 10px; color: var(--muted); text-transform: uppercase; font-family: var(--mono); }
+    .progress { height: 2px; background: var(--border); grid-column: 1 / -1; margin-top: 4px; border-radius: 1px; overflow: hidden; }
+    .progress span { display: block; height: 100%; background: var(--green); transition: width 0.3s; }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      z-index: 10000;
+      display: none;
+      animation: toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes toastIn {
+      from { transform: translate(-50%, 20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    /* INSPECTOR */
+    .inspector-list { display: flex; flex-direction: column; gap: 4px; }
+    .inspect-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.02);
+    }
+    .inspect-row span:first-child { color: var(--muted); }
+    .inspect-row span:last-child { font-family: var(--mono); color: var(--text); }
+
+    /* COMMAND PALETTE */
+    #command {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #command.open { display: flex; }
+    .command-box {
+      width: 100%;
+      max-width: 600px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+    .command-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      font-size: 16px;
+      color: var(--text);
+      outline: none;
+    }
+    .command-list { max-height: 400px; overflow-y: auto; padding: 8px; }
+    .command-item {
+      padding: 10px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .command-item:hover { background: var(--panel-light); }
+    .command-item span:last-child {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* SHOWCASE GRID */
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .showcase-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .showcase-card:hover { transform: translateY(-4px); border-color: var(--muted); }
+
+    .card-video-container {
+      aspect-ratio: 16/9;
+      background: #000;
+      overflow: hidden;
+      position: relative;
+    }
+    .card-video-container.vertical { aspect-ratio: 9/16; }
+    .card-video-container.square { aspect-ratio: 1; }
+    .card-video-container video { width: 100%; height: 100%; object-fit: cover; }
+
+    .card-info { padding: 16px; }
+    .card-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .card-subtitle { font-size: 11px; color: var(--muted); display: flex; gap: 8px; }
+    .tag { padding: 2px 6px; background: var(--border); border-radius: 4px; font-size: 9px; font-weight: 700; }
+    .tag-range { color: var(--green); }
+
+    .card-actions { margin-top: 12px; display: flex; gap: 8px; }
+
+    /* UTILITIES */
+    .view { display: none; }
+    .view.active { display: block; }
+    .hidden { display: none !important; }
+
+    .audio-card-inner {
+      height: 60px;
+      background: var(--panel-light);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 16px;
+    }
+    .mini-wave-container { flex: 1; height: 30px; background: rgba(255,255,255,0.05); border-radius: 4px; }
+    .play-btn {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--green); color: #000;
+      display: flex; align-items: center; justify-content: center; border: none; cursor: pointer;
+    }
+
+    /* MOBILE ADJUSTMENTS */
+    @media (max-width: 768px) {
+      .workspace { grid-template-columns: 1fr; }
+      .preview-stack { border-left: none; border-top: 1px solid var(--border); height: auto; position: static; }
+      .nav-links { display: none; }
+      .row-3 { grid-template-columns: 1fr; }
+      .phone { width: 100%; height: auto; aspect-ratio: 9/16; }
+    }
+
+    .chip {
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: var(--panel-light);
+        border: 1px solid var(--border);
+        font-size: 11px;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .chip:hover { border-color: var(--muted); color: var(--text); }
+    .chip.active { background: var(--green); color: #000; border-color: var(--green); }
+
+    .template-toolbar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .section-head {
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title { font-size: 18px; font-weight: 800; color: var(--text); }
+
+    details summary {
+      font-size: 11px;
+      color: var(--muted);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 0;
+      user-select: none;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    details summary:hover { color: var(--text); }
+    .details-body { padding: 12px 0; border-top: 1px solid var(--border); margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav-top">
+    <div class="brand">
+      <iconify-icon icon="lucide:scissors"></iconify-icon>
+      CLIPPED PRODUCTION STUDIO
+    </div>
+    <div class="nav-links">
+      <a class="nav-link active" onclick="showView('tool')" data-view="tool">
+        <iconify-icon icon="lucide:wrench"></iconify-icon> Studio
+      </a>
+      <a class="nav-link" onclick="showView('showcase')" data-view="showcase">
+        <iconify-icon icon="lucide:layout-grid"></iconify-icon> Showcase
+      </a>
+      <a class="nav-link" onclick="showView('library')" data-view="library">
+        <iconify-icon icon="lucide:library"></iconify-icon> Library
+      </a>
+      <a class="nav-link" onclick="showView('smoke-tests')" data-view="smoke-tests">
+        <iconify-icon icon="lucide:zap"></iconify-icon> Smoke Tests
+      </a>
+      <a class="nav-link" onclick="showView('toolkit')" data-view="toolkit">
+        <iconify-icon icon="lucide:box"></iconify-icon> Toolkit
+      </a>
+    </div>
+  </nav>
+
+  <div class="workspace view active" id="view-tool">
+    
+    <main>
+      
+      <section class="panel">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:music"></iconify-icon>1. Source Audio</span>
+          <div id="stat-bar" style="font-size:9px; color:var(--muted)">
+            <span id="stat-audio">0</span> Audios · <span id="stat-video">0</span> Videos · <span id="stat-templates">0</span> Templates
+          </div>
+        </div>
+
+        <div class="template-toolbar">
+          <button class="chip active source-tab" data-tab="my-clips">My Clips</button>
+          <button class="chip source-tab" data-tab="url">Paste URL</button>
+          <button class="chip source-tab" data-tab="upload">Upload File</button>
+        </div>
+
+        <div class="source-panel active" id="panel-my-clips">
+          <div class="form-group">
+            <label class="form-label">Library Clip</label>
+            <select class="form-select" id="library-select">
+              <option value="">Select a clip...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="source-panel" id="panel-url" style="display:none">
+          <div class="form-group">
+            <label class="form-label">YouTube or Direct MP3 URL</label>
+            <input type="text" class="form-input" id="source-url" placeholder="https://youtube.com/watch?v=...">
+          </div>
+        </div>
+
+        <div class="source-panel" id="panel-upload" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Local File (Preview Only)</label>
+            <input type="file" id="audio-file-input" class="form-input" accept="audio/*">
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:scissors"></iconify-icon>2. Trim & Region</span>
+          <div class="nav-links" style="gap:8px">
+            <button class="btn-mini" id="play-btn"><iconify-icon icon="lucide:play"></iconify-icon>Play</button>
+            <button class="btn-mini" id="loop-btn"><iconify-icon icon="lucide:repeat"></iconify-icon>Loop</button>
+          </div>
+        </div>
+
+        <div class="waveform-editor">
+          <div class="waveform-canvas-container" id="waveContainer">
+             <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
+             <div id="selectionOverlay" class="waveform-selection-overlay">
+                <div id="handleStart" class="handle handle-start"></div>
+                <div id="handleEnd" class="handle handle-end"></div>
+             </div>
+             <div id="wave-status" style="position:absolute; top:8px; right:10px; font-size:9px; font-family:var(--mono); text-transform:uppercase; pointer-events:none"></div>
+          </div>
+          <div class="wave-time">
+            <span id="time-start">0:00.00</span>
+            <span id="time-current">0:00.00</span>
+            <span id="time-end">0:00.00</span>
+          </div>
+        </div>
+
+        <div class="row-3" style="margin-top:16px">
+          <div class="form-group">
+            <label class="form-label">Start (sec)</label>
+            <input type="number" class="form-input" id="trim-start" value="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End (sec)</label>
+            <input type="number" class="form-input" id="trim-end" value="30" step="0.1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Crossfade (sec)</label>
+            <input type="number" class="form-input" id="trim-fade" value="0.5" step="0.1" min="0" max="5">
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:text-cursor-input"></iconify-icon>3. Metadata & Assets</span>
+        </div>
+
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">Artist Name</label>
+            <input type="text" class="form-input" id="meta-artist" placeholder="Juggaknots">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Track Title</label>
+            <input type="text" class="form-input" id="meta-title" placeholder="Trouble Man">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Template Assets</label>
+          <div class="asset-grid">
+            <div class="asset-card active" id="asset-cover" data-type="cover">
+              <div class="asset-preview"></div>
+              <div class="asset-content">
+                <div class="asset-icon"><iconify-icon icon="lucide:image"></iconify-icon></div>
+                <div class="asset-label">Cover Art</div>
+              </div>
+            </div>
+            <div class="asset-card" id="asset-artist" data-type="artist">
+              <div class="asset-preview"></div>
+              <div class="asset-content">
+                <div class="asset-icon"><iconify-icon icon="lucide:user-square"></iconify-icon></div>
+                <div class="asset-label">Artist Image</div>
+              </div>
+            </div>
+            <div class="asset-card" id="asset-bg" data-type="background">
+              <div class="asset-preview"></div>
+              <div class="asset-content">
+                <div class="asset-icon"><iconify-icon icon="lucide:film"></iconify-icon></div>
+                <div class="asset-label">Background</div>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="asset-file-input" style="display:none" accept="image/*,video/*">
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <span><iconify-icon icon="lucide:palette"></iconify-icon>Theme Extraction</span>
+          </div>
+
+          <div class="inspector-list" id="palette-list">
+            <div class="inspect-row" data-color="primary"><span>Primary</span><span>#04d58f</span></div>
+            <div class="inspect-row" data-color="accent"><span>Accent</span><span>#953ebf</span></div>
+            <div class="inspect-row" data-color="highlight"><span>Highlight</span><span>#f4a900</span></div>
+            <div class="inspect-row" data-color="bg"><span>Background</span><span>#0d0d0d</span></div>
+          </div>
+
+          <div class="tool-actions" style="margin-top:10px">
+            <button class="btn-mini"><iconify-icon icon="lucide:wand-sparkles"></iconify-icon>Apply Palette</button>
+            <button class="btn-mini" id="remove-bg-btn"><iconify-icon icon="lucide:eraser"></iconify-icon>Remove BG</button>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="panel" id="templates">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:layers"></iconify-icon>4. Video Template</span>
+        </div>
+
+        <div class="template-toolbar" id="templateFilters">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="remotion">Remotion</button>
+          <button class="chip" data-filter="ffmpeg">FFmpeg</button>
+          <button class="chip" data-filter="vertical">Vertical</button>
+          <button class="chip" data-filter="square">Square</button>
+          <button class="chip" data-filter="wide">Wide</button>
+        </div>
+
+        <div class="template-grid" id="templateGrid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:sliders-horizontal"></iconify-icon>5. Platform & Output</span>
+        </div>
+
+        <div class="template-toolbar" id="platformFilters">
+          <button class="chip active" data-platform="default">Default</button>
+          <button class="chip" data-platform="instagram">Instagram</button>
+          <button class="chip" data-platform="tiktok">TikTok</button>
+          <button class="chip" data-platform="youtube_shorts">YT Shorts</button>
+          <button class="chip" data-platform="vertical_full">Vertical Full</button>
+          <button class="chip" data-platform="twitter">Twitter</button>
+          <button class="chip" data-platform="youtube">YouTube</button>
+        </div>
+
+        <div class="row-3">
+          <div class="form-group">
+            <label class="form-label">Format</label>
+            <select class="form-select" id="out-format">
+              <option value="video">Video MP4</option>
+              <option value="audio">Audio MP3</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">FPS</label>
+            <select class="form-select" id="out-fps">
+              <option value="30">30</option>
+              <option value="60">60</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quality</label>
+            <select class="form-select" id="out-quality">
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+        </div>
+
+        <details>
+          <summary>
+            Advanced Settings
+            <iconify-icon icon="lucide:chevron-down"></iconify-icon>
+          </summary>
+          <div class="details-body">
+            <div class="row-3">
+              <div class="form-group">
+                <label class="form-label">Bitrate</label>
+                <input class="form-input" id="out-bitrate" value="8000k" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Audio Normalize</label>
+                <select class="form-select" id="out-norm">
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Debug Mode</label>
+                <button class="btn-mini" id="toggle-debug-btn" onclick="toggleDebug()">Enable Debug State</button>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <div class="tool-actions" style="margin-top:12px">
+          <button class="btn-primary" id="generate-btn">
+            <iconify-icon icon="lucide:play"></iconify-icon>
+            Generate Clip
+          </button>
+          <button class="btn-ghost">
+            <iconify-icon icon="lucide:save"></iconify-icon>
+            Save Preset
+          </button>
+          <button class="btn-ghost">
+            <iconify-icon icon="lucide:copy"></iconify-icon>
+            Batch Export
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <aside class="preview-stack" id="preview">
+
+      <section class="live-preview">
+        <div class="preview-head">
+          <span><iconify-icon icon="lucide:monitor-play"></iconify-icon> Live Render Preview</span>
+          <span id="previewTemplateLabel">Pulse Reel</span>
+        </div>
+
+        <div class="preview-frame">
+          <div class="phone" id="previewPhone">
+            <div class="phone-screen">
+              <div class="preview-grid-lines"></div>
+              <div class="preview-cover" id="previewCover"></div>
+              <div class="preview-wave" id="previewWave"></div>
+              <div class="preview-caption">
+                <small id="previewArtist">Juggaknots</small>
+                <h3 id="previewTitle">Trouble Man</h3>
+                <p id="previewDesc">Pulse Reel · 9:16 · Remotion</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel tight">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:list-checks"></iconify-icon>Template Inspector</span>
+        </div>
+
+        <div class="inspector-list">
+          <div class="inspect-row"><span>Template</span><span id="inspectTemplate">pulse_reel</span></div>
+          <div class="inspect-row"><span>Engine</span><span id="inspectEngine">remotion</span></div>
+          <div class="inspect-row"><span>Aspect</span><span id="inspectAspect">9:16</span></div>
+          <div class="inspect-row"><span>Assets</span><span id="inspectAssets">cover, logo, bg</span></div>
+          <div class="inspect-row"><span>Render speed</span><span>medium</span></div>
+        </div>
+      </section>
+
+      <section class="panel tight" id="queue">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:server-cog"></iconify-icon>Job Lifecycle</span>
+        </div>
+
+        <div id="job-container">
+            <div class="queue-item" id="active-job">
+              <div class="queue-name"><span id="job-filename">Idle</span> <small id="job-id-display" style="opacity:0.5"></small></div>
+              <div class="queue-status" id="job-status">ready</div>
+              <div class="progress"><span id="job-progress" style="width:0%"></span></div>
+              <div id="job-meta" style="grid-column:1/-1; display:flex; justify-content:space-between; font-size:9px; color:var(--muted); margin-top:4px">
+                <span id="job-raw-status">Waiting for input...</span>
+                <span id="job-elapsed">0s</span>
+              </div>
+            </div>
+        </div>
+
+        <div id="job-output" style="display:none; margin-top:10px">
+           <div id="job-preview" class="output-preview"></div>
+           <div class="btn-container" style="display:flex; gap:8px; margin-top:10px">
+              <a href="#" id="download-link" class="btn-primary" style="flex:1" download>
+                <iconify-icon icon="lucide:download"></iconify-icon> Download
+              </a>
+              <button class="btn-ghost" onclick="copyDownloadUrl()">
+                <iconify-icon icon="lucide:link"></iconify-icon>
+              </button>
+           </div>
+        </div>
+      </section>
+
+      <section class="panel tight" id="debug-panel" style="display:none">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:bug"></iconify-icon>Debug State</span>
+        </div>
+        <pre id="state-dump" style="font-size:9px; color:var(--muted); white-space:pre-wrap; word-break:break-all; max-height:200px; overflow-y:auto; font-family:var(--mono)"></pre>
+      </section>
+
+      <section class="panel tight">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:clock"></iconify-icon>Recent Clips</span>
+        </div>
+        <div class="inspector-list" id="recent-clips-list">
+           <!-- Populated by JS -->
+        </div>
+      </section>
+
+    </aside>
+
+  </div> <!-- End Workspace -->
+
+  <!-- SHOWCASE SECTION -->
+  <section class="showcase-section view" id="view-showcase">
+    <div class="section-head">
+      <span class="section-title">Video Showcase</span>
+      <div class="nav-links">
+         <input type="text" id="showcase-search" class="form-input" style="width:200px; font-size:10px" placeholder="Search clips...">
+         <select id="showcase-filter" class="form-select" style="width:120px; font-size:10px">
+            <option value="all">All</option>
+            <option value="vertical">Vertical</option>
+            <option value="square">Square</option>
+            <option value="remotion">Remotion</option>
+            <option value="ffmpeg">FFmpeg</option>
+         </select>
+      </div>
+    </div>
+    <div class="showcase-grid" id="video-grid"></div>
+  </section>
+
+  <!-- LIBRARY SECTION -->
+  <section class="showcase-section view" id="view-library">
+    <div class="section-head">
+      <span class="section-title">Audio Library</span>
+    </div>
+    <div class="showcase-grid" id="audio-grid"></div>
+  </section>
+
+  <!-- SMOKE TESTS -->
+  <section class="showcase-section view" id="view-smoke-tests">
+    <div class="section-head">
+      <span class="section-title">Template Smoke Tests</span>
+    </div>
+    <div class="showcase-grid" id="smoke-grid"></div>
+  </section>
+
+  <!-- TOOLKIT / INSTALL -->
+  <section class="showcase-section view" id="view-toolkit">
+    <div class="section-head">
+      <span class="section-title">Toolkit / Install</span>
+    </div>
+
+    <div class="tool-grid">
+       <div class="panel">
+          <div class="panel-title"><span><iconify-icon icon="lucide:terminal"></iconify-icon>Quick Install</span></div>
+          <pre style="font-family:var(--mono); font-size:11px; color:var(--muted); line-height:1.6">
+git clone https://github.com/deathrashed/clipped.git
+cd clipped && ./install.sh
+clipped --version</pre>
+       </div>
+       <div class="panel">
+          <div class="panel-title"><span><iconify-icon icon="lucide:command"></iconify-icon>Core Commands</span></div>
+          <pre style="font-family:var(--mono); font-size:11px; color:var(--muted); line-height:1.6">
+clipped audio "track.mp3" 1:30 2:15
+clipped video "track.mp3" --template reel
+clipped templates
+clipped doctor</pre>
+       </div>
+       <div class="panel">
+          <div class="panel-title"><span><iconify-icon icon="lucide:box"></iconify-icon>Dependencies</span></div>
+          <pre style="font-family:var(--mono); font-size:11px; color:var(--muted); line-height:1.6">
+- FFmpeg (Global or local)
+- yt-dlp (For YouTube sources)
+- Node.js 18+ (For Remotion engine)
+- Python 3.9+ (Core CLI)</pre>
+       </div>
+    </div>
+  </section>
+
+  <div id="command">
+    <div class="command-box">
+      <input type="text" class="command-input" id="command-input" placeholder="Type a command or search...">
+      <div class="command-list">
+        <div class="command-item" data-cmd="generate"><span>Generate Clip</span><span>R</span></div>
+        <div class="command-item" data-cmd="play"><span>Play / Pause</span><span>Space</span></div>
+        <div class="command-item" data-cmd="loop"><span>Toggle loop</span><span>L</span></div>
+        <div class="command-item" data-cmd="suggest"><span>Suggest clip ranges</span><span>S</span></div>
+        <div class="command-item" data-view-cmd="tool"><span>Open Studio</span><span>1</span></div>
+        <div class="command-item" data-view-cmd="showcase"><span>Open Video Showcase</span><span>2</span></div>
+        <div class="command-item" data-view-cmd="library"><span>Open Audio Library</span><span>3</span></div>
+        <div class="command-item" data-view-cmd="smoke-tests"><span>Open Smoke Tests</span><span>4</span></div>
+        <div class="command-item" data-view-cmd="toolkit"><span>Open Toolkit</span><span>5</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+<script>
+// ==== REACTIVE APP STATE ====
+const appState = new Proxy({
+  clips: [],
+  selectedClip: null,
+  sourceType: "my-clips", // "my-clips", "upload", "url"
+  sourceUrl: "",
+  template: "pulse_reel",
+  platform: "default",
+  format: "video",
+  audioBuffer: null,
+  selectionStart: 0,
+  selectionEnd: 30,
+  fade: 0.5,
+  jobId: null,
+  jobStatus: "idle",
+  activeView: "tool",
+  isPlaying: false,
+  loop: false,
+  waveformStatus: "none", // none, loading, ready, error
+  lastPayload: null
+}, {
+  set(target, prop, value) {
+    target[prop] = value;
+    if (prop === 'waveformStatus') updateWaveformStatusUI(value);
+    dumpState();
+    return true;
+  }
+});
+
+function updateWaveformStatusUI(status) {
+    const el = document.getElementById('wave-status');
+    if (!el) return;
+    el.textContent = status;
+    el.style.color = status === 'ready' ? 'var(--green)' : (status === 'error' ? 'var(--red)' : 'var(--gold)');
+}
+
+function dumpState() {
+    const dump = document.getElementById('state-dump');
+    if (!dump) return;
+    const cleanState = {};
+    Object.keys(appState).forEach(key => {
+        if (['audioBuffer', 'clips'].includes(key)) return;
+        cleanState[key] = appState[key];
+    });
+    if (appState.lastPayload) cleanState.lastPayload = appState.lastPayload;
+    dump.textContent = JSON.stringify(cleanState, null, 2);
+}
+
+const TEMPLATES = [
+  { id:"pulse_reel", name:"Pulse Reel", engine:"remotion", aspect:"9:16", icon:"lucide:radio-tower" },
+  { id:"gallery_square", name:"Gallery Sq", engine:"remotion", aspect:"1:1", icon:"lucide:images" },
+  { id:"record_square", name:"Record Sq", engine:"remotion", aspect:"1:1", icon:"lucide:disc-3" },
+  { id:"fluid_scene", name:"Fluid Scene", engine:"remotion", aspect:"1:1", icon:"lucide:waves" },
+  { id:"metal_vhs", name:"Metal VHS", engine:"remotion", aspect:"1:1", icon:"lucide:videotape" },
+  { id:"premium_card", name:"Premium Card", engine:"remotion", aspect:"1:1", icon:"lucide:square-stack" },
+  { id:"reel", name:"Reel", engine:"ffmpeg", aspect:"9:16", icon:"lucide:clapperboard" },
+  { id:"vertical_wave", name:"Vert Wave", engine:"ffmpeg", aspect:"9:16", icon:"lucide:audio-waveform" },
+  { id:"spinner", name:"Spinner", engine:"ffmpeg", aspect:"1:1", icon:"lucide:refresh-cw" },
+  { id:"waveformbar", name:"Waveform Bar", engine:"ffmpeg", aspect:"1:1", icon:"lucide:bar-chart-3" },
+  { id:"minimal", name:"Minimal", engine:"ffmpeg", aspect:"1:1", icon:"lucide:square" },
+  { id:"cinematic", name:"Cinematic", engine:"ffmpeg", aspect:"16:9", icon:"lucide:film" }
+];
+
+// ==== UI ELEMENTS ====
+const waveCanvas = document.getElementById('waveformCanvas');
+const waveCtx = waveCanvas?.getContext('2d');
+const waveContainer = document.getElementById('waveContainer');
+const selectionOverlay = document.getElementById('selectionOverlay');
+const handleStart = document.getElementById('handleStart');
+const handleEnd = document.getElementById('handleEnd');
+const librarySelect = document.getElementById('library-select');
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let sourceNode = null;
+let gainNode = audioCtx.createGain();
+gainNode.connect(audioCtx.destination);
+
+// ==== INITIALIZATION ====
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('debug') === '1') toggleDebug(true);
+
+    await loadClips();
+    initTemplateGrid();
+    initSourceTabs();
+    initWaveformEditor();
+    initMetadataSync();
+    initPlatformFilters();
+    initShowcaseControls();
+    initCommandPalette();
+    initKeyboardShortcuts();
+    
+    document.getElementById('generate-btn').addEventListener('click', generateClip);
+    document.getElementById('out-format').addEventListener('change', (e) => {
+        appState.format = e.target.value;
+        updatePreview();
+    });
+    
+    ['trim-start', 'trim-end', 'trim-fade'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            if (id === 'trim-start') appState.selectionStart = val;
+            else if (id === 'trim-end') appState.selectionEnd = val;
+            else if (id === 'trim-fade') appState.fade = val;
+            if (id !== 'trim-fade') updateSelectionUI();
+        });
+    });
+
+    dumpState();
+    showView('tool');
+});
+
+function toggleDebug(force) {
+    const panel = document.getElementById('debug-panel');
+    const btn = document.getElementById('toggle-debug-btn');
+    if (!panel || !btn) return;
+    const isVisible = force !== undefined ? !force : panel.style.display === 'block';
+    panel.style.display = isVisible ? 'none' : 'block';
+    btn.textContent = isVisible ? 'Enable Debug State' : 'Hide Debug State';
+}
+
+function initShowcaseControls() {
+    const searchIn = document.getElementById('showcase-search');
+    const filterSel = document.getElementById('showcase-filter');
+    if (!searchIn || !filterSel) return;
+    const update = () => renderVideoShowcase();
+    searchIn.addEventListener('input', update);
+    filterSel.addEventListener('change', update);
+}
+
+async function loadClips() {
+    try {
+        const res = await fetch('clips.json');
+        if (!res.ok) throw new Error();
+        appState.clips = await res.json();
+    } catch(e) {
+        if (window.userClips) appState.clips = window.userClips;
+    }
+    
+    // Populate select
+    librarySelect.innerHTML = '<option value="">Select a clip...</option>' + 
+        appState.clips.filter(c => c.kind === 'audio').map(c => 
+            `<option value="${c.filepath}">${c.artist || 'Unknown'} - ${c.title}</option>`
+        ).join('');
+
+    updateHeroStats();
+    renderGalleries();
+    populateRecentClips();
+}
+
+function updateHeroStats() {
+    const audioClips = appState.clips.filter(c => c.kind === 'audio');
+    const videoClips = appState.clips.filter(c => c.kind === 'video');
+    document.getElementById('stat-audio').textContent = audioClips.length;
+    document.getElementById('stat-video').textContent = videoClips.length;
+    document.getElementById('stat-templates').textContent = TEMPLATES.length;
+}
+
+function showView(name) {
+    appState.activeView = name;
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    const target = document.getElementById(`view-${name}`);
+    if (target) target.classList.add("active");
+    document.querySelectorAll(".nav-link").forEach(a => a.classList.remove("active"));
+    document.querySelector(`[data-view="${name}"]`)?.classList.add("active");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==== TOOL WORKSPACE LOGIC ====
+
+function initSourceTabs() {
+    const tabs = document.querySelectorAll('.source-tab');
+    const panels = document.querySelectorAll('.source-panel');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const target = document.getElementById(`panel-${tab.dataset.tab}`);
+            if (target) target.style.display = 'block';
+            // Hide others
+            panels.forEach(p => { if (p.id !== `panel-${tab.dataset.tab}`) p.style.display = 'none'; });
+            appState.sourceType = tab.dataset.tab;
+        });
+    });
+    librarySelect.addEventListener('change', () => {
+        const path = librarySelect.value;
+        if (!path) return;
+        const clip = appState.clips.find(c => c.filepath === path);
+        if (clip) {
+            appState.selectedClip = clip;
+            appState.sourceUrl = clip.filepath;
+            document.getElementById('meta-artist').value = clip.artist || '';
+            document.getElementById('meta-title').value = clip.title || '';
+            appState.selectionStart = parseFloat(clip.clip_start) || 0;
+            appState.selectionEnd = parseFloat(clip.clip_end) || 30;
+            loadAudioForWaveform(clip.filepath);
+            updatePreview();
+            updateSelectionUI();
+        }
+    });
+    document.getElementById('audio-file-input').addEventListener('change', (e) => {
+        if (e.target.files[0]) loadAudioFromFile(e.target.files[0]);
+    });
+    document.getElementById('source-url').addEventListener('change', (e) => {
+        appState.sourceUrl = e.target.value;
+        if (e.target.value.startsWith('http')) loadAudioForWaveform(e.target.value);
+    });
+}
+
+function getSourceUrl() {
+    let url = "";
+    if (appState.sourceType === "my-clips") url = librarySelect.value;
+    else if (appState.sourceType === "url") url = document.getElementById('source-url').value;
+    else if (appState.sourceType === "upload") url = appState.sourceUrl;
+    if (url && !url.startsWith('http') && !url.startsWith('blob:')) {
+        return window.location.origin + '/' + url.replace(/^\//, '');
+    }
+    return url;
+}
+
+async function loadAudioFromFile(file) {
+    showToast(`Loading local file: ${file.name}...`);
+    appState.sourceUrl = URL.createObjectURL(file);
+    loadAudioForWaveform(appState.sourceUrl);
+    const stem = file.name.replace(/\.[^/.]+$/, "");
+    if (stem.includes(" - ")) {
+        const parts = stem.split(" - ");
+        document.getElementById('meta-artist').value = parts[0];
+        document.getElementById('meta-title').value = parts[1];
+        updatePreview();
+    }
+}
+
+async function loadAudioForWaveform(url) {
+    appState.waveformStatus = "loading";
+    showToast("Loading audio waveform...", "var(--gold)");
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("CORS or Network Error");
+        const buf = await res.arrayBuffer();
+        appState.audioBuffer = await audioCtx.decodeAudioData(buf);
+        appState.waveformStatus = "ready";
+        drawWaveform();
+        updateSelectionUI();
+        showToast("Audio loaded successfully.", "var(--green)");
+    } catch (err) {
+        appState.waveformStatus = "error";
+        drawFallbackWaveform();
+        showToast("Waveform failed to load (CORS). Audio still works for render.", "var(--red)");
+    }
+}
+
+// ==== WAVEFORM EDITOR ====
+function initWaveformEditor() {
+    window.addEventListener('resize', drawWaveform);
+    let isDragging = false;
+    let dragType = null;
+    const onMouseDown = (e, type) => { isDragging = true; dragType = type; e.stopPropagation(); };
+    handleStart.addEventListener('mousedown', (e) => onMouseDown(e, 'start'));
+    handleEnd.addEventListener('mousedown', (e) => onMouseDown(e, 'end'));
+    waveContainer.addEventListener('mousedown', (e) => {
+        const rect = waveContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const time = xToTime(x);
+        if (Math.abs(time - appState.selectionStart) < Math.abs(time - appState.selectionEnd)) {
+            appState.selectionStart = time; dragType = 'start';
+        } else {
+            appState.selectionEnd = time; dragType = 'end';
+        }
+        isDragging = true;
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = waveContainer.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const time = xToTime(x);
+        if (dragType === 'start') appState.selectionStart = Math.min(time, appState.selectionEnd - 0.1);
+        else if (dragType === 'end') appState.selectionEnd = Math.max(time, appState.selectionStart + 0.1);
+        updateSelectionUI();
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; dragType = null; });
+    document.getElementById('play-btn').addEventListener('click', togglePlay);
+    document.getElementById('loop-btn').addEventListener('click', () => {
+        appState.loop = !appState.loop;
+        document.getElementById('loop-btn').classList.toggle('active', appState.loop);
+    });
+}
+
+function xToTime(x) {
+    const width = waveContainer.clientWidth;
+    const dur = appState.audioBuffer ? appState.audioBuffer.duration : 60;
+    return (x / width) * dur;
+}
+function timeToX(time) {
+    const width = waveContainer.clientWidth;
+    const dur = appState.audioBuffer ? appState.audioBuffer.duration : 60;
+    return (time / dur) * width;
+}
+function updateSelectionUI() {
+    const x1 = timeToX(appState.selectionStart);
+    const x2 = timeToX(appState.selectionEnd);
+    selectionOverlay.style.left = `${x1}px`;
+    selectionOverlay.style.width = `${x2 - x1}px`;
+    document.getElementById('trim-start').value = appState.selectionStart.toFixed(2);
+    document.getElementById('trim-end').value = appState.selectionEnd.toFixed(2);
+    document.getElementById('time-start').textContent = formatTime(appState.selectionStart);
+    document.getElementById('time-end').textContent = formatTime(appState.selectionEnd);
+}
+function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = (s % 60).toFixed(2).padStart(5, '0');
+    return `${m}:${sec}`;
+}
+function drawWaveform() {
+    if (!waveCanvas) return;
+    const w = waveCanvas.width = waveCanvas.clientWidth;
+    const h = waveCanvas.height = waveCanvas.clientHeight;
+    waveCtx.clearRect(0, 0, w, h);
+    if (!appState.audioBuffer) { drawFallbackWaveform(); return; }
+    const data = appState.audioBuffer.getChannelData(0);
+    const step = Math.ceil(data.length / w);
+    const amp = h / 2;
+    waveCtx.fillStyle = '#04d58f';
+    waveCtx.globalAlpha = 0.5;
+    for (let i = 0; i < w; i++) {
+        let min = 1.0, max = -1.0;
+        for (let j = 0; j < step; j++) {
+            const datum = data[(i * step) + j];
+            if (datum < min) min = datum;
+            if (datum > max) max = datum;
+        }
+        waveCtx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+    }
+}
+function drawFallbackWaveform() {
+    if (!waveCanvas) return;
+    const w = waveCanvas.width;
+    const h = waveCanvas.height;
+    waveCtx.fillStyle = '#242424';
+    for(let i=0; i<w; i+=4) {
+        const bh = 10 + Math.random() * (h-20);
+        waveCtx.fillRect(i, h/2 - bh/2, 2, bh);
+    }
+}
+let playTimeout = null;
+function togglePlay() {
+    if (appState.isPlaying) stopAudio();
+    else playRange(appState.selectionStart, appState.selectionEnd);
+}
+function playRange(start, end) {
+    if (!appState.audioBuffer) return;
+    stopAudio();
+    sourceNode = audioCtx.createBufferSource();
+    sourceNode.buffer = appState.audioBuffer;
+    sourceNode.connect(gainNode);
+    sourceNode.start(0, start);
+    appState.isPlaying = true;
+    document.getElementById('play-btn').innerHTML = '<iconify-icon icon="lucide:square"></iconify-icon>Stop';
+    playTimeout = setTimeout(() => {
+        if (appState.loop) playRange(start, end);
+        else stopAudio();
+    }, (end - start) * 1000);
+}
+function stopAudio() {
+    if (sourceNode) { try { sourceNode.stop(); } catch(e) {} sourceNode = null; }
+    clearTimeout(playTimeout);
+    appState.isPlaying = false;
+    document.getElementById('play-btn').innerHTML = '<iconify-icon icon="lucide:play"></iconify-icon>Play';
+}
+
+// ==== RENDERING PIPELINE ====
+let jobStartTime = null;
+let jobTimer = null;
+async function generateClip() {
+  const url = getSourceUrl();
+  if (!url) { showToast("Select a source first.", "var(--red)"); return; }
+  if (appState.sourceType === "upload") { showToast("Local uploads are preview-only.", "var(--gold)"); return; }
+  const payload = {
+    url,
+    start: Number(appState.selectionStart || 0),
+    end: Number(appState.selectionEnd || 30),
+    fade: Number(appState.fade || 0.5),
+    format: appState.format,
+    template: appState.format === "video" ? appState.template : null,
+    platform: appState.platform
+  };
+  appState.lastPayload = payload;
+  document.getElementById("job-output").style.display = "none";
+  document.getElementById("job-preview").innerHTML = "";
+  jobStartTime = Date.now();
+  setJobState("submitting", 8, "Submitting Request...");
+  document.getElementById('job-id-display').textContent = "";
+  try {
+      const res = await fetch("/.netlify/functions/clip-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) { setJobState("error", 100, data.error || "Request failed"); return; }
+      appState.jobId = data.jobId;
+      document.getElementById('job-id-display').textContent = `(${data.jobId.slice(0, 8)})`;
+      setJobState("queued", 15, "Job Queued");
+      pollJob(data.jobId, payload.format);
+  } catch(e) { setJobState("error", 100, e.message); }
+}
+
+async function pollJob(jobId, format) {
+  if (jobTimer) clearInterval(jobTimer);
+  jobTimer = setInterval(async () => {
+    const elapsed = Math.floor((Date.now() - jobStartTime) / 1000);
+    document.getElementById('job-elapsed').textContent = `${elapsed}s`;
+    try {
+        const res = await fetch(`/.netlify/functions/clip-status?job=${jobId}`);
+        if (!res.ok) throw new Error("Status link failed");
+        const { status } = await res.json();
+        document.getElementById('job-raw-status').textContent = status || "Waiting...";
+        const lower = String(status || "").toLowerCase();
+        if (lower.includes("initializing")) setJobState("initializing", 20, "Initializing...");
+        else if (lower.includes("download")) setJobState("downloading", 40, "Downloading...");
+        else if (lower.includes("rendering")) setJobState("rendering", 70, "Rendering...");
+        else if (lower.includes("finalizing")) setJobState("finalizing", 90, "Finalizing...");
+        else if (lower === "done") {
+          clearInterval(jobTimer);
+          setJobState("complete", 100, "Production Done");
+          showOutput(jobId, format);
+        } else if (lower.includes("error") || lower.includes("failed")) {
+          clearInterval(jobTimer);
+          setJobState("error", 100, "Render Failed");
+          showToast(status, "var(--red)");
+        } else { setJobState("running", 50, "In Progress"); }
+    } catch(e) { console.error("Polling error", e); }
+  }, 2500);
+}
+
+function setJobState(status, progress, label = "") {
+    appState.jobStatus = status;
+    const statusEl = document.getElementById('job-status');
+    const progEl = document.getElementById('job-progress');
+    const nameEl = document.getElementById('job-filename');
+    statusEl.textContent = status;
+    if (label) nameEl.textContent = label;
+    progEl.style.width = `${progress}%`;
+    if (status === "error") { statusEl.style.color = 'var(--red)'; progEl.style.background = 'var(--red)'; }
+    else { statusEl.style.color = 'var(--green)'; progEl.style.background = 'var(--green)'; }
+}
+
+function showOutput(jobId, format) {
+  const url = `/.netlify/functions/clip-download?job=${jobId}`;
+  const output = document.getElementById("job-output");
+  output.style.display = "block";
+  document.getElementById("download-link").href = url;
+  const preview = document.getElementById("job-preview");
+  const elapsed = document.getElementById('job-elapsed').textContent;
+  const type = format === "audio" ? "MP3 Audio" : "MP4 Video";
+  
+  preview.innerHTML = `
+    <div style="margin-bottom:10px; font-size:11px; color:var(--muted)">
+      <strong>Type:</strong> ${type} | <strong>Time:</strong> ${elapsed} | <strong>Job:</strong> ${jobId.slice(0,8)}
+    </div>
+    ${format === "audio" ? `<audio controls src="${url}" style="width:100%"></audio>` : `<video controls playsinline src="${url}" style="width:100%; border-radius:8px"></video>`}
+    <div style="font-size:10px; color:var(--gold); margin-top:8px; opacity:0.8">
+      <iconify-icon icon="lucide:info"></iconify-icon> Use this output in the showcase by downloading it.
+    </div>
+  `;
+  showToast("Clip production finished!", "var(--green)");
+}
+
+// ==== GALLERY RENDERING ====
+function renderGalleries() {
+    renderVideoShowcase();
+    renderAudioLibrary();
+    renderSmokeTests();
+}
+
+function renderVideoShowcase() {
+    const grid = document.getElementById('video-grid');
+    if (!grid) return;
+    const query = document.getElementById('showcase-search')?.value.toLowerCase() || "";
+    const filter = document.getElementById('showcase-filter')?.value || "all";
+    const videos = appState.clips.filter(c => {
+        if (c.kind !== 'video') return false;
+        const matchQuery = (c.artist||'').toLowerCase().includes(query) || (c.title||'').toLowerCase().includes(query);
+        let matchFilter = true;
+        if (filter === 'vertical') matchFilter = c.aspect === '9:16';
+        if (filter === 'square') matchFilter = c.aspect === '1:1';
+        if (filter === 'remotion') matchFilter = c.engine === 'remotion';
+        if (filter === 'ffmpeg') matchFilter = c.engine === 'ffmpeg';
+        return matchQuery && matchFilter;
+    });
+    if (videos.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--muted)">No videos found matching your search.</div>`;
+        return;
+    }
+    grid.innerHTML = videos.map(clip => {
+        const aspectClass = clip.aspect === "9:16" ? "vertical" : (clip.aspect === "16:9" ? "wide" : "");
+        const clipJson = JSON.stringify(clip).replace(/"/g, '&quot;');
+        return `<div class="showcase-card video-card">
+              <div class="card-video-container ${aspectClass}">
+                <video src="${clip.filepath}" muted playsinline loop onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0" preload="none"></video>
+              </div>
+              <div class="card-info">
+                <div class="card-title">${clip.artist || 'Unknown'} — ${clip.title}</div>
+                <div class="card-subtitle" style="margin-bottom: 8px;">
+                  <span class="tag">${(clip.template||'reel').toUpperCase()}</span>
+                  <span class="tag tag-range">${clip.clip_start || '0.00'} – ${clip.clip_end || '30.00'}</span>
+                </div>
+                <div class="card-actions">
+                  <button class="btn-mini" onclick="useSetup(${clipJson})">Use Setup</button>
+                  <a href="${clip.filepath}" download class="btn-mini">Download</a>
+                </div>
+              </div>
+            </div>`;
+    }).join('');
+}
+
+function renderAudioLibrary() {
+    const grid = document.getElementById('audio-grid');
+    if (!grid) return;
+    const audios = appState.clips.filter(c => c.kind === 'audio');
+    if (audios.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--muted)">Library is empty.</div>`;
+        return;
+    }
+    grid.innerHTML = audios.map(clip => {
+        const clipJson = JSON.stringify(clip).replace(/"/g, '&quot;');
+        return `<div class="showcase-card audio-card">
+              <div class="audio-card-inner">
+                <div class="mini-wave-container"><canvas class="mini-waveform" data-src="${clip.filepath}"></canvas></div>
+                <button class="play-btn" onclick="toggleAudioCard(this, '${clip.filepath}')">▶</button>
+              </div>
+              <div class="card-info">
+                <div class="card-title">${clip.artist || 'Unknown'} — ${clip.title}</div>
+                <div class="card-subtitle">
+                   <span class="tag">AUDIO</span>
+                   <span class="tag tag-range">${clip.clip_start || '0.00'} – ${clip.clip_end || '30.00'}</span>
+                </div>
+                <div class="card-actions">
+                  <button class="btn-mini" onclick="useSetup(${clipJson})">Use Setup</button>
+                  <a href="${clip.filepath}" download class="btn-mini">Download</a>
+                </div>
+              </div>
+            </div>`;
+    }).join('');
+}
+
+function renderSmokeTests() {
+    const grid = document.getElementById('smoke-grid');
+    if (!grid) return;
+    const smoke = appState.clips.filter(c => c.kind === 'smoke');
+    if (smoke.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--muted)">No smoke tests found.</div>`;
+        return;
+    }
+    grid.innerHTML = smoke.map(f => `<div class="tpl-card">
+          <div class="tpl-thumb" style="aspect-ratio: 16/9">
+            <video src="${f.filepath}" muted playsinline loop onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0" style="width:100%; height:100%; object-fit:cover" onerror="this.parentElement.innerHTML='<div style=font-size:10px;color:var(--muted)>Preview unavailable</div>'"></video>
+          </div>
+          <div class="tpl-footer"><span class="tpl-name">${f.title}</span><span class="tpl-engine">${f.engine}</span></div>
+        </div>`).join('');
+}
+
+// ==== OTHER UI HELPERS ====
+function initTemplateGrid() {
+    renderTemplates('all');
+    document.querySelectorAll('#templateFilters .chip').forEach(f => {
+        f.addEventListener('click', () => {
+            document.querySelectorAll('#templateFilters .chip').forEach(c => c.classList.remove('active'));
+            f.classList.add('active');
+            renderTemplates(f.dataset.filter);
+        });
+    });
+}
+function renderTemplates(filter) {
+    const grid = document.getElementById('templateGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const filtered = TEMPLATES.filter(t => {
+        if (filter === 'all') return true;
+        if (filter === 'remotion' || filter === 'ffmpeg') return t.engine === filter;
+        if (filter === 'vertical') return t.aspect === '9:16';
+        if (filter === 'square') return t.aspect === '1:1';
+        if (filter === 'wide') return t.aspect === '16:9';
+        return true;
+    });
+    filtered.forEach(t => {
+        const card = document.createElement('button');
+        card.className = 'tpl-card' + (t.id === appState.template ? ' active' : '');
+        card.innerHTML = `<div class="tpl-thumb"><iconify-icon icon="${t.icon}"></iconify-icon></div>
+                          <div class="tpl-footer"><span class="tpl-name">${t.name}</span><span class="tpl-engine">${t.engine}</span></div>`;
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            appState.template = t.id;
+            updatePreview();
+        });
+        grid.appendChild(card);
+    });
+}
+function initPlatformFilters() {
+    document.querySelectorAll('#platformFilters .chip').forEach(c => {
+        c.addEventListener('click', () => {
+            document.querySelectorAll('#platformFilters .chip').forEach(x => x.classList.remove('active'));
+            c.classList.add('active');
+            appState.platform = c.dataset.platform;
+        });
+    });
+}
+function initMetadataSync() {
+    ['meta-artist', 'meta-title'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updatePreview);
+    });
+}
+function updatePreview() {
+    const artist = document.getElementById('meta-artist')?.value || 'Artist';
+    const title = document.getElementById('meta-title')?.value || 'Track Title';
+    const template = TEMPLATES.find(t => t.id === appState.template);
+    if (document.getElementById('previewArtist')) document.getElementById('previewArtist').textContent = artist;
+    if (document.getElementById('previewTitle')) document.getElementById('previewTitle').textContent = title;
+    if (document.getElementById('previewTemplateLabel')) document.getElementById('previewTemplateLabel').textContent = template?.name || 'Template';
+    if (document.getElementById('previewDesc')) document.getElementById('previewDesc').textContent = `${template?.name || 'Template'} · ${template?.aspect || '9:16'} · ${template?.engine || 'remotion'}`;
+    if (document.getElementById('inspectTemplate')) document.getElementById('inspectTemplate').textContent = appState.template;
+    if (document.getElementById('inspectEngine')) document.getElementById('inspectEngine').textContent = template?.engine || 'remotion';
+    if (document.getElementById('inspectAspect')) document.getElementById('inspectAspect').textContent = template?.aspect || '9:16';
+    const phone = document.getElementById('previewPhone');
+    if (phone) {
+        phone.classList.remove('square', 'wide');
+        if (template?.aspect === '1:1') phone.classList.add('square');
+        if (template?.aspect === '16:9') phone.classList.add('wide');
+    }
+}
+function useSetup(clip) {
+    showView('tool');
+    const tab = document.querySelector('.source-tab[data-tab="my-clips"]');
+    if (tab) tab.click();
+    librarySelect.value = clip.filepath;
+    appState.selectedClip = clip;
+    appState.sourceUrl = clip.filepath;
+    if (document.getElementById('meta-artist')) document.getElementById('meta-artist').value = clip.artist || '';
+    if (document.getElementById('meta-title')) document.getElementById('meta-title').value = clip.title || '';
+    updatePreview();
+    appState.selectionStart = parseFloat(clip.clip_start) || 0;
+    appState.selectionEnd = parseFloat(clip.clip_end) || 30;
+    updateSelectionUI();
+    if (clip.template) { appState.template = clip.template; renderTemplates('all'); updatePreview(); }
+    if (clip.platform) { const pc = document.querySelector(`#platformFilters .chip[data-platform="${clip.platform}"]`); if (pc) pc.click(); }
+    loadAudioForWaveform(clip.filepath);
+    showToast("Setup loaded into producer.");
+}
+function showToast(msg, color = 'var(--green)') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.style.color = color;
+    toast.style.borderColor = color;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+}
+function initCommandPalette() {
+    const input = document.getElementById('command-input');
+    const items = document.querySelectorAll('.command-item');
+    if (!input) return;
+    input.addEventListener('input', () => {
+        const query = input.value.toLowerCase();
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(query) ? 'flex' : 'none';
+        });
+    });
+    items.forEach(item => {
+        item.addEventListener('click', () => {
+            const c = item.dataset.cmd, v = item.dataset.viewCmd;
+            if (c === 'generate') generateClip();
+            if (c === 'play') togglePlay();
+            if (c === 'loop') { appState.loop = !appState.loop; document.getElementById('loop-btn').classList.toggle('active', appState.loop); }
+            if (v) showView(v);
+            toggleCommand();
+        });
+    });
+}
+function toggleCommand() {
+    const cmd = document.getElementById('command');
+    if (!cmd) return;
+    cmd.classList.toggle('open');
+    if (cmd.classList.contains('open')) document.getElementById('command-input').focus();
+}
+function initKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); toggleCommand(); }
+        if (e.key === 'Escape') document.getElementById('command')?.classList.remove('open');
+        if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+        if (e.key.toLowerCase() === 'r') generateClip();
+        if (e.key.toLowerCase() === 'l') { appState.loop = !appState.loop; document.getElementById('loop-btn')?.classList.toggle('active', appState.loop); }
+        if (e.key === '1') showView('tool');
+        if (e.key === '2') showView('showcase');
+        if (e.key === '3') showView('library');
+        if (e.key === '4') showView('smoke-tests');
+        if (e.key === '5') showView('toolkit');
+    });
+}
+function populateRecentClips() {
+    const container = document.getElementById('recent-clips-list');
+    if (!container) return;
+    const recent = appState.clips.slice(0, 5);
+    container.innerHTML = recent.map(c => `<div class="inspect-row" style="cursor:pointer" onclick="useSetup(${JSON.stringify(c).replace(/"/g, '&quot;')})"><span>${c.artist || 'Unknown'}</span><span>${c.title || c.filename}</span></div>`).join('');
+}
+function copyDownloadUrl() {
+    const url = document.getElementById('download-link').href;
+    navigator.clipboard.writeText(url).then(() => showToast("Download URL copied."));
+}
+let activeAudio = null;
+function toggleAudioCard(btn, url) {
+    if (activeAudio && activeAudio.src.includes(url)) {
+        if (activeAudio.paused) { activeAudio.play(); btn.textContent = '⏸'; }
+        else { activeAudio.pause(); btn.textContent = '▶'; }
+        return;
+    }
+    if (activeAudio) { activeAudio.pause(); document.querySelectorAll('.play-btn').forEach(b => b.textContent = '▶'); }
+    activeAudio = new Audio(url);
+    activeAudio.play();
+    btn.textContent = '⏸';
+    activeAudio.onended = () => { btn.textContent = '▶'; activeAudio = null; };
+}
+</script>
+</body>
+</html>

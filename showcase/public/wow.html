@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clipped — Dev UI Redesign</title>
+
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0d0d0d;
+  --bg1:#111;
+  --bg2:#161616;
+  --bg3:#1c1c1c;
+  --bg4:#222;
+  --border:#242424;
+  --border2:#303030;
+  --green:#04d58f;
+  --green2:#04d58f22;
+  --purple:#953ebf;
+  --gold:#f4a900;
+  --red:#f05050;
+  --text:#e8e0d6;
+  --muted:#7a7470;
+  --muted2:#4a4540;
+  --radius:8px;
+  --mono:"Space Mono","SFMono-Regular",Consolas,monospace;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:Georgia,serif;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:
+    radial-gradient(circle at 12% 0%,#04d58f0b,transparent 28%),
+    radial-gradient(circle at 88% 6%,#953ebf12,transparent 30%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.5;
+  overflow-x:hidden;
+}
+
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:var(--green);text-decoration:none}
+iconify-icon{display:inline-block;vertical-align:-.15em}
+
+/* NAV */
+.topnav{
+  position:sticky;
+  top:0;
+  z-index:50;
+  height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:0 24px;
+  background:rgba(13,13,13,.94);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-family:var(--serif);
+  font-size:20px;
+  color:var(--green);
+  white-space:nowrap;
+}
+
+.logo-mark{
+  width:30px;
+  height:30px;
+  border-radius:6px;
+  background:var(--green);
+  color:var(--bg);
+  display:grid;
+  place-items:center;
+}
+
+.nav-links{
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+
+.nav-link{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--muted);
+  padding:6px 12px;
+  border-radius:5px;
+  border:1px solid transparent;
+}
+
+.nav-link:hover,
+.nav-link.active{
+  color:var(--green);
+  background:#04d58f0d;
+  border-color:#04d58f22;
+}
+
+.nav-cta{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:700;
+  background:var(--green);
+  color:var(--bg);
+  border:none;
+  border-radius:5px;
+  padding:7px 14px;
+}
+
+/* PAGE */
+.page{
+  max-width:1380px;
+  margin:0 auto;
+  padding:32px 24px 70px;
+}
+
+.hero{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 360px;
+  gap:24px;
+  align-items:end;
+  margin-bottom:28px;
+}
+
+.eyebrow{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--purple);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+.hero h1{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:clamp(34px,5vw,58px);
+  line-height:1;
+  margin-bottom:14px;
+}
+
+.hero h1 em{
+  font-style:italic;
+  color:var(--green);
+}
+
+.hero p{
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.75;
+  max-width:620px;
+}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:20px;
+}
+
+.btn-primary,
+.btn-ghost,
+.btn-mini{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border-radius:5px;
+  font-family:var(--mono);
+  transition:.15s;
+}
+
+.btn-primary{
+  background:var(--green);
+  color:var(--bg);
+  border:none;
+  font-size:11px;
+  font-weight:700;
+  padding:9px 16px;
+}
+
+.btn-ghost{
+  background:transparent;
+  color:var(--green);
+  border:1px solid #04d58f33;
+  font-size:11px;
+  padding:8px 14px;
+}
+
+.btn-ghost:hover{
+  border-color:var(--green);
+  background:#04d58f0a;
+}
+
+.btn-mini{
+  background:var(--bg1);
+  color:var(--muted);
+  border:1px solid var(--border2);
+  font-size:10px;
+  padding:6px 9px;
+}
+
+.btn-mini:hover{
+  color:var(--green);
+  border-color:#04d58f44;
+}
+
+.hero-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.stat{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:12px;
+}
+
+.stat-num{
+  font-family:var(--serif);
+  color:var(--green);
+  font-size:28px;
+  line-height:1;
+}
+
+.stat-label{
+  margin-top:4px;
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--muted2);
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+}
+
+/* LAYOUT */
+.workspace{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 390px;
+  gap:18px;
+  align-items:start;
+}
+
+.left-stack{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.preview-stack{
+  position:sticky;
+  top:72px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.section-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  border-bottom:1px solid var(--green);
+  padding-bottom:8px;
+  margin-bottom:14px;
+}
+
+.section-title{
+  font-family:var(--serif);
+  font-size:22px;
+  font-weight:400;
+}
+
+.section-tag{
+  font-family:var(--mono);
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+
+.panel{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+}
+
+.panel.tight{padding:12px}
+
+.panel-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--green);
+  text-transform:uppercase;
+  letter-spacing:2px;
+}
+
+.panel-title span{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+}
+
+.tool-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin-bottom:10px;
+}
+
+.form-label{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--green);
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.form-input,
+.form-select,
+.form-textarea{
+  width:100%;
+  background:var(--bg1);
+  border:1px solid var(--border2);
+  border-radius:5px;
+  color:var(--text);
+  padding:8px 11px;
+  outline:none;
+  font-size:13px;
+}
+
+.form-textarea{
+  min-height:70px;
+  resize:vertical;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus{
+  border-color:var(--green);
+}
+
+.row-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.row-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+/* STEPPER */
+.stepper{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+  margin-bottom:14px;
+}
+
+.step{
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:9px 10px;
+  color:var(--muted);
+  font-family:var(--mono);
+  font-size:10px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.step.active{
+  color:var(--green);
+  border-color:#04d58f44;
+  background:#04d58f0a;
+}
+
+/* SOURCE */
+.source-tabs{
+  display:flex;
+  gap:3px;
+  background:var(--bg1);
+  padding:3px;
+  border-radius:6px;
+  margin-bottom:12px;
+}
+
+.source-tab{
+  flex:1;
+  background:none;
+  border:none;
+  border-radius:4px;
+  color:var(--muted);
+  font-family:var(--mono);
+  font-size:10px;
+  padding:7px;
+}
+
+.source-tab.active{
+  background:var(--bg3);
+  color:var(--text);
+}
+
+.dropzone{
+  border:1px dashed var(--border2);
+  border-radius:7px;
+  padding:22px 12px;
+  text-align:center;
+  color:var(--muted);
+  background:var(--bg1);
+}
+
+.dropzone strong{color:var(--green)}
+
+.dropzone-main{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:13px;
+}
+
+.dropzone-sub{
+  font-family:var(--mono);
+  color:var(--muted2);
+  font-size:10px;
+  margin-top:6px;
+}
+
+/* WAVEFORM */
+.waveform{
+  position:relative;
+  height:128px;
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:6px;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+
+.wave-bars{
+  position:absolute;
+  inset:12px;
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+
+.wave-bar{
+  flex:1;
+  background:var(--green);
+  opacity:.45;
+  border-radius:2px;
+  min-height:3px;
+}
+
+.wave-selection{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:22%;
+  width:38%;
+  background:#04d58f14;
+  border-left:2px solid var(--green);
+  border-right:2px solid var(--green);
+}
+
+.wave-handle{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:8px;
+  height:38px;
+  background:var(--green);
+  border-radius:3px;
+}
+
+.wave-handle.left{left:-5px}
+.wave-handle.right{right:-5px}
+
+.wave-time{
+  position:absolute;
+  bottom:7px;
+  left:10px;
+  right:10px;
+  display:flex;
+  justify-content:space-between;
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--muted);
+}
+
+.tool-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+/* ASSETS */
+.asset-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+
+.asset-card{
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:10px;
+  min-height:112px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.asset-icon{
+  height:54px;
+  display:grid;
+  place-items:center;
+  color:var(--muted);
+}
+
+.asset-icon iconify-icon{
+  font-size:28px;
+}
+
+.asset-label{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--muted);
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.asset-card.active{
+  border-color:#953ebf66;
+  background:#953ebf08;
+}
+
+/* TEMPLATES */
+.template-toolbar{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.chip{
+  background:none;
+  border:1px solid var(--border);
+  border-radius:4px;
+  color:var(--muted);
+  font-family:var(--mono);
+  font-size:9px;
+  padding:5px 9px;
+}
+
+.chip.active{
+  color:var(--green);
+  border-color:var(--green);
+  background:#04d58f0a;
+}
+
+.template-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(118px,1fr));
+  gap:8px;
+}
+
+.tpl-card{
+  background:var(--bg1);
+  border:1.5px solid var(--border);
+  border-radius:6px;
+  overflow:hidden;
+  transition:.15s;
+}
+
+.tpl-card:hover{
+  border-color:var(--purple);
+}
+
+.tpl-card.active{
+  border-color:var(--green);
+  background:#04d58f08;
+}
+
+.tpl-thumb{
+  aspect-ratio:1.4/1;
+  background:
+    linear-gradient(135deg,#0b0b0b,#181818);
+  display:grid;
+  place-items:center;
+  color:var(--muted);
+  position:relative;
+  overflow:hidden;
+}
+
+.tpl-thumb::before{
+  content:"";
+  position:absolute;
+  inset:18%;
+  border:1px solid #04d58f22;
+  transform:rotate(8deg);
+}
+
+.tpl-thumb iconify-icon{
+  font-size:26px;
+  color:var(--green);
+  opacity:.8;
+}
+
+.tpl-footer{
+  padding:7px 8px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:center;
+}
+
+.tpl-name{
+  font-size:11px;
+  font-weight:700;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.tpl-engine{
+  font-family:var(--mono);
+  font-size:7px;
+  color:var(--purple);
+  text-transform:uppercase;
+}
+
+/* PREVIEW */
+.live-preview{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+
+.preview-head{
+  height:42px;
+  padding:0 12px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--green);
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+}
+
+.preview-frame{
+  padding:18px;
+  display:grid;
+  place-items:center;
+  background:
+    linear-gradient(90deg,#ffffff04 1px,transparent 1px),
+    linear-gradient(#ffffff04 1px,transparent 1px),
+    var(--bg1);
+  background-size:22px 22px;
+  min-height:480px;
+}
+
+.phone{
+  width:230px;
+  aspect-ratio:9/16;
+  background:#050505;
+  border:1px solid #333;
+  border-radius:22px;
+  padding:10px;
+  box-shadow:0 22px 70px #000c;
+}
+
+.phone-screen{
+  width:100%;
+  height:100%;
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 50% 32%,#953ebf55,transparent 26%),
+    linear-gradient(180deg,#151515,#050505);
+  position:relative;
+  overflow:hidden;
+}
+
+.preview-grid-lines{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,#ffffff08 1px,transparent 1px),
+    linear-gradient(#ffffff08 1px,transparent 1px);
+  background-size:28px 28px;
+  opacity:.35;
+}
+
+.preview-cover{
+  position:absolute;
+  left:50%;
+  top:30%;
+  transform:translate(-50%,-50%);
+  width:118px;
+  height:118px;
+  background:
+    linear-gradient(135deg,#04d58f,#953ebf);
+  border-radius:8px;
+  animation:coverFloat 3.5s ease-in-out infinite;
+  box-shadow:0 20px 45px #04d58f22;
+}
+
+.preview-wave{
+  position:absolute;
+  left:24px;
+  right:24px;
+  top:54%;
+  height:46px;
+  display:flex;
+  align-items:center;
+  gap:3px;
+}
+
+.preview-wave span{
+  flex:1;
+  background:var(--green);
+  opacity:.7;
+  border-radius:2px;
+  animation:pulse 1s ease-in-out infinite;
+}
+
+.preview-wave span:nth-child(2n){animation-delay:.1s}
+.preview-wave span:nth-child(3n){animation-delay:.2s}
+
+.preview-caption{
+  position:absolute;
+  left:20px;
+  right:20px;
+  bottom:24px;
+}
+
+.preview-caption small{
+  font-family:var(--mono);
+  color:var(--green);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+}
+
+.preview-caption h3{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:25px;
+  line-height:1;
+  margin-top:5px;
+}
+
+.preview-caption p{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:8px;
+}
+
+@keyframes coverFloat{
+  50%{transform:translate(-50%,-56%) rotate(2deg)}
+}
+
+@keyframes pulse{
+  50%{height:12px;opacity:.3}
+}
+
+.inspector-list{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.inspect-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 10px;
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:5px;
+  font-family:var(--mono);
+  font-size:10px;
+}
+
+.inspect-row span:first-child{
+  color:var(--muted);
+}
+
+.inspect-row span:last-child{
+  color:var(--text);
+}
+
+/* QUEUE */
+.queue-item{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:5px;
+  padding:9px 10px;
+  margin-bottom:7px;
+}
+
+.queue-name{
+  font-size:12px;
+}
+
+.queue-status{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--green);
+  text-transform:uppercase;
+}
+
+.progress{
+  grid-column:1/-1;
+  height:4px;
+  background:var(--border2);
+  border-radius:4px;
+  overflow:hidden;
+}
+
+.progress span{
+  display:block;
+  width:67%;
+  height:100%;
+  background:var(--green);
+}
+
+/* ADVANCED */
+details{
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:0;
+}
+
+summary{
+  list-style:none;
+  padding:10px 12px;
+  font-family:var(--mono);
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+summary::-webkit-details-marker{display:none}
+
+details[open] summary{
+  border-bottom:1px solid var(--border);
+  color:var(--green);
+}
+
+.details-body{
+  padding:12px;
+}
+
+/* COMMAND */
+.command{
+  position:fixed;
+  top:72px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(620px,calc(100vw - 32px));
+  background:var(--bg2);
+  border:1px solid #04d58f66;
+  border-radius:8px;
+  box-shadow:0 30px 90px #000;
+  z-index:100;
+  padding:12px;
+  display:none;
+}
+
+.command.open{display:block}
+
+.command-list{
+  margin-top:8px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.command-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:9px 10px;
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:5px;
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--muted);
+}
+
+/* RESPONSIVE */
+@media(max-width:1100px){
+  .workspace,
+  .hero{
+    grid-template-columns:1fr;
+  }
+
+  .preview-stack{
+    position:static;
+  }
+
+  .preview-frame{
+    min-height:420px;
+  }
+}
+
+@media(max-width:760px){
+  .topnav{
+    padding:0 14px;
+  }
+
+  .nav-links{
+    display:none;
+  }
+
+  .page{
+    padding:24px 14px 80px;
+  }
+
+  .tool-grid,
+  .row-2,
+  .row-3,
+  .stepper{
+    grid-template-columns:1fr;
+  }
+
+  .hero-stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .template-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="topnav">
+  <a class="logo" href="#">
+    <span class="logo-mark"><iconify-icon icon="lucide:scissors"></iconify-icon></span>
+    Clipped
+  </a>
+
+  <div class="nav-links">
+    <a class="nav-link active" href="#tool">Tool</a>
+    <a class="nav-link" href="#templates">Templates</a>
+    <a class="nav-link" href="#preview">Preview</a>
+    <a class="nav-link" href="#queue">Queue</a>
+    <a class="nav-link" href="#">GitHub</a>
+  </div>
+
+  <button class="nav-cta" onclick="toggleCommand()">
+    <iconify-icon icon="lucide:terminal"></iconify-icon>
+    Cmd
+  </button>
+</nav>
+
+<div class="page">
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Metadata-aware audio tool</div>
+      <h1>Clip <em>audio files</em>, render video.</h1>
+      <p>
+        A tighter developer-style interface for trimming audio, applying artwork,
+        selecting render templates, and generating platform-ready video outputs.
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">
+          <iconify-icon icon="lucide:play"></iconify-icon>
+          Start Render
+        </button>
+        <button class="btn-ghost" onclick="toggleCommand()">
+          <iconify-icon icon="lucide:command"></iconify-icon>
+          Command Palette
+        </button>
+        <button class="btn-ghost">
+          <iconify-icon icon="lucide:github"></iconify-icon>
+          Repository
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">248</div>
+        <div class="stat-label">Audio clips</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">96</div>
+        <div class="stat-label">Video renders</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Templates</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="workspace" id="tool">
+
+    <main class="left-stack">
+
+      <div>
+        <div class="section-head">
+          <span class="section-title">Clip Generator</span>
+          <span class="section-tag">Primary workspace</span>
+        </div>
+
+        <div class="stepper">
+          <div class="step active"><iconify-icon icon="lucide:music"></iconify-icon>Source</div>
+          <div class="step"><iconify-icon icon="lucide:waves"></iconify-icon>Trim</div>
+          <div class="step"><iconify-icon icon="lucide:image"></iconify-icon>Assets</div>
+          <div class="step"><iconify-icon icon="lucide:layers"></iconify-icon>Template</div>
+          <div class="step"><iconify-icon icon="lucide:settings-2"></iconify-icon>Output</div>
+        </div>
+      </div>
+
+      <section class="tool-grid">
+
+        <div class="panel">
+          <div class="panel-title">
+            <span><iconify-icon icon="lucide:music"></iconify-icon>1. Audio Source</span>
+          </div>
+
+          <div class="source-tabs">
+            <button class="source-tab active">My Clips</button>
+            <button class="source-tab">Upload File</button>
+            <button class="source-tab">URL</button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Select existing clip</label>
+            <select class="form-select">
+              <option>Juggaknots — Trouble Man</option>
+              <option>Demo Track — Render Test</option>
+              <option>Imported Audio — Latest</option>
+            </select>
+          </div>
+
+          <div class="dropzone">
+            <div class="dropzone-main">
+              <iconify-icon icon="lucide:upload"></iconify-icon>
+              <span>Drop audio here or <strong>browse files</strong></span>
+            </div>
+            <div class="dropzone-sub">MP3 · FLAC · WAV · M4A · OGG</div>
+          </div>
+
+          <div class="form-group" style="margin-top:12px">
+            <label class="form-label">YouTube or direct audio URL</label>
+            <input class="form-input" placeholder="https://www.youtube.com/watch?v=..." />
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <span><iconify-icon icon="lucide:database"></iconify-icon>Metadata</span>
+            <button class="btn-mini">Auto-read</button>
+          </div>
+
+          <div class="row-2">
+            <div class="form-group">
+              <label class="form-label">Artist</label>
+              <input class="form-input" value="Juggaknots" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Track</label>
+              <input class="form-input" value="Trouble Man" />
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="form-group">
+              <label class="form-label">Album</label>
+              <input class="form-input" placeholder="Album title" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Year</label>
+              <input class="form-input" placeholder="1996" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Caption Override</label>
+            <textarea class="form-textarea" placeholder="Optional text rendered into the template"></textarea>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:waves"></iconify-icon>2. Clip Range</span>
+          <span style="color:var(--muted);font-size:9px">snap-to-beat enabled</span>
+        </div>
+
+        <div class="waveform">
+          <div class="wave-bars" id="waveBars"></div>
+          <div class="wave-selection">
+            <div class="wave-handle left"></div>
+            <div class="wave-handle right"></div>
+          </div>
+          <div class="wave-time">
+            <span>0:43.00</span>
+            <span>1:12.00</span>
+          </div>
+        </div>
+
+        <div class="row-3">
+          <div class="form-group">
+            <label class="form-label">Start</label>
+            <input class="form-input" value="0:43" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">End</label>
+            <input class="form-input" value="1:12" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fade</label>
+            <input class="form-input" value="0.3" />
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button class="btn-mini"><iconify-icon icon="lucide:play"></iconify-icon>Play Selection</button>
+          <button class="btn-mini"><iconify-icon icon="lucide:repeat-2"></iconify-icon>Loop</button>
+          <button class="btn-mini"><iconify-icon icon="lucide:zoom-in"></iconify-icon>Zoom In</button>
+          <button class="btn-mini"><iconify-icon icon="lucide:zoom-out"></iconify-icon>Zoom Out</button>
+          <button class="btn-mini"><iconify-icon icon="lucide:sparkles"></iconify-icon>Suggest Clips</button>
+        </div>
+      </section>
+
+      <section class="tool-grid">
+
+        <div class="panel">
+          <div class="panel-title">
+            <span><iconify-icon icon="lucide:image"></iconify-icon>3. Artwork & Assets</span>
+          </div>
+
+          <div class="asset-grid">
+            <div class="asset-card active">
+              <div class="asset-icon"><iconify-icon icon="lucide:image"></iconify-icon></div>
+              <div class="asset-label">Album Cover</div>
+            </div>
+            <div class="asset-card">
+              <div class="asset-icon"><iconify-icon icon="lucide:badge"></iconify-icon></div>
+              <div class="asset-label">Band Logo</div>
+            </div>
+            <div class="asset-card">
+              <div class="asset-icon"><iconify-icon icon="lucide:user-square"></iconify-icon></div>
+              <div class="asset-label">Artist Image</div>
+            </div>
+            <div class="asset-card">
+              <div class="asset-icon"><iconify-icon icon="lucide:film"></iconify-icon></div>
+              <div class="asset-label">Background</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <span><iconify-icon icon="lucide:palette"></iconify-icon>Theme Extraction</span>
+          </div>
+
+          <div class="inspector-list">
+            <div class="inspect-row"><span>Primary</span><span>#04d58f</span></div>
+            <div class="inspect-row"><span>Accent</span><span>#953ebf</span></div>
+            <div class="inspect-row"><span>Highlight</span><span>#f4a900</span></div>
+            <div class="inspect-row"><span>Background</span><span>#0d0d0d</span></div>
+          </div>
+
+          <div class="tool-actions" style="margin-top:10px">
+            <button class="btn-mini"><iconify-icon icon="lucide:wand-sparkles"></iconify-icon>Apply Palette</button>
+            <button class="btn-mini"><iconify-icon icon="lucide:eraser"></iconify-icon>Remove BG</button>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="panel" id="templates">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:layers"></iconify-icon>4. Video Template</span>
+          <button class="btn-mini">View all</button>
+        </div>
+
+        <div class="template-toolbar">
+          <button class="chip active">All</button>
+          <button class="chip">Remotion</button>
+          <button class="chip">FFmpeg</button>
+          <button class="chip">Vertical</button>
+          <button class="chip">Square</button>
+          <button class="chip">Minimal</button>
+          <button class="chip">Animated</button>
+        </div>
+
+        <div class="template-grid" id="templateGrid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:sliders-horizontal"></iconify-icon>5. Platform & Output</span>
+        </div>
+
+        <div class="template-toolbar">
+          <button class="chip active">Default</button>
+          <button class="chip">Instagram</button>
+          <button class="chip">TikTok</button>
+          <button class="chip">YT Shorts</button>
+          <button class="chip">Twitter</button>
+          <button class="chip">YouTube</button>
+        </div>
+
+        <div class="row-3">
+          <div class="form-group">
+            <label class="form-label">Format</label>
+            <select class="form-select">
+              <option>Video MP4</option>
+              <option>Audio MP3</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">FPS</label>
+            <select class="form-select">
+              <option>30</option>
+              <option>60</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quality</label>
+            <select class="form-select">
+              <option>High</option>
+              <option>Medium</option>
+              <option>Draft</option>
+            </select>
+          </div>
+        </div>
+
+        <details>
+          <summary>
+            Advanced Settings
+            <iconify-icon icon="lucide:chevron-down"></iconify-icon>
+          </summary>
+          <div class="details-body">
+            <div class="row-3">
+              <div class="form-group">
+                <label class="form-label">Bitrate</label>
+                <input class="form-input" value="8000k" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Audio Normalize</label>
+                <select class="form-select">
+                  <option>Enabled</option>
+                  <option>Disabled</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Safe Area</label>
+                <select class="form-select">
+                  <option>Show</option>
+                  <option>Hide</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <div class="tool-actions" style="margin-top:12px">
+          <button class="btn-primary" onclick="simulateRender()">
+            <iconify-icon icon="lucide:play"></iconify-icon>
+            Generate Clip
+          </button>
+          <button class="btn-ghost">
+            <iconify-icon icon="lucide:save"></iconify-icon>
+            Save Preset
+          </button>
+          <button class="btn-ghost">
+            <iconify-icon icon="lucide:copy"></iconify-icon>
+            Batch Export
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <aside class="preview-stack" id="preview">
+
+      <section class="live-preview">
+        <div class="preview-head">
+          <span><iconify-icon icon="lucide:monitor-play"></iconify-icon> Live Render Preview</span>
+          <span id="previewTemplate">Pulse Reel</span>
+        </div>
+
+        <div class="preview-frame">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="preview-grid-lines"></div>
+              <div class="preview-cover"></div>
+              <div class="preview-wave" id="previewWave"></div>
+              <div class="preview-caption">
+                <small>Juggaknots</small>
+                <h3 id="previewTitle">Trouble Man</h3>
+                <p id="previewDesc">Pulse Reel · 9:16 · Remotion</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel tight">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:list-checks"></iconify-icon>Template Inspector</span>
+        </div>
+
+        <div class="inspector-list">
+          <div class="inspect-row"><span>Template</span><span id="inspectTemplate">pulse_reel</span></div>
+          <div class="inspect-row"><span>Engine</span><span id="inspectEngine">remotion</span></div>
+          <div class="inspect-row"><span>Aspect</span><span id="inspectAspect">9:16</span></div>
+          <div class="inspect-row"><span>Assets</span><span>cover, logo, bg</span></div>
+          <div class="inspect-row"><span>Render speed</span><span>medium</span></div>
+        </div>
+      </section>
+
+      <section class="panel tight" id="queue">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:server-cog"></iconify-icon>Render Queue</span>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-name">pulse_reel_output.mp4</div>
+          <div class="queue-status" id="queueStatus">idle</div>
+          <div class="progress"><span id="queueProgress" style="width:0%"></span></div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-name">minimal_square.mp4</div>
+          <div class="queue-status">queued</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-name">cinematic_16x9.mp4</div>
+          <div class="queue-status">complete</div>
+        </div>
+      </section>
+
+      <section class="panel tight">
+        <div class="panel-title">
+          <span><iconify-icon icon="lucide:bot"></iconify-icon>Assistive Tools</span>
+        </div>
+
+        <div class="tool-actions">
+          <button class="btn-mini"><iconify-icon icon="lucide:sparkles"></iconify-icon>Find Best Segment</button>
+          <button class="btn-mini"><iconify-icon icon="lucide:captions"></iconify-icon>Captions</button>
+          <button class="btn-mini"><iconify-icon icon="lucide:hash"></iconify-icon>Hashtags</button>
+          <button class="btn-mini"><iconify-icon icon="lucide:image-up"></iconify-icon>Enhance Art</button>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+</div>
+
+<div class="command" id="command">
+  <div class="panel tight">
+    <div class="panel-title">
+      <span><iconify-icon icon="lucide:command"></iconify-icon>Command Palette</span>
+      <button class="btn-mini" onclick="toggleCommand()">Close</button>
+    </div>
+
+    <input class="form-input" placeholder="Search commands, templates, exports..." />
+
+    <div class="command-list">
+      <div class="command-item"><span>Generate current clip</span><span>Enter</span></div>
+      <div class="command-item"><span>Open template browser</span><span>T</span></div>
+      <div class="command-item"><span>Batch export selected platforms</span><span>B</span></div>
+      <div class="command-item"><span>Find best clip segment</span><span>A</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const waveBars = document.getElementById("waveBars");
+for(let i=0;i<120;i++){
+  const bar=document.createElement("div");
+  bar.className="wave-bar";
+  const h=8+Math.random()*92;
+  bar.style.height=h+"px";
+  waveBars.appendChild(bar);
+}
+
+const previewWave = document.getElementById("previewWave");
+for(let i=0;i<28;i++){
+  const s=document.createElement("span");
+  s.style.height=(8+Math.random()*38)+"px";
+  previewWave.appendChild(s);
+}
+
+const templates = [
+  {id:"pulse_reel",name:"Pulse Reel",engine:"remotion",aspect:"9:16",icon:"lucide:radio-tower"},
+  {id:"gallery_square",name:"Gallery Sq",engine:"remotion",aspect:"1:1",icon:"lucide:images"},
+  {id:"record_square",name:"Record Sq",engine:"remotion",aspect:"1:1",icon:"lucide:disc-3"},
+  {id:"fluid_scene",name:"Fluid Scene",engine:"remotion",aspect:"1:1",icon:"lucide:waves"},
+  {id:"metal_vhs",name:"Metal VHS",engine:"remotion",aspect:"1:1",icon:"lucide:videotape"},
+  {id:"premium_card",name:"Premium Card",engine:"remotion",aspect:"1:1",icon:"lucide:square-stack"},
+  {id:"reel",name:"Reel",engine:"ffmpeg",aspect:"9:16",icon:"lucide:clapperboard"},
+  {id:"vertical_wave",name:"Vert Wave",engine:"ffmpeg",aspect:"9:16",icon:"lucide:audio-waveform"},
+  {id:"spinner",name:"Spinner",engine:"ffmpeg",aspect:"1:1",icon:"lucide:refresh-cw"},
+  {id:"waveformbar",name:"Waveform Bar",engine:"ffmpeg",aspect:"1:1",icon:"lucide:bar-chart-3"},
+  {id:"minimal",name:"Minimal",engine:"ffmpeg",aspect:"1:1",icon:"lucide:square"},
+  {id:"cinematic",name:"Cinematic",engine:"ffmpeg",aspect:"16:9",icon:"lucide:film"}
+];
+
+const grid = document.getElementById("templateGrid");
+
+templates.forEach((t,index)=>{
+  const card=document.createElement("button");
+  card.className="tpl-card"+(index===0?" active":"");
+  card.innerHTML=`
+    <div class="tpl-thumb">
+      <iconify-icon icon="${t.icon}"></iconify-icon>
+    </div>
+    <div class="tpl-footer">
+      <span class="tpl-name">${t.name}</span>
+      <span class="tpl-engine">${t.engine}</span>
+    </div>
+  `;
+
+  card.addEventListener("click",()=>{
+    document.querySelectorAll(".tpl-card").forEach(c=>c.classList.remove("active"));
+    card.classList.add("active");
+
+    document.getElementById("previewTemplate").textContent=t.name;
+    document.getElementById("previewDesc").textContent=`${t.name} · ${t.aspect} · ${t.engine}`;
+    document.getElementById("inspectTemplate").textContent=t.id;
+    document.getElementById("inspectEngine").textContent=t.engine;
+    document.getElementById("inspectAspect").textContent=t.aspect;
+  });
+
+  grid.appendChild(card);
+});
+
+function toggleCommand(){
+  document.getElementById("command").classList.toggle("open");
+}
+
+document.addEventListener("keydown",(e)=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==="k"){
+    e.preventDefault();
+    toggleCommand();
+  }
+
+  if(e.key==="Escape"){
+    document.getElementById("command").classList.remove("open");
+  }
+});
+
+function simulateRender(){
+  const bar=document.getElementById("queueProgress");
+  const status=document.getElementById("queueStatus");
+  let p=0;
+  status.textContent="rendering";
+  bar.style.width="0%";
+
+  const timer=setInterval(()=>{
+    p+=8;
+    bar.style.width=Math.min(p,100)+"%";
+
+    if(p>=100){
+      clearInterval(timer);
+      status.textContent="complete";
+    }
+  },180);
+}
+</script>
+
+</body>
+</html>
