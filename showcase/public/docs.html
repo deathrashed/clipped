@@ -1,0 +1,139 @@
+<h1>Clipped Toolkit &amp; Showcase Documentation</h1>
+<p>Welcome to <strong>Clipped</strong>. This document explains what the toolkit is, how the cloud and local environments differ, and how to maintain the project architecture.</p>
+<hr>
+<h2>1. What is Clipped?</h2>
+<p>Clipped is a dual-environment motion graphics and audio clipping utility:</p>
+<ol>
+<li><strong>The CLI Toolkit (Local):</strong> A robust Python and Remotion-powered video generator capable of complex FFmpeg processing, template rendering, and asset extraction.</li>
+<li><strong>The Showcase (Cloud):</strong> A Netlify SPA frontend for browsing generated assets, reading documentation, and performing lightweight cloud audio clipping.</li>
+</ol>
+<hr>
+<h2>Current Status</h2>
+<p><strong>Cloud:</strong></p>
+<ul>
+<li>Audio clipping: Available</li>
+<li>Library: Available</li>
+<li>Showcase: Available</li>
+<li>Downloads: Available</li>
+<li>Video rendering: Coming soon</li>
+</ul>
+<p><strong>Local CLI:</strong></p>
+<ul>
+<li>Audio clipping: Available</li>
+<li>FFmpeg templates: Available</li>
+<li>Remotion templates: Available</li>
+<li>Asset extraction: Available</li>
+</ul>
+<h2>2. Cloud vs Local Capabilities</h2>
+<p>To manage serverless limits and AWS dependencies, the capabilities are strictly divided:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Capability</th>
+<th align="left">Cloud (Netlify)</th>
+<th align="left">Local (CLI)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Audio Clipping (MP3)</strong></td>
+<td align="left">✅ Available</td>
+<td align="left">✅ Available</td>
+</tr>
+<tr>
+<td align="left"><strong>Waveform Generation</strong></td>
+<td align="left">✅ Available (Canvas)</td>
+<td align="left">✅ Available</td>
+</tr>
+<tr>
+<td align="left"><strong>FFmpeg Video Renders</strong></td>
+<td align="left">❌ Coming Soon</td>
+<td align="left">✅ Available</td>
+</tr>
+<tr>
+<td align="left"><strong>Remotion MP4 Renders</strong></td>
+<td align="left">❌ Coming Soon</td>
+<td align="left">✅ Available</td>
+</tr>
+<tr>
+<td align="left"><strong>Asset Extraction (rmbg)</strong></td>
+<td align="left">❌ Local Only</td>
+<td align="left">✅ Available</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Note:</strong> Cloud MP4 rendering is currently unavailable. Use the Clipped CLI for video generation.
+Cloud Netlify functions enforce a strict 15-minute execution limit and currently lack the headless Chromium dependencies required for Remotion template execution.</p>
+</blockquote>
+<hr>
+<h2>3. How Rendering Works</h2>
+<h3>Cloud Audio Rendering Pipeline</h3>
+<ol>
+<li><strong>Request:</strong> The frontend (<code>clip-request.js</code>) validates the requested URL and timing parameters, creates a UUID, and stores the initial job state in Netlify Blobs.</li>
+<li><strong>Background Execution:</strong> <code>clip-job-background.js</code> takes over. It uses an embedded <code>yt-dlp</code> binary to extract the raw audio from the URL.</li>
+<li><strong>Processing:</strong> An embedded <code>ffmpeg</code> binary trims the track based on start/end parameters and applies a user-provided fade in/out (defaults to 0.3s).</li>
+<li><strong>Storage:</strong> The output binary is stored directly into Netlify Blobs with a strict <code>{ ttl: 3600 }</code> to prevent memory leaks.</li>
+<li><strong>Retrieval:</strong> The frontend polls <code>clip-status.js</code> until completion, then streams the file via <code>clip-download.js</code>.</li>
+</ol>
+<h3>Local Video Rendering Pipeline</h3>
+<ol>
+<li><strong>Initialization:</strong> The <code>bin/clipped</code> executable coordinates Python scripts (<code>src/clipped/video.py</code>, <code>src/clipped/audio.py</code>).</li>
+<li><strong>Rendering:</strong> Calls out to Remotion for heavy Chromium-based composition (<code>pulse_reel</code>, <code>gallery_square</code>) or uses native FFmpeg filters for hardware-accelerated static renders (<code>vertical_wave</code>, <code>spinner</code>).</li>
+</ol>
+<hr>
+<h2>4. How <code>clips.json</code> Works</h2>
+<p>The showcase gallery is not manually hardcoded. It is fully data-driven.</p>
+<p>When you run <code>uv run scripts/sync_showcase.py</code>:</p>
+<ol>
+<li>The script recursively scans the <code>_audio/</code>, <code>_video/</code>, and <code>tests/videos/</code> directories.</li>
+<li>It filters out broken, local-only paths (e.g., <code>/tmp/</code>).</li>
+<li>It parses the filenames using regex to extract metadata (<code>template</code>, <code>artist</code>, <code>title</code>, <code>start</code>, <code>end</code>).</li>
+<li>It generates <code>showcase/public/clips.json</code>.</li>
+<li>The frontend fetches this JSON on load to dynamically build the Library, Showcase, and Smoke Test galleries.</li>
+</ol>
+<hr>
+<h2>5. Local Installation</h2>
+<p>To unlock full video rendering capabilities, install the CLI locally:</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Python 3.10+</li>
+<li>Node.js 18+</li>
+<li>FFmpeg (available in PATH)</li>
+</ul>
+<h3>Installation</h3>
+<pre><code class="language-bash">git clone https://github.com/deathrashed/clipped.git
+cd clipped
+./install.sh
+</code></pre>
+<h3>Core Commands</h3>
+<pre><code class="language-bash"># Verify system dependencies
+clipped doctor
+
+# View available video templates
+clipped templates
+
+# Extract an audio segment
+clipped audio &quot;track.mp3&quot; 1:30 2:15
+
+# Render a full video reel
+clipped video &quot;track.mp3&quot; --template reel --platform instagram
+</code></pre>
+<hr>
+<h2>6. How to Add Templates</h2>
+<ol>
+<li><strong>Create the Template:</strong> Add your new Remotion composition or FFmpeg command profile to the local source (<code>tests/videos/remotion</code> or <code>tests/videos/ffmpeg</code>).</li>
+<li><strong>Update the Parser:</strong> If the template introduces a new aspect ratio or category, update <code>sync_showcase.py</code> mapping rules.</li>
+<li><strong>Generate Smoke Tests:</strong> Run the local test suite <code>clipped video</code> against your new template.</li>
+<li><strong>Sync:</strong> Run <code>scripts/sync_showcase.py</code> to ingest the new smoke test MP4 into <code>clips.json</code>.</li>
+<li><strong>Deploy:</strong> Run <code>scripts/deploy_showcase.sh</code> to push the new frontend and binary assets to Netlify.</li>
+</ol>
+<hr>
+<h2>7. FAQ &amp; Troubleshooting</h2>
+<p><strong>Q: Why does my YouTube cloud extraction fail randomly?</strong>
+<strong>A:</strong> Netlify Functions share AWS datacenter IPs. <code>yt-dlp</code> requests from datacenters are frequently rate-limited or blocked by YouTube&#39;s &quot;Sign in to confirm you&#39;re not a bot&quot; protections. Try a shorter clip, an alternate URL, or use the local CLI.</p>
+<p><strong>Q: I deployed new videos but they show up as 404 broken links.</strong>
+<strong>A:</strong> Check your <code>clips.json</code> payload. If the source file was located in your local <code>/tmp/</code> directory when <code>sync_showcase.py</code> was run, it will not exist on Netlify. Always stage finalized videos inside the local <code>_video/</code> directory before syncing.</p>
+<p><strong>Q: The site is leaking Netlify blob storage quota!</strong>
+<strong>A:</strong> Ensure <code>ttl: 3600</code> is present on all <code>store.set()</code> calls in <code>clip-job-background.js</code>. This guarantees transient artifacts are flushed after one hour.</p>
+<p><strong>Q: Can I re-enable Cloud MP4 generation?</strong>
+<strong>A:</strong> Only if you refactor the Netlify background function to install Node, run npm installs, and bootstrap headless Chromium. Due to Lambda file-size limitations (50MB zipped), this requires advanced layer/binary management and is currently not supported out-of-the-box.</p>
+

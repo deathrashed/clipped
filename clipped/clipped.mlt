@@ -1,0 +1,784 @@
+<?xml version="1.0" standalone="no"?>
+<mlt LC_NUMERIC="C" version="7.39.0" title="Shotcut version 26.4.30" producer="main_bin">
+  <profile description="automatic" width="1080" height="1920" progressive="1" sample_aspect_num="1" sample_aspect_den="1" display_aspect_num="9" display_aspect_den="16" frame_rate_num="25" frame_rate_den="1" colorspace="601"/>
+  <chain id="chain0" out="00:00:50.960">
+    <property name="length">00:00:51.000</property>
+    <property name="eof">pause</property>
+    <property name="resource">/Users/rd/Scripts/Riley/clipped/_video/Reel ⋅ Iron Reagan - Drop the Gun.mp4</property>
+    <property name="mlt_service">avformat-novalidate</property>
+    <property name="meta.media.nb_streams">2</property>
+    <property name="meta.media.0.stream.type">video</property>
+    <property name="meta.media.0.stream.frame_rate">25</property>
+    <property name="meta.media.0.stream.sample_aspect_ratio">1</property>
+    <property name="meta.media.0.codec.width">1080</property>
+    <property name="meta.media.0.codec.height">1920</property>
+    <property name="meta.media.0.codec.rotate">0</property>
+    <property name="meta.media.0.codec.pix_fmt">yuvj420p</property>
+    <property name="meta.media.0.codec.sample_aspect_ratio">0</property>
+    <property name="meta.media.0.codec.colorspace">601</property>
+    <property name="meta.media.0.codec.name">h264</property>
+    <property name="meta.media.0.codec.long_name">H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10</property>
+    <property name="meta.media.0.codec.bit_rate">18083492</property>
+    <property name="meta.attr.0.stream.handler_name.markup">VideoHandler</property>
+    <property name="meta.attr.0.stream.encoder.markup">Lavc62.28.101 h264_videotoolbox</property>
+    <property name="meta.media.1.stream.type">audio</property>
+    <property name="meta.media.1.codec.sample_fmt">fltp</property>
+    <property name="meta.media.1.codec.sample_rate">44100</property>
+    <property name="meta.media.1.codec.channels">2</property>
+    <property name="meta.media.1.codec.layout">stereo</property>
+    <property name="meta.media.1.codec.name">aac</property>
+    <property name="meta.media.1.codec.long_name">AAC (Advanced Audio Coding)</property>
+    <property name="meta.media.1.codec.bit_rate">192996</property>
+    <property name="meta.attr.1.stream.handler_name.markup">SoundHandler</property>
+    <property name="meta.attr.major_brand.markup">isom</property>
+    <property name="meta.attr.minor_version.markup">512</property>
+    <property name="meta.attr.compatible_brands.markup">isomiso2avc1mp41</property>
+    <property name="meta.attr.title.markup">Drop the Gun</property>
+    <property name="meta.attr.artist.markup">Iron Reagan</property>
+    <property name="meta.attr.album_artist.markup">Iron Reagan</property>
+    <property name="meta.attr.album.markup">Worse Than Dead</property>
+    <property name="meta.attr.date.markup">2013</property>
+    <property name="meta.attr.encoder.markup">Lavf62.12.101</property>
+    <property name="meta.attr.comment.markup">Ñiaoeaeuii aey Dark-World.ru</property>
+    <property name="meta.attr.genre.markup">Crossover; Thrash Metal</property>
+    <property name="meta.attr.copyright.markup">Dark-World.ru</property>
+    <property name="meta.attr.track.markup">1</property>
+    <property name="meta.attr.disc.markup">1/1</property>
+    <property name="seekable">1</property>
+    <property name="meta.media.sample_aspect_num">1</property>
+    <property name="meta.media.sample_aspect_den">1</property>
+    <property name="audio_index">1</property>
+    <property name="video_index">0</property>
+    <property name="vstream">0</property>
+    <property name="meta.media.frame_rate_num">25</property>
+    <property name="meta.media.frame_rate_den">1</property>
+    <property name="meta.media.colorspace">601</property>
+    <property name="meta.media.color_trc">2</property>
+    <property name="meta.media.has_b_frames">0</property>
+    <property name="meta.media.width">1080</property>
+    <property name="meta.media.height">1920</property>
+    <property name="meta.media.aspect_ratio">1</property>
+    <property name="meta.media.color_range">full</property>
+    <property name="astream">0</property>
+    <property name="meta.media.top_field_first">0</property>
+    <property name="meta.media.progressive">1</property>
+    <property name="creation_time">2026-05-31T20:37:31</property>
+    <property name="shotcut:skipConvert">1</property>
+    <property name="shotcut:hash">46b8172b62104a0deb4f57de4485035d</property>
+    <property name="ignore_points">0</property>
+    <property name="mute_on_pause">0</property>
+    <property name="xml">was here</property>
+  </chain>
+  <producer id="producer0" in="00:00:00.000" out="03:59:59.960">
+    <property name="length">04:00:00.000</property>
+    <property name="eof">pause</property>
+    <property name="resource">/Users/rd/Scripts/Riley/clipped/tests/audio-templates/hip-hop/juggaknots/artist.jpg</property>
+    <property name="ttl">1</property>
+    <property name="aspect_ratio">1</property>
+    <property name="meta.media.progressive">1</property>
+    <property name="seekable">1</property>
+    <property name="format">1</property>
+    <property name="meta.media.width">770</property>
+    <property name="meta.media.height">770</property>
+    <property name="mlt_service">qimage</property>
+    <property name="creation_time">2026-05-29T08:56:44</property>
+    <property name="shotcut:skipConvert">1</property>
+    <property name="xml">was here</property>
+    <property name="shotcut:hash">88c20ccdcbc3206f74765f19eeb87cb4</property>
+  </producer>
+  <chain id="chain1" out="00:00:24.960">
+    <property name="length">00:00:25.000</property>
+    <property name="eof">pause</property>
+    <property name="resource">/Users/rd/Scripts/Riley/clipped/tests/audio-templates/hip-hop/juggaknots/Juggaknots - Trouble Man (2.41 - 3.06).mp3</property>
+    <property name="mlt_service">avformat-novalidate</property>
+    <property name="meta.media.nb_streams">2</property>
+    <property name="meta.media.0.stream.type">audio</property>
+    <property name="meta.media.0.codec.sample_fmt">fltp</property>
+    <property name="meta.media.0.codec.sample_rate">44100</property>
+    <property name="meta.media.0.codec.channels">2</property>
+    <property name="meta.media.0.codec.layout">stereo</property>
+    <property name="meta.media.0.codec.name">mp3float</property>
+    <property name="meta.media.0.codec.long_name">MP3 (MPEG audio layer 3)</property>
+    <property name="meta.media.0.codec.bit_rate">180119</property>
+    <property name="meta.attr.0.stream.encoder.markup">Lavc62.28</property>
+    <property name="meta.media.1.stream.type">video</property>
+    <property name="meta.media.1.stream.frame_rate">90000</property>
+    <property name="meta.media.1.stream.sample_aspect_ratio">0</property>
+    <property name="meta.media.1.codec.width">1000</property>
+    <property name="meta.media.1.codec.height">1000</property>
+    <property name="meta.media.1.codec.rotate">0</property>
+    <property name="meta.media.1.codec.pix_fmt">yuvj444p</property>
+    <property name="meta.media.1.codec.sample_aspect_ratio">1</property>
+    <property name="meta.media.1.codec.colorspace">601</property>
+    <property name="meta.media.1.codec.name">mjpeg</property>
+    <property name="meta.media.1.codec.long_name">MJPEG (Motion JPEG)</property>
+    <property name="meta.media.1.codec.bit_rate">0</property>
+    <property name="meta.attr.1.stream.title.markup">cover</property>
+    <property name="meta.attr.1.stream.comment.markup">Cover (front)</property>
+    <property name="meta.attr.album.markup">Re:Release</property>
+    <property name="meta.attr.artist.markup">Juggaknots</property>
+    <property name="meta.attr.album_artist.markup">Juggaknots</property>
+    <property name="meta.attr.composer.markup">Juggaknots</property>
+    <property name="meta.attr.copyright.markup">90's Tapes / HHV</property>
+    <property name="meta.attr.disc.markup">1/1</property>
+    <property name="meta.attr.TSRC.markup">DEQ021804630</property>
+    <property name="meta.attr.TLEN.markup">275000</property>
+    <property name="meta.attr.publisher.markup">90's Tapes / HHV</property>
+    <property name="meta.attr.title.markup">Trouble Man</property>
+    <property name="meta.attr.track.markup">2/23</property>
+    <property name="meta.attr.lyrics-XXX.markup">I declare war 
+The joy becomes a rappifyin' weapon 
+If you step in 
+When your draws get mobbed behind enemy lines
+You become a sittin' duck but fuck 
+I ain't givin' 'em livin' trifle 
+The pen and pad becomes a 12 gauge rifle 
+This is no laughing matter 
+Step into this you step in a minefield 
+Your body's scattered 
+You people drop pickin' up the pieces 
+But only corny niggas 
+The attack from a brotha like the Buddy never ceases 
+Without a moment of silence the violence thickens
+So if you ain't got it together you slim pickings 
+Shorts and prisoners are never taken 
+If you fakin' all the booty competition 
+I'm a bag fuck a white flag 
+Get down and dirty like a brotha in the trench 
+Leave a nigga dead and stinkin' as he wonders what his stench is 
+I'm bustin' clip after clip 
+My artillery will funk on the punk 
+When ya want to test my shit
+
+Tell it to hell is it
+I feel my brain swell like meningitis 
+With the slightest mind motion 
+Givin' me the notion
+That I got it bad 
+I think I got a brain tumor 
+Brain rumor 
+Such a pain to analyze the strain and then understand it
+The seed was planted
+That shit is ill but still 
+The thought I'm lovin' got the dome growin' 
+With the biscuit in the oven 
+Shovin' nothin' but the nutrients 
+My diet to support me
+A whiff of the spliff 
+A guzzle of the forty to inspire fire thought
+To the mic there was marriage
+Causin' competition 
+Verbal miscarriage of the mental fetus 
+Greet us with the rugged rhythm then I'm showin'
+I think I feel my water breakin' thus I'm flowin'
+Timin' my contractions 
+Concentratin' on my breathin'
+Heavin' curses at the father he has the funk 
+'Cause if I flunk my shit ain't livin'
+Pushin' givin' every bit of what I'm worth 
+And as the Brewin' drops the lyrical 
+The miracle of birth
+
+I be the sick ass brotha, nasty ass nigga 
+A phony motherfucker grave digga 
+I know this sounds rough 
+But I had enough to funk 
+So part of me the heart of me
+So if you corny nigga 
+It's like cloggin' up my artery 
+You cuttin' circulation 
+So now it's do or die 
+While niggas always try to test my shit
+Only preservation of the funk is why I kick this
+As I give a simple diagnosis of the sickness
+
+Now upon the fruits of my labor 
+Your ear feasts 
+The beast from within 
+It's some shit ain't it
+The picture painted 
+From the use of a noun and a verb might disturb 
+We make you say, &quot;Damn that nigga's crazy&quot; 
+Well if we crazed, deranged well then we fittin'
+If you say the world's a normal place
+Who the fuck you kiddin'?
+Your mind's blind if you say you haven't seen this
+As I walk the fine line between insanity and genius</property>
+    <property name="meta.attr.ITUNESADVISORY.markup">1</property>
+    <property name="meta.attr.ARTISTS.markup">Juggaknots</property>
+    <property name="meta.attr.BARCODE.markup">4018939584603</property>
+    <property name="meta.attr.REPLAYGAIN_TRACK_GAIN.markup">-8.90 dB</property>
+    <property name="meta.attr.genre.markup">Hip-Hop</property>
+    <property name="meta.attr.date.markup">2003</property>
+    <property name="meta.attr.encoder.markup">Lavf62.12.101</property>
+    <property name="seekable">1</property>
+    <property name="meta.media.sample_aspect_num">1</property>
+    <property name="meta.media.sample_aspect_den">1</property>
+    <property name="audio_index">0</property>
+    <property name="video_index">1</property>
+    <property name="creation_time">2026-05-29T19:07:51</property>
+    <property name="vstream">0</property>
+    <property name="meta.media.frame_rate_num">90000</property>
+    <property name="meta.media.frame_rate_den">1</property>
+    <property name="meta.media.colorspace">601</property>
+    <property name="meta.media.color_trc">2</property>
+    <property name="meta.media.has_b_frames">0</property>
+    <property name="meta.media.width">1000</property>
+    <property name="meta.media.height">1000</property>
+    <property name="meta.media.aspect_ratio">1</property>
+    <property name="meta.media.color_range">full</property>
+    <property name="astream">0</property>
+    <property name="shotcut:skipConvert">1</property>
+    <property name="xml">was here</property>
+    <property name="shotcut:hash">92221f95fe7fcd4aade3627662d9433a</property>
+    <property name="ignore_points">1</property>
+    <property name="meta.media.top_field_first">0</property>
+    <property name="meta.media.progressive">1</property>
+    <property name="shotcut:caption">Juggaknots - Trouble Man (2.41 - 3.06).mp3</property>
+  </chain>
+  <chain id="chain2" out="00:00:24.960">
+    <property name="length">00:00:25.000</property>
+    <property name="eof">pause</property>
+    <property name="resource">/Users/rd/Scripts/Riley/clipped/tests/audio-templates/hip-hop/juggaknots/Juggaknots - Trouble Man (2.41 - 3.06).mp3</property>
+    <property name="mlt_service">avformat-novalidate</property>
+    <property name="meta.media.nb_streams">2</property>
+    <property name="meta.media.0.stream.type">audio</property>
+    <property name="meta.media.0.codec.sample_fmt">fltp</property>
+    <property name="meta.media.0.codec.sample_rate">44100</property>
+    <property name="meta.media.0.codec.channels">2</property>
+    <property name="meta.media.0.codec.layout">stereo</property>
+    <property name="meta.media.0.codec.name">mp3float</property>
+    <property name="meta.media.0.codec.long_name">MP3 (MPEG audio layer 3)</property>
+    <property name="meta.media.0.codec.bit_rate">180119</property>
+    <property name="meta.attr.0.stream.encoder.markup">Lavc62.28</property>
+    <property name="meta.media.1.stream.type">video</property>
+    <property name="meta.media.1.stream.frame_rate">90000</property>
+    <property name="meta.media.1.stream.sample_aspect_ratio">0</property>
+    <property name="meta.media.1.codec.width">1000</property>
+    <property name="meta.media.1.codec.height">1000</property>
+    <property name="meta.media.1.codec.rotate">0</property>
+    <property name="meta.media.1.codec.pix_fmt">yuvj444p</property>
+    <property name="meta.media.1.codec.sample_aspect_ratio">1</property>
+    <property name="meta.media.1.codec.colorspace">601</property>
+    <property name="meta.media.1.codec.name">mjpeg</property>
+    <property name="meta.media.1.codec.long_name">MJPEG (Motion JPEG)</property>
+    <property name="meta.media.1.codec.bit_rate">0</property>
+    <property name="meta.attr.1.stream.title.markup">cover</property>
+    <property name="meta.attr.1.stream.comment.markup">Cover (front)</property>
+    <property name="meta.attr.album.markup">Re:Release</property>
+    <property name="meta.attr.artist.markup">Juggaknots</property>
+    <property name="meta.attr.album_artist.markup">Juggaknots</property>
+    <property name="meta.attr.composer.markup">Juggaknots</property>
+    <property name="meta.attr.copyright.markup">90's Tapes / HHV</property>
+    <property name="meta.attr.disc.markup">1/1</property>
+    <property name="meta.attr.TSRC.markup">DEQ021804630</property>
+    <property name="meta.attr.TLEN.markup">275000</property>
+    <property name="meta.attr.publisher.markup">90's Tapes / HHV</property>
+    <property name="meta.attr.title.markup">Trouble Man</property>
+    <property name="meta.attr.track.markup">2/23</property>
+    <property name="meta.attr.lyrics-XXX.markup">I declare war 
+The joy becomes a rappifyin' weapon 
+If you step in 
+When your draws get mobbed behind enemy lines
+You become a sittin' duck but fuck 
+I ain't givin' 'em livin' trifle 
+The pen and pad becomes a 12 gauge rifle 
+This is no laughing matter 
+Step into this you step in a minefield 
+Your body's scattered 
+You people drop pickin' up the pieces 
+But only corny niggas 
+The attack from a brotha like the Buddy never ceases 
+Without a moment of silence the violence thickens
+So if you ain't got it together you slim pickings 
+Shorts and prisoners are never taken 
+If you fakin' all the booty competition 
+I'm a bag fuck a white flag 
+Get down and dirty like a brotha in the trench 
+Leave a nigga dead and stinkin' as he wonders what his stench is 
+I'm bustin' clip after clip 
+My artillery will funk on the punk 
+When ya want to test my shit
+
+Tell it to hell is it
+I feel my brain swell like meningitis 
+With the slightest mind motion 
+Givin' me the notion
+That I got it bad 
+I think I got a brain tumor 
+Brain rumor 
+Such a pain to analyze the strain and then understand it
+The seed was planted
+That shit is ill but still 
+The thought I'm lovin' got the dome growin' 
+With the biscuit in the oven 
+Shovin' nothin' but the nutrients 
+My diet to support me
+A whiff of the spliff 
+A guzzle of the forty to inspire fire thought
+To the mic there was marriage
+Causin' competition 
+Verbal miscarriage of the mental fetus 
+Greet us with the rugged rhythm then I'm showin'
+I think I feel my water breakin' thus I'm flowin'
+Timin' my contractions 
+Concentratin' on my breathin'
+Heavin' curses at the father he has the funk 
+'Cause if I flunk my shit ain't livin'
+Pushin' givin' every bit of what I'm worth 
+And as the Brewin' drops the lyrical 
+The miracle of birth
+
+I be the sick ass brotha, nasty ass nigga 
+A phony motherfucker grave digga 
+I know this sounds rough 
+But I had enough to funk 
+So part of me the heart of me
+So if you corny nigga 
+It's like cloggin' up my artery 
+You cuttin' circulation 
+So now it's do or die 
+While niggas always try to test my shit
+Only preservation of the funk is why I kick this
+As I give a simple diagnosis of the sickness
+
+Now upon the fruits of my labor 
+Your ear feasts 
+The beast from within 
+It's some shit ain't it
+The picture painted 
+From the use of a noun and a verb might disturb 
+We make you say, &quot;Damn that nigga's crazy&quot; 
+Well if we crazed, deranged well then we fittin'
+If you say the world's a normal place
+Who the fuck you kiddin'?
+Your mind's blind if you say you haven't seen this
+As I walk the fine line between insanity and genius</property>
+    <property name="meta.attr.ITUNESADVISORY.markup">1</property>
+    <property name="meta.attr.ARTISTS.markup">Juggaknots</property>
+    <property name="meta.attr.BARCODE.markup">4018939584603</property>
+    <property name="meta.attr.REPLAYGAIN_TRACK_GAIN.markup">-8.90 dB</property>
+    <property name="meta.attr.genre.markup">Hip-Hop</property>
+    <property name="meta.attr.date.markup">2003</property>
+    <property name="meta.attr.encoder.markup">Lavf62.12.101</property>
+    <property name="seekable">1</property>
+    <property name="meta.media.sample_aspect_num">1</property>
+    <property name="meta.media.sample_aspect_den">1</property>
+    <property name="audio_index">0</property>
+    <property name="video_index">1</property>
+    <property name="creation_time">2026-05-29T19:07:51</property>
+    <property name="vstream">0</property>
+    <property name="meta.media.frame_rate_num">90000</property>
+    <property name="meta.media.frame_rate_den">1</property>
+    <property name="meta.media.colorspace">601</property>
+    <property name="meta.media.color_trc">2</property>
+    <property name="meta.media.has_b_frames">0</property>
+    <property name="meta.media.width">1000</property>
+    <property name="meta.media.height">1000</property>
+    <property name="meta.media.aspect_ratio">1</property>
+    <property name="meta.media.color_range">full</property>
+    <property name="astream">0</property>
+    <property name="shotcut:skipConvert">1</property>
+    <property name="xml">was here</property>
+    <property name="shotcut:hash">92221f95fe7fcd4aade3627662d9433a</property>
+    <property name="ignore_points">0</property>
+    <property name="meta.media.top_field_first">0</property>
+    <property name="meta.media.progressive">1</property>
+    <property name="shotcut:caption">Juggaknots - Trouble Man (2.41 - 3.06).mp3</property>
+  </chain>
+  <producer id="producer1" in="00:00:00.000" out="03:59:59.960">
+    <property name="length">04:00:00.000</property>
+    <property name="eof">pause</property>
+    <property name="resource">/Users/rd/Scripts/Riley/clipped/tests/audio-templates/hip-hop/juggaknots/logo.png</property>
+    <property name="ttl">1</property>
+    <property name="aspect_ratio">1</property>
+    <property name="meta.media.progressive">1</property>
+    <property name="seekable">1</property>
+    <property name="format">2</property>
+    <property name="meta.media.width">1150</property>
+    <property name="meta.media.height">398</property>
+    <property name="mlt_service">qimage</property>
+    <property name="creation_time">2026-05-29T09:15:36</property>
+    <property name="shotcut:skipConvert">1</property>
+    <property name="xml">was here</property>
+    <property name="shotcut:hash">5499ae10f4457e207b4ec9e64ca69034</property>
+  </producer>
+  <playlist id="main_bin" title="Shotcut version 26.4.30">
+    <property name="shotcut:projectAudioChannels">2</property>
+    <property name="shotcut:projectFolder">1</property>
+    <property name="shotcut:processingMode">Native8Cpu</property>
+    <property name="xml_retain">1</property>
+    <entry producer="chain0" in="00:00:00.000" out="00:00:50.960"/>
+    <entry producer="producer0" in="00:00:00.000" out="00:00:03.960"/>
+    <entry producer="chain1" in="00:00:00.000" out="00:00:24.960"/>
+    <entry producer="chain2" in="00:00:00.000" out="00:00:24.960"/>
+    <entry producer="producer1" in="00:00:00.000" out="00:00:03.960"/>
+  </playlist>
+  <producer id="black" in="00:00:00.000" out="00:00:49.960">
+    <property name="length">00:00:50.000</property>
+    <property name="eof">pause</property>
+    <property name="resource">0</property>
+    <property name="aspect_ratio">1</property>
+    <property name="mlt_service">color</property>
+    <property name="mlt_image_format">rgba</property>
+    <property name="set.test_audio">0</property>
+  </producer>
+  <playlist id="background">
+    <entry producer="black" in="00:00:00.000" out="00:00:49.960"/>
+  </playlist>
+  <chain id="chain3" out="00:00:24.960">
+    <property name="length">00:00:25.000</property>
+    <property name="eof">pause</property>
+    <property name="resource">/Users/rd/Scripts/Riley/clipped/tests/audio-templates/hip-hop/juggaknots/Juggaknots - Trouble Man (2.41 - 3.06).mp3</property>
+    <property name="mlt_service">avformat-novalidate</property>
+    <property name="meta.media.nb_streams">2</property>
+    <property name="meta.media.0.stream.type">audio</property>
+    <property name="meta.media.0.codec.sample_fmt">fltp</property>
+    <property name="meta.media.0.codec.sample_rate">44100</property>
+    <property name="meta.media.0.codec.channels">2</property>
+    <property name="meta.media.0.codec.layout">stereo</property>
+    <property name="meta.media.0.codec.name">mp3float</property>
+    <property name="meta.media.0.codec.long_name">MP3 (MPEG audio layer 3)</property>
+    <property name="meta.media.0.codec.bit_rate">180119</property>
+    <property name="meta.attr.0.stream.encoder.markup">Lavc62.28</property>
+    <property name="meta.media.1.stream.type">video</property>
+    <property name="meta.media.1.stream.frame_rate">90000</property>
+    <property name="meta.media.1.stream.sample_aspect_ratio">0</property>
+    <property name="meta.media.1.codec.width">1000</property>
+    <property name="meta.media.1.codec.height">1000</property>
+    <property name="meta.media.1.codec.rotate">0</property>
+    <property name="meta.media.1.codec.pix_fmt">yuvj444p</property>
+    <property name="meta.media.1.codec.sample_aspect_ratio">1</property>
+    <property name="meta.media.1.codec.colorspace">601</property>
+    <property name="meta.media.1.codec.name">mjpeg</property>
+    <property name="meta.media.1.codec.long_name">MJPEG (Motion JPEG)</property>
+    <property name="meta.media.1.codec.bit_rate">0</property>
+    <property name="meta.attr.1.stream.title.markup">cover</property>
+    <property name="meta.attr.1.stream.comment.markup">Cover (front)</property>
+    <property name="meta.attr.album.markup">Re:Release</property>
+    <property name="meta.attr.artist.markup">Juggaknots</property>
+    <property name="meta.attr.album_artist.markup">Juggaknots</property>
+    <property name="meta.attr.composer.markup">Juggaknots</property>
+    <property name="meta.attr.copyright.markup">90's Tapes / HHV</property>
+    <property name="meta.attr.disc.markup">1/1</property>
+    <property name="meta.attr.TSRC.markup">DEQ021804630</property>
+    <property name="meta.attr.TLEN.markup">275000</property>
+    <property name="meta.attr.publisher.markup">90's Tapes / HHV</property>
+    <property name="meta.attr.title.markup">Trouble Man</property>
+    <property name="meta.attr.track.markup">2/23</property>
+    <property name="meta.attr.lyrics-XXX.markup">I declare war 
+The joy becomes a rappifyin' weapon 
+If you step in 
+When your draws get mobbed behind enemy lines
+You become a sittin' duck but fuck 
+I ain't givin' 'em livin' trifle 
+The pen and pad becomes a 12 gauge rifle 
+This is no laughing matter 
+Step into this you step in a minefield 
+Your body's scattered 
+You people drop pickin' up the pieces 
+But only corny niggas 
+The attack from a brotha like the Buddy never ceases 
+Without a moment of silence the violence thickens
+So if you ain't got it together you slim pickings 
+Shorts and prisoners are never taken 
+If you fakin' all the booty competition 
+I'm a bag fuck a white flag 
+Get down and dirty like a brotha in the trench 
+Leave a nigga dead and stinkin' as he wonders what his stench is 
+I'm bustin' clip after clip 
+My artillery will funk on the punk 
+When ya want to test my shit
+
+Tell it to hell is it
+I feel my brain swell like meningitis 
+With the slightest mind motion 
+Givin' me the notion
+That I got it bad 
+I think I got a brain tumor 
+Brain rumor 
+Such a pain to analyze the strain and then understand it
+The seed was planted
+That shit is ill but still 
+The thought I'm lovin' got the dome growin' 
+With the biscuit in the oven 
+Shovin' nothin' but the nutrients 
+My diet to support me
+A whiff of the spliff 
+A guzzle of the forty to inspire fire thought
+To the mic there was marriage
+Causin' competition 
+Verbal miscarriage of the mental fetus 
+Greet us with the rugged rhythm then I'm showin'
+I think I feel my water breakin' thus I'm flowin'
+Timin' my contractions 
+Concentratin' on my breathin'
+Heavin' curses at the father he has the funk 
+'Cause if I flunk my shit ain't livin'
+Pushin' givin' every bit of what I'm worth 
+And as the Brewin' drops the lyrical 
+The miracle of birth
+
+I be the sick ass brotha, nasty ass nigga 
+A phony motherfucker grave digga 
+I know this sounds rough 
+But I had enough to funk 
+So part of me the heart of me
+So if you corny nigga 
+It's like cloggin' up my artery 
+You cuttin' circulation 
+So now it's do or die 
+While niggas always try to test my shit
+Only preservation of the funk is why I kick this
+As I give a simple diagnosis of the sickness
+
+Now upon the fruits of my labor 
+Your ear feasts 
+The beast from within 
+It's some shit ain't it
+The picture painted 
+From the use of a noun and a verb might disturb 
+We make you say, &quot;Damn that nigga's crazy&quot; 
+Well if we crazed, deranged well then we fittin'
+If you say the world's a normal place
+Who the fuck you kiddin'?
+Your mind's blind if you say you haven't seen this
+As I walk the fine line between insanity and genius</property>
+    <property name="meta.attr.ITUNESADVISORY.markup">1</property>
+    <property name="meta.attr.ARTISTS.markup">Juggaknots</property>
+    <property name="meta.attr.BARCODE.markup">4018939584603</property>
+    <property name="meta.attr.REPLAYGAIN_TRACK_GAIN.markup">-8.90 dB</property>
+    <property name="meta.attr.genre.markup">Hip-Hop</property>
+    <property name="meta.attr.date.markup">2003</property>
+    <property name="meta.attr.encoder.markup">Lavf62.12.101</property>
+    <property name="seekable">1</property>
+    <property name="meta.media.sample_aspect_num">1</property>
+    <property name="meta.media.sample_aspect_den">1</property>
+    <property name="audio_index">0</property>
+    <property name="video_index">1</property>
+    <property name="creation_time">2026-05-29T19:07:51</property>
+    <property name="vstream">0</property>
+    <property name="meta.media.frame_rate_num">90000</property>
+    <property name="meta.media.frame_rate_den">1</property>
+    <property name="meta.media.colorspace">601</property>
+    <property name="meta.media.color_trc">2</property>
+    <property name="meta.media.has_b_frames">0</property>
+    <property name="meta.media.width">1000</property>
+    <property name="meta.media.height">1000</property>
+    <property name="meta.media.aspect_ratio">1</property>
+    <property name="meta.media.color_range">full</property>
+    <property name="astream">0</property>
+    <property name="shotcut:skipConvert">1</property>
+    <property name="xml">was here</property>
+    <property name="shotcut:hash">92221f95fe7fcd4aade3627662d9433a</property>
+    <property name="ignore_points">0</property>
+    <property name="meta.media.top_field_first">0</property>
+    <property name="meta.media.progressive">1</property>
+    <property name="shotcut:caption">Juggaknots - Trouble Man (2.41 - 3.06).mp3</property>
+  </chain>
+  <chain id="chain4" out="00:00:24.960">
+    <property name="length">00:00:25.000</property>
+    <property name="eof">pause</property>
+    <property name="resource">/Users/rd/Scripts/Riley/clipped/tests/audio-templates/hip-hop/juggaknots/Juggaknots - Trouble Man (2.41 - 3.06).mp3</property>
+    <property name="mlt_service">avformat-novalidate</property>
+    <property name="meta.media.nb_streams">2</property>
+    <property name="meta.media.0.stream.type">audio</property>
+    <property name="meta.media.0.codec.sample_fmt">fltp</property>
+    <property name="meta.media.0.codec.sample_rate">44100</property>
+    <property name="meta.media.0.codec.channels">2</property>
+    <property name="meta.media.0.codec.layout">stereo</property>
+    <property name="meta.media.0.codec.name">mp3float</property>
+    <property name="meta.media.0.codec.long_name">MP3 (MPEG audio layer 3)</property>
+    <property name="meta.media.0.codec.bit_rate">180119</property>
+    <property name="meta.attr.0.stream.encoder.markup">Lavc62.28</property>
+    <property name="meta.media.1.stream.type">video</property>
+    <property name="meta.media.1.stream.frame_rate">90000</property>
+    <property name="meta.media.1.stream.sample_aspect_ratio">0</property>
+    <property name="meta.media.1.codec.width">1000</property>
+    <property name="meta.media.1.codec.height">1000</property>
+    <property name="meta.media.1.codec.rotate">0</property>
+    <property name="meta.media.1.codec.pix_fmt">yuvj444p</property>
+    <property name="meta.media.1.codec.sample_aspect_ratio">1</property>
+    <property name="meta.media.1.codec.colorspace">601</property>
+    <property name="meta.media.1.codec.name">mjpeg</property>
+    <property name="meta.media.1.codec.long_name">MJPEG (Motion JPEG)</property>
+    <property name="meta.media.1.codec.bit_rate">0</property>
+    <property name="meta.attr.1.stream.title.markup">cover</property>
+    <property name="meta.attr.1.stream.comment.markup">Cover (front)</property>
+    <property name="meta.attr.album.markup">Re:Release</property>
+    <property name="meta.attr.artist.markup">Juggaknots</property>
+    <property name="meta.attr.album_artist.markup">Juggaknots</property>
+    <property name="meta.attr.composer.markup">Juggaknots</property>
+    <property name="meta.attr.copyright.markup">90's Tapes / HHV</property>
+    <property name="meta.attr.disc.markup">1/1</property>
+    <property name="meta.attr.TSRC.markup">DEQ021804630</property>
+    <property name="meta.attr.TLEN.markup">275000</property>
+    <property name="meta.attr.publisher.markup">90's Tapes / HHV</property>
+    <property name="meta.attr.title.markup">Trouble Man</property>
+    <property name="meta.attr.track.markup">2/23</property>
+    <property name="meta.attr.lyrics-XXX.markup">I declare war 
+The joy becomes a rappifyin' weapon 
+If you step in 
+When your draws get mobbed behind enemy lines
+You become a sittin' duck but fuck 
+I ain't givin' 'em livin' trifle 
+The pen and pad becomes a 12 gauge rifle 
+This is no laughing matter 
+Step into this you step in a minefield 
+Your body's scattered 
+You people drop pickin' up the pieces 
+But only corny niggas 
+The attack from a brotha like the Buddy never ceases 
+Without a moment of silence the violence thickens
+So if you ain't got it together you slim pickings 
+Shorts and prisoners are never taken 
+If you fakin' all the booty competition 
+I'm a bag fuck a white flag 
+Get down and dirty like a brotha in the trench 
+Leave a nigga dead and stinkin' as he wonders what his stench is 
+I'm bustin' clip after clip 
+My artillery will funk on the punk 
+When ya want to test my shit
+
+Tell it to hell is it
+I feel my brain swell like meningitis 
+With the slightest mind motion 
+Givin' me the notion
+That I got it bad 
+I think I got a brain tumor 
+Brain rumor 
+Such a pain to analyze the strain and then understand it
+The seed was planted
+That shit is ill but still 
+The thought I'm lovin' got the dome growin' 
+With the biscuit in the oven 
+Shovin' nothin' but the nutrients 
+My diet to support me
+A whiff of the spliff 
+A guzzle of the forty to inspire fire thought
+To the mic there was marriage
+Causin' competition 
+Verbal miscarriage of the mental fetus 
+Greet us with the rugged rhythm then I'm showin'
+I think I feel my water breakin' thus I'm flowin'
+Timin' my contractions 
+Concentratin' on my breathin'
+Heavin' curses at the father he has the funk 
+'Cause if I flunk my shit ain't livin'
+Pushin' givin' every bit of what I'm worth 
+And as the Brewin' drops the lyrical 
+The miracle of birth
+
+I be the sick ass brotha, nasty ass nigga 
+A phony motherfucker grave digga 
+I know this sounds rough 
+But I had enough to funk 
+So part of me the heart of me
+So if you corny nigga 
+It's like cloggin' up my artery 
+You cuttin' circulation 
+So now it's do or die 
+While niggas always try to test my shit
+Only preservation of the funk is why I kick this
+As I give a simple diagnosis of the sickness
+
+Now upon the fruits of my labor 
+Your ear feasts 
+The beast from within 
+It's some shit ain't it
+The picture painted 
+From the use of a noun and a verb might disturb 
+We make you say, &quot;Damn that nigga's crazy&quot; 
+Well if we crazed, deranged well then we fittin'
+If you say the world's a normal place
+Who the fuck you kiddin'?
+Your mind's blind if you say you haven't seen this
+As I walk the fine line between insanity and genius</property>
+    <property name="meta.attr.ITUNESADVISORY.markup">1</property>
+    <property name="meta.attr.ARTISTS.markup">Juggaknots</property>
+    <property name="meta.attr.BARCODE.markup">4018939584603</property>
+    <property name="meta.attr.REPLAYGAIN_TRACK_GAIN.markup">-8.90 dB</property>
+    <property name="meta.attr.genre.markup">Hip-Hop</property>
+    <property name="meta.attr.date.markup">2003</property>
+    <property name="meta.attr.encoder.markup">Lavf62.12.101</property>
+    <property name="seekable">1</property>
+    <property name="meta.media.sample_aspect_num">1</property>
+    <property name="meta.media.sample_aspect_den">1</property>
+    <property name="audio_index">0</property>
+    <property name="video_index">1</property>
+    <property name="creation_time">2026-05-29T19:07:51</property>
+    <property name="vstream">0</property>
+    <property name="meta.media.frame_rate_num">90000</property>
+    <property name="meta.media.frame_rate_den">1</property>
+    <property name="meta.media.colorspace">601</property>
+    <property name="meta.media.color_trc">2</property>
+    <property name="meta.media.has_b_frames">0</property>
+    <property name="meta.media.width">1000</property>
+    <property name="meta.media.height">1000</property>
+    <property name="meta.media.aspect_ratio">1</property>
+    <property name="meta.media.color_range">full</property>
+    <property name="astream">0</property>
+    <property name="shotcut:skipConvert">1</property>
+    <property name="xml">was here</property>
+    <property name="shotcut:hash">92221f95fe7fcd4aade3627662d9433a</property>
+    <property name="ignore_points">0</property>
+    <property name="meta.media.top_field_first">0</property>
+    <property name="meta.media.progressive">1</property>
+    <property name="shotcut:caption">Juggaknots - Trouble Man (2.41 - 3.06).mp3</property>
+  </chain>
+  <playlist id="playlist0">
+    <property name="shotcut:video">1</property>
+    <property name="shotcut:name">V1</property>
+    <entry producer="chain3" in="00:00:00.000" out="00:00:24.960"/>
+    <entry producer="chain4" in="00:00:00.000" out="00:00:24.960"/>
+  </playlist>
+  <playlist id="playlist1">
+    <property name="shotcut:video">1</property>
+    <property name="shotcut:name">V2</property>
+    <blank length="00:00:00.040"/>
+  </playlist>
+  <tractor id="tractor0" title="Shotcut version 26.4.30" in="00:00:00.000" out="00:00:49.960">
+    <property name="shotcut">1</property>
+    <property name="shotcut:projectAudioChannels">2</property>
+    <property name="shotcut:projectFolder">1</property>
+    <property name="shotcut:processingMode">Native8Cpu</property>
+    <property name="shotcut:trackHeaderWidth">150</property>
+    <track producer="background"/>
+    <track producer="playlist0"/>
+    <track producer="playlist1"/>
+    <transition id="transition0">
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="mlt_service">mix</property>
+      <property name="always_active">1</property>
+      <property name="sum">1</property>
+    </transition>
+    <transition id="transition1">
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="compositing">0</property>
+      <property name="distort">0</property>
+      <property name="rotate_center">0</property>
+      <property name="mlt_service">qtblend</property>
+      <property name="threads">0</property>
+      <property name="disable">1</property>
+    </transition>
+    <transition id="transition2">
+      <property name="a_track">0</property>
+      <property name="b_track">2</property>
+      <property name="mlt_service">mix</property>
+      <property name="always_active">1</property>
+      <property name="sum">1</property>
+    </transition>
+    <transition id="transition3">
+      <property name="a_track">1</property>
+      <property name="b_track">2</property>
+      <property name="compositing">0</property>
+      <property name="distort">0</property>
+      <property name="rotate_center">0</property>
+      <property name="mlt_service">qtblend</property>
+      <property name="threads">0</property>
+      <property name="disable">0</property>
+    </transition>
+  </tractor>
+</mlt>
