@@ -37,7 +37,17 @@ remotion-research-inspiration/
 _audio/
 _video/
 showcase/dist/
+dist_showcase/
+media/
+assets/examples/
 .qa/
+
+# Test and render artifacts (regenerate locally; keep out of Git)
+tests/videos/
+tests/frames/
+tests/audio-templates/
+src/remotion/public/jobs/
+src/remotion/public/audio-templates/
 
 # macOS
 .DS_Store
