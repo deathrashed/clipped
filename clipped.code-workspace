@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "clipped",
+			"path": "."
+		}
+	],
+	"settings": {
+		"specstory.cloudSync.enabled": "always"
+	}
+}
