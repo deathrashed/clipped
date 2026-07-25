@@ -66,14 +66,31 @@ _NF_ICONS = {
     "open": "\uf04b",
     "path": "\uf07b",
     "platform": "\uf135",
-    "pointer": "\uf105",
-    "prompt": "\uf128",
+    "pointer": "\u2192",
+    "prompt": "\u276f",
     "refresh": "\uf021",
     "render": "\uf1c8",
     "settings": "\uf013",
     "template": "\uf1c5",
     "video": "\uf03d",
     "warn": "\uf071",
+}
+
+# Aspect-ratio icons (Nerd Font)
+_NF_ASPECT = {
+    (1, 1): "\uf0c8",    #   square
+    (9, 16): "\uf10b",   #   mobile (portrait)
+    (16, 9): "\uf26c",   #   television (landscape)
+    (4, 5): "\uf109",    #   tablet (portrait-ish)
+    (3, 4): "\uf109",    # 
+}
+
+_ASCII_ASPECT = {
+    (1, 1): "[sq]",
+    (9, 16): "[||]",
+    (16, 9): "[--]",
+    (4, 5): "[|]",
+    (3, 4): "[|]",
 }
 
 _ASCII_ICONS = {
@@ -93,8 +110,8 @@ _ASCII_ICONS = {
     "open": "[open]",
     "path": "[path]",
     "platform": "[plat]",
-    "pointer": ">",
-    "prompt": "?",
+    "pointer": "*",
+    "prompt": ">",
     "refresh": "[again]",
     "render": "[render]",
     "settings": "[set]",
@@ -122,6 +139,26 @@ def _menu_label(icon_name: str, text: str) -> str:
     return f"{marker}  {text}" if marker else text
 
 
+def _menu_choice(icon_name: str, style_class: str, text: str, value: str) -> Any:
+    """Build a main-menu choice with the icon colored by category."""
+    import questionary
+    mk = icon(icon_name)
+    if "  -  " in text:
+        main_part, _, detail_part = text.partition("  -  ")
+        title = [
+            (style_class, mk),
+            ("", f"  {main_part}"),
+            ("class:menu_sep", "  —  "),
+            ("class:menu_sep", detail_part),
+        ]
+    else:
+        title = [
+            (style_class, mk),
+            ("", f"  {text}"),
+        ]
+    return questionary.Choice(title=title, value=value)
+
+
 def _prompt_style():
     global _PROMPT_STYLE
     if _PROMPT_STYLE is None:
@@ -137,6 +174,23 @@ def _prompt_style():
             ("instruction", "fg:#888888"),
             ("text", "fg:#ffffff"),
             ("disabled", "fg:#666666 italic"),
+            # Per-item syntax highlighting
+            ("fav_star", "fg:#ffd700"),
+            ("aspect_square", "fg:#00ff88"),
+            ("aspect_portrait", "fg:#00e5ff"),
+            ("aspect_landscape", "fg:#ffd75f"),
+            ("aspect_tablet", "fg:#ff7acb"),
+            ("platform_aspect", "fg:#888888"),
+            ("platform_duration", "fg:#666666"),
+            # Main menu
+            ("menu_video", "fg:#00e5ff"),
+            ("menu_audio", "fg:#ff7acb"),
+            ("menu_test", "fg:#00ff88"),
+            ("menu_browse", "fg:#ffd75f"),
+            ("menu_settings", "fg:#ffd75f"),
+            ("menu_exit", "fg:#666666"),
+            ("menu_rerun", "fg:#888888"),
+            ("menu_sep", "fg:#444444"),
         ])
     return _PROMPT_STYLE
 
@@ -221,6 +275,97 @@ def _aspect_label(width: int | None, height: int | None) -> str:
         return "preserve"
     divisor = gcd(width, height)
     return f"{width}x{height} ({width // divisor}:{height // divisor})"
+
+def _short_aspect(width: int | None, height: int | None) -> str:
+    """Short aspect tag with icon like  [9:16],  [1:1]."""
+    if not width or not height:
+        return ""
+    divisor = gcd(width, height)
+    ratio = (width // divisor, height // divisor)
+    icons = _ASCII_ICONS if _use_ascii_icons() else _NF_ICONS
+    asp_icons = _ASCII_ASPECT if _use_ascii_icons() else _NF_ASPECT
+    icon_char = ""
+    for key in sorted(asp_icons.keys(), key=lambda k: abs(k[0]/k[1] - ratio[0]/ratio[1])):
+        if key == ratio:
+            icon_char = asp_icons[key]
+            break
+    # If no exact match, find closest by ratio
+    if not icon_char:
+        target = ratio[0] / ratio[1] if ratio[1] else 99
+        closest = min(asp_icons.keys(), key=lambda k: abs(k[0]/k[1] - target) if k[1] else 99)
+        icon_char = asp_icons.get(closest, "")
+    return f"{icon_char}  [{ratio[0]}:{ratio[1]}]" if icon_char else f"[{ratio[0]}:{ratio[1]}]"
+
+
+# ── Prompt-toolkit formatted choice helpers ─────────────────────────────────
+
+_ASPECT_COLORS = {
+    (1, 1):  "class:aspect_square",    # green
+    (9, 16): "class:aspect_portrait",  # cyan
+    (16, 9): "class:aspect_landscape", # yellow
+    (4, 5):  "class:aspect_tablet",    # magenta
+    (3, 4):  "class:aspect_tablet",
+}
+
+
+def _aspect_style(width: int | None, height: int | None) -> str:
+    """Return the style class for a given aspect ratio."""
+    if not width or not height:
+        return ""
+    divisor = gcd(width, height)
+    ratio = (width // divisor, height // divisor)
+    asp = _ASPECT_COLORS.get(ratio)
+    if asp:
+        return asp
+    # Find closest by ratio
+    target = ratio[0] / ratio[1] if ratio[1] else 99
+    closest = min(_ASPECT_COLORS.keys(), key=lambda k: abs(k[0]/k[1] - target) if k[1] else 99)
+    return _ASPECT_COLORS[closest]
+
+
+def _short_label(label: str) -> str:
+    """Strip parenthetical descriptions for compact picker display."""
+    idx = label.find("  (") if label.find("  (") >= 0 else label.find(" (")
+    return label[:idx] if idx > 0 else label
+
+
+def _template_choice_title(star: str, label_class: str, template) -> list:
+    """Build a styled prompt_toolkit formatted title for a template choice.
+
+    The template name itself is colored by its aspect ratio.
+    Parenthetical descriptions are stripped for cleaner display.
+    """
+    return [
+        ("class:fav_star", star),
+        (f"{label_class} bold", _short_label(template.info.label)),
+    ]
+
+
+def _platform_choice_title(p, label_class: str, duration: str) -> list:
+    """Build a styled prompt_toolkit formatted title for a platform choice.
+
+    The platform name is colored by its format/aspect.
+    """
+    return [
+        (label_class, p.label),
+        ("class:platform_duration", f"  {duration}"),
+    ]
+
+
+def _aspect_legend() -> list:
+    """Build a styled legend line for the aspect ratio color key."""
+    return [
+        ("", "  "),
+        ("class:aspect_square", "\uf0c8 [1:1]"),
+        ("", "  "),
+        ("class:aspect_portrait", "\uf10b [9:16]"),
+        ("", "  "),
+        ("class:aspect_landscape", "\uf26c [16:9]"),
+        ("", "  "),
+        ("class:aspect_tablet", "\uf109 [4:5]"),
+        ("", "  "),
+        ("class:aspect_tablet", "\uf109 [3:4]"),
+    ]
 
 
 class UI:
@@ -823,30 +968,28 @@ def _run_interactive_menu(preset_config: dict | None = None) -> None:
 
         choices = []
         if last_action:
-            choices.append(questionary.Choice(
-                title=_menu_label("refresh", f"Rerun previous workflow  -  {last_action['label']}"),
-                value="rerun",
-            ))
+            choices.append(
+                _menu_choice("refresh", "class:menu_rerun",
+                    f"Rerun previous workflow  -  {last_action['label']}",
+                    "rerun"),
+            )
             choices.append(questionary.Separator())
 
         choices += [
-            questionary.Choice(
-                title=_menu_label("video", "Generate video reel  -  choose source, template, platform, time range"),
-                value="video",
-            ),
-            questionary.Choice(
-                title=_menu_label("video", "Render preview of all templates (contact sheet)"),
-                value="test-templates",
-            ),
-            questionary.Choice(
-                title=_menu_label("audio", "Clip audio  -  file, Swinsian, last source, or YouTube URL"),
-                value="audio",
-            ),
+            _menu_choice("video", "class:menu_video",
+                "Generate video reel  -  choose source, template, platform, time range",
+                "video"),
+            _menu_choice("video", "class:menu_test",
+                "Render preview of all templates  -  contact sheet",
+                "test-templates"),
+            _menu_choice("audio", "class:menu_audio",
+                "Clip audio  -  file, Swinsian, last source, or YouTube URL",
+                "audio"),
             questionary.Separator(),
-            questionary.Choice(title=_menu_label("template", "Browse templates"), value="templates"),
-            questionary.Choice(title=_menu_label("platform", "Browse platform profiles"), value="platforms"),
-            questionary.Choice(title=_menu_label("settings", "Settings"), value="settings"),
-            questionary.Choice(title=_menu_label("exit", "Exit"), value="exit"),
+            _menu_choice("template", "class:menu_browse", "Browse templates", "templates"),
+            _menu_choice("platform", "class:menu_browse", "Browse platform profiles", "platforms"),
+            _menu_choice("settings", "class:menu_settings", "Settings", "settings"),
+            _menu_choice("exit", "class:menu_exit", "Exit", "exit"),
         ]
 
         choice = _ask_select(
@@ -993,9 +1136,16 @@ def _interactive_browse_templates(cfg: dict) -> dict | None:
             if choices:
                 choices.append(questionary.Separator())
             choices.append(questionary.Separator(group))
-            for t in group_templates:
+            sorted_group = sorted(
+                group_templates,
+                key=lambda t: (not getattr(t.info, "favourite", False), t.info.label),
+            )
+            for t in sorted_group:
+                star = "❉ " if getattr(t.info, "favourite", False) else "  "
+                label_class = _aspect_style(*t.info.aspect)
+                title = _template_choice_title(star, label_class, t)
                 choices.append(questionary.Choice(
-                    title=f"{t.info.label}  ({t.info.name})  -  {_aspect_label(*t.info.aspect)}",
+                    title=title,
                     value=t.info.name,
                 ))
         choices.extend([
@@ -1003,6 +1153,10 @@ def _interactive_browse_templates(cfg: dict) -> dict | None:
             questionary.Choice(title=_menu_label("back", "Go Back"), value=NAV_BACK),
             questionary.Choice(title=_menu_label("home", "Return to main menu"), value=NAV_MAIN),
         ])
+        console.print(Panel(
+            "[green]□ 1:1[/]    [cyan]▯ 9:16[/]    [yellow]▭ 16:9[/]    [magenta]▉ 4:5[/]",
+            border_style="dim", box=box.MINIMAL, padding=(0, 1),
+        ))
         selected = _ask_select("Choose a template:", choices=choices)
         if selected in (None, NAV_BACK, NAV_MAIN):
             return None
@@ -1092,9 +1246,11 @@ def _interactive_browse_platforms(cfg: dict) -> dict | None:
         platforms = list_platforms()
         choices = []
         for p in platforms:
-            duration = f"{p.max_duration:.0f}s max" if p.max_duration else "no cap"
+            label_class = _aspect_style(p.width, p.height) if p.width else ""
+            duration = f"{int(p.max_duration)}s" if p.max_duration else "∞"
+            title = _platform_choice_title(p, label_class, duration)
             choices.append(questionary.Choice(
-                title=f"{p.label}  ({p.name})  -  {_aspect_label(p.width, p.height)}; {duration}",
+                title=title,
                 value=p.name,
             ))
         choices.extend([
@@ -1102,6 +1258,10 @@ def _interactive_browse_platforms(cfg: dict) -> dict | None:
             questionary.Choice(title=_menu_label("back", "Go Back"), value=NAV_BACK),
             questionary.Choice(title=_menu_label("home", "Return to main menu"), value=NAV_MAIN),
         ])
+        console.print(Panel(
+            "[green]□ 1:1[/]    [cyan]▯ 9:16[/]    [yellow]▭ 16:9[/]    [magenta]▉ 4:5[/]",
+            border_style="dim", box=box.MINIMAL, padding=(0, 1),
+        ))
         selected = _ask_select("Choose a platform:", choices=choices)
         if selected in (None, NAV_BACK, NAV_MAIN):
             return None
@@ -1359,24 +1519,55 @@ def _interactive_video(
     # Asset Overrides
     cover_override = None
     logo_override = None
+    artist_override = None
     background_override = None
     media_override = None
     lyrics_override = None
 
-    if _ask_confirm("Provide custom assets (cover, logo, background, media, lyrics)?", default=False):
-        cover_answer = _ask_text("Cover image path/URL:", default="")
+    if _ask_confirm("Provide custom assets (cover, logo, artist image, background, media, lyrics)?", default=False):
+        _c = "[green]found[/]" if assets and assets.cover else "[dim]missing[/]"
+        _l = "[green]found[/]" if assets and assets.logo else "[dim]missing[/]"
+        _a = "[green]found[/]" if assets and assets.artist else "[dim]missing[/]"
+        _y = "[green]found[/]" if assets and assets.lyrics_json else "[dim]missing[/]"
+        console.print(Panel(
+            f"Cover: {_c}  Logo: {_l}  Artist: {_a}  Lyrics: {_y}",
+            title="Auto-detected assets",
+            border_style="dim", box=box.MINIMAL, padding=(0, 1),
+        ))
+        cover_answer = _ask_text(
+            "Cover image", default="",
+            instruction="blank = use auto-detected cover",
+        )
         if cover_answer: cover_override = cover_answer
-        
-        logo_answer = _ask_text("Logo image path/URL:", default="")
+
+        logo_answer = _ask_text(
+            "Logo image", default="",
+            instruction="blank = look in album / artist folder",
+        )
         if logo_answer: logo_override = logo_answer
-        
-        bg_answer = _ask_text("Background image path/URL:", default="")
+
+        artist_answer = _ask_text(
+            "Artist image", default="",
+            instruction="blank = look in artist folder",
+        )
+        if artist_answer: artist_override = artist_answer
+
+        bg_answer = _ask_text(
+            "Background image", default="",
+            instruction="blank = blurred cover (default)",
+        )
         if bg_answer: background_override = bg_answer
-        
-        media_answer = _ask_text("Media (video/image) path/URL:", default="")
+
+        media_answer = _ask_text(
+            "Media (video/image)", default="",
+            instruction="blank = none",
+        )
         if media_answer: media_override = media_answer
-        
-        lyrics_answer = _ask_text("Lyrics (.lrc/.srt) path/URL:", default="")
+
+        lyrics_answer = _ask_text(
+            "Lyrics (.lrc/.srt)", default="",
+            instruction="blank = use embedded lyrics if found",
+        )
         if lyrics_answer: lyrics_override = lyrics_answer
 
     # Template picker
@@ -1452,6 +1643,7 @@ def _interactive_video(
         "output_path": output_path,
         "cover": cover_override,
         "logo": logo_override,
+        "artist": artist_override,
         "background": background_override,
         "media": media_override,
         "lyrics": lyrics_override,
@@ -1512,6 +1704,7 @@ def _interactive_video(
             end=parse_time(end) if end else None,
             cover=cover_override,
             logo=logo_override,
+            artist=artist_override,
             background=background_override,
             media=media_override,
             lyrics=lyrics_override,
@@ -1951,13 +2144,14 @@ def _pick_template(default: str | None = None) -> str | None:
         if choices:
             choices.append(questionary.Separator())
         choices.append(questionary.Separator(group))
-        for t in group_templates:
-            w, h = t.info.aspect
-            engine = getattr(t.info, "engine", "ffmpeg")
-            title = (
-                f"{t.info.label}  ({t.info.name})  -  "
-                f"{engine}; {w}x{h}; {', '.join(t.info.ideal_for) or 'general'}"
-            )
+        sorted_group = sorted(
+            group_templates,
+            key=lambda t: (not getattr(t.info, "favourite", False), t.info.label),
+        )
+        for t in sorted_group:
+            star = "❉ " if getattr(t.info, "favourite", False) else "  "
+            label_class = _aspect_style(*t.info.aspect)
+            title = _template_choice_title(star, label_class, t)
             choice = questionary.Choice(title=title, value=t.info.name)
             choices.append(choice)
             if t.info.name == default:
@@ -1968,6 +2162,12 @@ def _pick_template(default: str | None = None) -> str | None:
         questionary.Separator(),
         questionary.Choice(title=_menu_label("back", "Go Back"), value=NAV_BACK),
     ])
+    console.print(Panel(
+        "[green]□ 1:1[/]    [cyan]▯ 9:16[/]    [yellow]▭ 16:9[/]    [magenta]▉ 4:5[/]",
+        border_style="dim",
+        box=box.MINIMAL,
+        padding=(0, 1),
+    ))
     selected = _ask_select(
         "Template:",
         choices=choices,
@@ -1983,9 +2183,9 @@ def _pick_platform(default: str | None = None) -> str | None:
     choices = []
     default_choice = None
     for p in platforms:
-        size = f"{p.width}x{p.height}" if p.width and p.height else p.output_format.upper()
-        duration = f"{int(p.max_duration)}s max" if p.max_duration else "no cap"
-        title = f"{p.label}  ({p.name})  —  {size}; {duration}"
+        label_class = _aspect_style(p.width, p.height) if p.width else ""
+        duration = f"{int(p.max_duration)}s" if p.max_duration else "∞"
+        title = _platform_choice_title(p, label_class, duration)
         choice = questionary.Choice(title=title, value=p.name)
         choices.append(choice)
         if p.name == default:
@@ -1994,6 +2194,12 @@ def _pick_platform(default: str | None = None) -> str | None:
         questionary.Separator(),
         questionary.Choice(title=_menu_label("back", "Go Back"), value=NAV_BACK),
     ])
+    console.print(Panel(
+        "[green]□ 1:1[/]    [cyan]▯ 9:16[/]    [yellow]▭ 16:9[/]    [magenta]▉ 4:5[/]",
+        border_style="dim",
+        box=box.MINIMAL,
+        padding=(0, 1),
+    ))
     selected = _ask_select(
         "Platform:",
         choices=choices,
@@ -2011,13 +2217,19 @@ def _print_templates():
     table.add_column("Size",        style="green",   width=12)
     table.add_column("Ideal For",   style="yellow")
 
-    for t in list_templates():
+    sorted_templates = sorted(
+        list_templates(),
+        key=lambda t: (not getattr(t.info, "favourite", False), t.info.label),
+    )
+    for t in sorted_templates:
         w, h = t.info.aspect
+        fav = "❉ " if getattr(t.info, "favourite", False) else "  "
+        aspect = _short_aspect(w, h)
         table.add_row(
-            t.info.name,
+            f"{fav}{t.info.name}",
             getattr(t.info, "engine", "ffmpeg"),
             t.info.label,
-            f"{w}x{h}",
+            aspect,
             ", ".join(t.info.ideal_for),
         )
     console.print(table)

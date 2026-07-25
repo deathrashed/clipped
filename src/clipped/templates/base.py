@@ -39,6 +39,7 @@ class TemplateInfo:
     capabilities: list[str] = field(default_factory=list)
     options: dict[str, Any] = field(default_factory=dict)
     defaults: dict[str, Any] = field(default_factory=dict)
+    favourite: bool = False  # Starred + sorted to top of template picker
 
 
 class VideoTemplate(ABC):
