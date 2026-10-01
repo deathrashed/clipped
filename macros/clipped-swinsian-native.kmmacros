@@ -10,9 +10,9 @@
 		<key>ModificationDate</key>
 		<real>801441079.901778</real>
 		<key>Name</key>
-		<string>Swinsian - Clipped Import</string>
+		<string>Swinsian - Clipped Native Import</string>
 		<key>UID</key>
-		<string>B375BA03-1B80-4D0D-A364-19BED3C6A66F</string>
+		<string>AF63FDED-C297-4EEE-A8D9-ACB67D524BB4</string>
 		<key>Enabled</key>
 		<true/>
 		<key>Macros</key>
@@ -25,9 +25,9 @@
 				<key>ModificationDate</key>
 				<real>801441079.901778</real>
 				<key>Name</key>
-				<string>Utility: Clipped Dynamic Reel (No Limit)</string>
+				<string>Utility: Clipped Dynamic Reel (Native Prompts)</string>
 				<key>UID</key>
-				<string>D051FBB8-C0E0-4A41-9BE8-2D411457086D</string>
+				<string>96A33F8C-79D1-415E-A47A-565541FAB284</string>
 				<key>Enabled</key>
 				<true/>
 				<key>Triggers</key>
@@ -42,7 +42,7 @@
 						<key>Variable</key>
 						<string>SwinsianClipped_Config_ClippedBin</string>
 						<key>Text</key>
-						<string>~/Scripts/Riley/clipped/bin/clipped</string>
+		<string>/Users/rd/Scripts/Riley/clipped/bin/clipped</string>
 					</dict>
 					<dict>
 						<key>ActionUID</key>
@@ -86,7 +86,7 @@
 					</dict>
 					<dict>
 						<key>ActionUID</key>
-						<integer>1779751286</integer>
+						<integer>1779752001</integer>
 						<key>DisplayKind</key>
 						<string>None</string>
 						<key>HonourFailureSettings</key>
@@ -134,78 +134,35 @@ if trackSummary is "" then set trackSummary to trackPath
 tell application "Keyboard Maestro Engine"
 	setvariable "SwinsianClipped_Source" to (trackPath as text)
 	setvariable "SwinsianClipped_Track" to trackSummary
-end tell</string>
-						<key>TimeOutAbortsMacro</key>
-						<true/>
-						<key>TrimResults</key>
-						<true/>
-						<key>TrimResultsNew</key>
-						<true/>
-						<key>UseText</key>
-						<true/>
-					</dict>
-					<dict>
-						<key>ActionUID</key>
-						<integer>1779751287</integer>
-						<key>DisplayKind</key>
-						<string>None</string>
-						<key>HonourFailureSettings</key>
-						<true/>
-						<key>IncludeStdErr</key>
-						<true/>
-						<key>MacroActionType</key>
-						<string>ExecuteAppleScript</string>
-						<key>Path</key>
-						<string></string>
-						<key>Text</key>
-						<string>tell application "Keyboard Maestro Engine"
-	setvariable "SwinsianClipped_Cancelled" to "true"
-	set sourcePath to getvariable "SwinsianClipped_Source"
-	set trackSummary to getvariable "SwinsianClipped_Track"
+end tell
+
+tell application "Keyboard Maestro Engine"
+  setvariable "SwinsianClipped_Cancelled" to "true"
+  set sourcePath to getvariable "SwinsianClipped_Source"
+  set trackSummary to getvariable "SwinsianClipped_Track"
 end tell
 
 set rangeDialog to display dialog "Selected: " &amp; trackSummary &amp; return &amp; return &amp; "Enter start - end for the Dynamic Reel." &amp; return &amp; "Examples: 0 - 1:00 or 4:10 - 5:40." default answer "0 - 1:00" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" with title "Swinsian - Dynamic Reel Range"
 set rangeText to text returned of rangeDialog
-
 set AppleScript's text item delimiters to " - "
 set rangeParts to text items of rangeText
 set AppleScript's text item delimiters to ""
 if (count of rangeParts) is not 2 then error "Enter the range as start - end."
-
 set startValue to (item 1 of rangeParts)'s contents
 set endValue to (item 2 of rangeParts)'s contents
 if startValue is "" or endValue is "" then error "Both start and end times are required."
 
 set defaultDirectory to (POSIX path of (path to home folder)) &amp; "Music/clipped/_video"
-do shell script "/bin/mkdir -p " &amp; quoted form of defaultDirectory
-
-set sourceName to do shell script "/usr/bin/basename " &amp; quoted form of sourcePath
-set dotOffset to offset of "." in sourceName
-if dotOffset &gt; 1 then
-	set sourceStem to text 1 thru (dotOffset - 1) of sourceName
-else
-	set sourceStem to sourceName
-end if
-set AppleScript's text item delimiters to ":"
-set startLabel to text items of startValue as text
-set endLabel to text items of endValue as text
-set AppleScript's text item delimiters to "-"
-set startLabel to startLabel as text
-set endLabel to endLabel as text
-set AppleScript's text item delimiters to ""
-set suggestedName to sourceStem &amp; " (" &amp; startLabel &amp; " - " &amp; endLabel &amp; ").mp4"
-
-try
-	set chosenFile to choose file name with prompt "Save the Dynamic Reel to:" default location (POSIX file defaultDirectory as alias) default name suggestedName
-on error number -128
-	return
-end try
+set pathDialog to display dialog "Output directory for the Dynamic Reel:" default answer defaultDirectory buttons {"Cancel", "Save"} default button "Save" cancel button "Cancel" with title "Clipped - Output Directory"
+set outputDirectory to text returned of pathDialog
+if outputDirectory is "" then error "An output directory is required."
+do shell script "/bin/mkdir -p " &amp; quoted form of outputDirectory
 
 tell application "Keyboard Maestro Engine"
-	setvariable "SwinsianClipped_Start" to startValue
-	setvariable "SwinsianClipped_End" to endValue
-	setvariable "SwinsianClipped_OutputPath" to (POSIX path of chosenFile)
-	setvariable "SwinsianClipped_Cancelled" to "false"
+  setvariable "SwinsianClipped_Start" to startValue
+  setvariable "SwinsianClipped_End" to endValue
+  setvariable "SwinsianClipped_OutputDir" to outputDirectory
+  setvariable "SwinsianClipped_Cancelled" to "false"
 end tell</string>
 						<key>TimeOutAbortsMacro</key>
 						<true/>
@@ -244,14 +201,20 @@ fi
 TEMPLATE="${KMVAR_SwinsianClipped_Config_Template:-reel}"
 PLATFORM="${KMVAR_SwinsianClipped_Config_Platform:-vertical_full}"
 FADE="${KMVAR_SwinsianClipped_Config_Fade:-0.5}"
-CANCELLED="${KMVAR_SwinsianClipped_Cancelled:-true}"
-OUTPUT_PATH="${KMVAR_SwinsianClipped_OutputPath:-}"
 OPEN_OUTPUT="${KMVAR_SwinsianClipped_Config_OpenOutput:-false}"
 
-SOURCE="$KMVAR_SwinsianClipped_Source"
-START="$KMVAR_SwinsianClipped_Start"
-END="$KMVAR_SwinsianClipped_End"
+CANCELLED="${KMVAR_SwinsianClipped_Cancelled:-true}"
+SOURCE="${KMVAR_SwinsianClipped_Source:-}"
+START="${KMVAR_SwinsianClipped_Start:-}"
+END="${KMVAR_SwinsianClipped_End:-}"
 TRACK="${KMVAR_SwinsianClipped_Track:-Selected Swinsian track}"
+OUTPUT_DIR="${KMVAR_SwinsianClipped_OutputDir:-}"
+if [[ "$CANCELLED" == "true" ]]; then
+  exit 0
+fi
+if [[ -z "$OUTPUT_DIR" ]]; then
+  exit 0
+fi
 
 if [[ -z "$SOURCE" || ! -f "$SOURCE" ]]; then
   osascript -e 'display notification "Selected Swinsian track path could not be resolved." with title "Clipped"'
@@ -266,12 +229,7 @@ if [[ ! -x "$CLIPPED_BIN" ]]; then
   exit 1
 fi
 
-if [[ "$CANCELLED" == "true" || -z "$OUTPUT_PATH" ]]; then
-  exit 0
-fi
-
-OUTPUT_PATH="${OUTPUT_PATH/#\~/$HOME}"
-OUTPUT_DIR="${OUTPUT_PATH:h}"
+OUTPUT_DIR="${OUTPUT_DIR/#\~/$HOME}"
 mkdir -p "$OUTPUT_DIR"
 
 RUNNER_DIR="$(mktemp -d -t swinsian-clipped-reel)"
@@ -286,7 +244,7 @@ q_track=${(qqq)TRACK}
 q_template=${(qqq)TEMPLATE}
 q_platform=${(qqq)PLATFORM}
 q_fade=${(qqq)FADE}
-q_output=${(qqq)OUTPUT_PATH}
+q_output_dir=${(qqq)OUTPUT_DIR}
 q_open=${(qqq)OPEN_OUTPUT}
 q_log=${(qqq)LOG}
 
@@ -301,7 +259,7 @@ TRACK=$q_track
 TEMPLATE=$q_template
 PLATFORM=$q_platform
 FADE=$q_fade
-OUTPUT_PATH=$q_output
+OUTPUT_DIR=$q_output_dir
 OPEN_OUTPUT=$q_open
 LOG=$q_log
 
@@ -312,20 +270,16 @@ echo "Range    : \$START -&gt; \$END"
 echo "Template : \$TEMPLATE"
 echo "Platform : \$PLATFORM"
 echo "Fade     : \$FADE"
-if [[ -n "\$OUTPUT_PATH" ]]; then echo "Output   : \$OUTPUT_PATH"; fi
+echo "Output dir: \$OUTPUT_DIR"
 echo "Log      : \$LOG"
 echo
 
-cmd=("\$CLIPPED_BIN" video "\$SOURCE" --template "\$TEMPLATE" --platform "\$PLATFORM" --start "\$START" --end "\$END" --fade-in "\$FADE" --fade-out "\$FADE")
-if [[ -n "\$OUTPUT_PATH" ]]; then
-  cmd+=(--output "\$OUTPUT_PATH")
-fi
-"\${cmd[@]}" 2>&amp;1 | /usr/bin/tee -a "\$LOG"
+cmd=("\$CLIPPED_BIN" video "\$SOURCE" --template "\$TEMPLATE" --platform "\$PLATFORM" --start "\$START" --end "\$END" --fade-in "\$FADE" --fade-out "\$FADE" --output-dir "\$OUTPUT_DIR")
+"\${cmd[@]}" 2&gt;&amp;1 | /usr/bin/tee -a "\$LOG"
 render_status=\${pipestatus[1]}
 
 if (( render_status == 0 )); then
   final_output_path="\$(/usr/bin/sed -n 's/^CLIPPED_OUTPUT_PATH=//p' "\$LOG" | /usr/bin/tail -n 1)"
-  [[ -z "\$final_output_path" ]] &amp;&amp; final_output_path="\$OUTPUT_PATH"
   if [[ -n "\$final_output_path" ]]; then
     echo
     echo "Output path (copy this): \$final_output_path"
@@ -406,8 +360,14 @@ launch_terminal() {
   return 1
 }
 
-if ! launch_terminal "zsh ${(q)RUNNER}"; then
-  exit 1
+SHOW_TERMINAL="${CLIPPED_SHOW_TERMINAL:-false}"
+if [[ "$SHOW_TERMINAL" == "true" ]]; then
+  if ! launch_terminal "zsh ${(q)RUNNER}"; then
+    exit 1
+  fi
+else
+  nohup /bin/zsh "$RUNNER" >>"$LOG" 2>&amp;1 &lt;/dev/null &amp;
+  echo "Rendering in background. Log: $LOG"
 fi
 </string>
 						<key>TimeOutAbortsMacro</key>
@@ -429,7 +389,7 @@ fi
 						<key>SubTitle</key>
 						<string>Dynamic reel started</string>
 						<key>Text</key>
-						<string>Rendering in Terminal with no 60-second cap.</string>
+						<string>Rendering in the background. Set CLIPPED_SHOW_TERMINAL=true to open Ghostty or cmux.</string>
 					</dict>
 				</array>
 			</dict>

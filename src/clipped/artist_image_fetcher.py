@@ -910,19 +910,55 @@ class ArtistImageFetcher:
 
         return success
 
-    def clean_logo_background(self, logo_path: Path) -> None:
-        rmbg_path = "/Users/rd/Scripts/Riley/rmbg/bin/rmbg"
+    def should_clean_logo(self, logo_path: Path) -> bool:
+        if not logo_path.exists():
+            return False
+
+        try:
+            from PIL import Image
+            with Image.open(logo_path) as img:
+                if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+                    return False
+                if img.mode == "RGB":
+                    # Most Metal Archives logos are black-on-transparent or black-background treatment.
+                    # Only trigger rmbg if the input is an opaque raster with a dark background.
+                    pixels = list(img.getdata())
+                    if not pixels:
+                        return False
+                    sample = pixels[: min(len(pixels), 200)]
+                    dark_pixels = sum(1 for r, g, b in sample if r < 32 and g < 32 and b < 32)
+                    if dark_pixels / len(sample) < 0.25:
+                        return False
+                    return True
+        except Exception:
+            pass
+
+        return False
+
+    def clean_logo_background(self, logo_path: Path, rmbg_path: Path | str | None = None) -> None:
+        if not self.should_clean_logo(logo_path):
+            return
+
+        if rmbg_path is None:
+            rmbg_path = "/Users/rd/Scripts/Riley/rmbg/bin/rmbg"
         rmbg = Path(rmbg_path).expanduser()
         if not rmbg.exists():
             return
 
         tmp_logo = logo_path.with_name(logo_path.stem + ".cleaned.png")
-        cmd = [str(rmbg), "-i", str(logo_path), "-o", str(tmp_logo), "--fuzz", "15"]
+        cmd = [
+            str(rmbg),
+            "--input", str(logo_path),
+            "--output", str(tmp_logo),
+            "--background", "black",
+            "--logo",
+            "--fuzz", "15",
+        ]
         try:
             res = subprocess.run(cmd, capture_output=True, text=True)
             if res.returncode == 0 and tmp_logo.exists():
                 tmp_logo.replace(logo_path)
-                self.log(f"✨ Logo background cleaned using rmbg")
+                self.log("✨ Logo background cleaned using rmbg")
         except Exception as e:
             self.debug(f"Failed to clean logo with rmbg: {e}")
 

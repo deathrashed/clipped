@@ -241,11 +241,26 @@ class MediaAssets:
 
     @functools.cached_property
     def logo(self) -> Path | None:
-        logo_path = self._resolve_path_or_url(self._logo_override) if self._logo_override else (self._find(["logo"], self.artist_dir) or self._find(["logo"], self.album_dir))
+        if self._logo_override:
+            logo_path = self._resolve_path_or_url(self._logo_override)
+        else:
+            logo_path = (
+                self._find_prepared_logo(self.artist_dir)
+                or self._find_prepared_logo(self.album_dir)
+                or self._find(["logo"], self.artist_dir)
+                or self._find(["logo"], self.album_dir)
+            )
         if not logo_path:
             self._ensure_artist_fetched()
-            logo_path = self._find(["logo"], self.artist_dir) or self._find(["logo"], self.album_dir)
+            logo_path = (
+                self._find_prepared_logo(self.artist_dir)
+                or self._find_prepared_logo(self.album_dir)
+                or self._find(["logo"], self.artist_dir)
+                or self._find(["logo"], self.album_dir)
+            )
         if logo_path:
+            if logo_path.name.casefold() == "logo.png":
+                return logo_path
             return self._clean_logo_background(logo_path)
         return None
 
@@ -449,6 +464,10 @@ class MediaAssets:
             return out_path
         except Exception:
             return None
+
+    def _find_prepared_logo(self, directory: Path) -> Path | None:
+        candidate = directory / "logo.png"
+        return candidate if candidate.is_file() else None
 
     def _find(self, names: list[str], directory: Path) -> Path | None:
         if not directory.exists() or not directory.is_dir():

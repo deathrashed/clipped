@@ -58,19 +58,23 @@ def _clean_logo(src: Path | None, job_dir: Path, config: dict) -> Path | None:
     src = Path(src).expanduser()
     if not src.exists():
         return None
-        
+
+    # A manually supplied logo.png is already production-ready; never rewrite it.
+    if src.name.casefold() == "logo.png":
+        return src
+
     clean_logos = config.get("clean_logo", config.get("remotion_clean_logos", True))
     if str(clean_logos).lower() in ("false", "0", "no"):
         return src
-        
+
     try:
         from PIL import Image
         with Image.open(src) as img:
-            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+            if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
                 return src
     except Exception:
         pass
-        
+
     rmbg_path = config.get("rmbg_path", "/Users/rd/Scripts/Riley/rmbg/bin/rmbg")
     rmbg = Path(rmbg_path).expanduser()
     if not rmbg.exists():
@@ -79,22 +83,22 @@ def _clean_logo(src: Path | None, job_dir: Path, config: dict) -> Path | None:
             rmbg = Path(resolved)
         else:
             return src
-        
-    dest = job_dir / f"logo_cleaned.png"
+
+    dest = job_dir / "logo_cleaned.png"
     fuzz = config.get("logo_fuzz", config.get("remotion_logo_fuzz", 15))
     bg = config.get("logo_bg", config.get("remotion_logo_bg", "auto"))
-    
+
     cmd = [str(rmbg), "-i", str(src), "-o", str(dest), "--fuzz", str(fuzz)]
     if bg and str(bg) != "auto":
         cmd += ["--color", str(bg)]
-        
+
     try:
         res = subprocess.run(cmd, capture_output=True, text=True)
         if res.returncode == 0 and dest.exists():
             return dest
     except Exception:
         pass
-        
+
     return src
 
 

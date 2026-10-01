@@ -1830,6 +1830,7 @@ def video_cmd(
     fade_out:      Optional[float] = typer.Option(None, "--fade-out",     help="Audio fade-out duration (seconds)"),
     dry_run:       bool          = typer.Option(False, "--dry-run", help="Print FFmpeg command, don't run"),
     output:        Optional[str] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output_dir:    Optional[str] = typer.Option(None, "--output-dir", help="Output directory; preserve Clipped's generated filename"),
     cover:         Optional[str] = typer.Option(None, "--cover", help="Path or URL to cover image"),
     logo:          Optional[str] = typer.Option(None, "--logo", help="Path or URL to logo image"),
     background:    Optional[str] = typer.Option(None, "--background", help="Path or URL to background image"),
@@ -1882,13 +1883,15 @@ def video_cmd(
     if effects:        extra["effects"]        = effects
     if captions:       extra["captions"]       = captions
     if seed:           extra["seed"]           = seed
+    if output_dir:
+        extra["video_dir"] = str(Path(output_dir).expanduser().resolve())
     if clean_logo is not None: extra["clean_logo"] = clean_logo
 
     out_path = Path(output) if output else None
     if not final_src or not _validate_source(final_src, allow_url=False):
         raise typer.Exit(1)
 
-    process_video(
+    output_path = process_video(
         final_src,
         template_name=final_template,
         platform_name=final_platform,
@@ -1906,6 +1909,8 @@ def video_cmd(
         lyrics=lyrics,
         clean_logo=clean_logo,
     )
+    if output_path:
+        typer.echo(f"CLIPPED_OUTPUT_PATH={Path(output_path).expanduser().resolve()}")
 
 
 @app.command("preview")
